@@ -1,7 +1,7 @@
 import zipfile
 
 
-CHANGEABLE_FILE_TYPES = ('.swift', '.storyboard', '.xml')
+CHANGEABLE_FILE_TYPES = ('.swift', '.storyboard')
 
 
 def list_files_in_zip(zip_path, file_types: tuple[str] = CHANGEABLE_FILE_TYPES):
@@ -27,8 +27,8 @@ def list_exclude_files_in_zip(zip_path, exclude: tuple[str] = CHANGEABLE_FILE_TY
 def read_file_content_from_zip(zip_path, file_path):
     try:
         with zipfile.ZipFile(zip_path, 'r') as zip_file:
-            content = zip_file.read(file_path).strip()
-            return content
+            content = zip_file.read(file_path)
+            return content.decode('utf-8').strip()
     except FileNotFoundError:
         return f"Error: File '{file_path}' not found."
     except IOError as e:
@@ -37,7 +37,7 @@ def read_file_content_from_zip(zip_path, file_path):
         return f"Error: Could not read the file '{file_path}'. {e}"
 
 
-def read_changeable_from_zip(zip_path, changeable: bool = True):
+def read_project_from_zip(zip_path, changeable: bool = True):
     file_list = list_files_in_zip(zip_path) if changeable else list_exclude_files_in_zip(zip_path)
     project = {}
     for file in file_list:
