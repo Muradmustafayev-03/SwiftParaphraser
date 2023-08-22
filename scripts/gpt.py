@@ -1,4 +1,4 @@
-from secret import *
+from .secret import *
 import openai
 import json
 
