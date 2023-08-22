@@ -1,4 +1,3 @@
-import json
 import re
 
 
@@ -45,60 +44,103 @@ def remove_comments(swift_code: str):
     return swift_code
 
 
-def parse_names(project: str):
-    names = {
-        'class': set(),
-        'struct': set(),
-        'func': set(),
-        'var': set(),
-    }
+def apply_to_project(project: dict, func: callable):
+    for file_path, file_content in project.items():
+        if file_path.endswith('.swift'):
+            project[file_path] = func(file_content)
+    return project
+
+
+def parse_names(swift_code: str):
+    names = []
 
     # parse class names
     pattern = r'class\s+([A-Z][a-zA-Z0-9_]+)\s*(:|\{)'
-    matches = re.finditer(pattern, project)
+    matches = re.finditer(pattern, swift_code)
     for match in matches:
-        names['class'].add(match.group(1))
+        names.append(match.group(1))
 
     # parse struct names
     pattern = r'struct\s+([A-Z][a-zA-Z0-9_]+)\s*(:|\{)'
-    matches = re.finditer(pattern, project)
+    matches = re.finditer(pattern, swift_code)
     for match in matches:
-        names['struct'].add(match.group(1))
+        names.append(match.group(1))
 
-    # parse func names
-    pattern = r'func\s+([a-z][a-zA-Z0-9_]+)\s*\('
-    matches = re.finditer(pattern, project)
+    # parse enum names
+    pattern = r'enum\s+([A-Z][a-zA-Z0-9_]+)\s*(:|\{)'
+    matches = re.finditer(pattern, swift_code)
     for match in matches:
-        names['func'].add(match.group(1))
+        names.append(match.group(1))
 
-    # parse var names
-    pattern = r'var\s+([a-z][a-zA-Z0-9_]+)\s*(:|=)'
-    matches = re.finditer(pattern, project)
+    # parse protocol names
+    pattern = r'protocol\s+([A-Z][a-zA-Z0-9_]+)\s*(:|\{)'
+    matches = re.finditer(pattern, swift_code)
     for match in matches:
-        names['var'].add(match.group(1))
+        names.append(match.group(1))
 
-    # parse let names
-    pattern = r'let\s+([a-z][a-zA-Z0-9_]+)\s*(:|=)'
-    matches = re.finditer(pattern, project)
+    # parse extension names
+    pattern = r'extension\s+([A-Z][a-zA-Z0-9_]+)\s*(:|\{)'
+    matches = re.finditer(pattern, swift_code)
     for match in matches:
-        names['var'].add(match.group(1))
+        names.append(match.group(1))
 
-    # sets to tuple and return json
-    for key in names.keys():
-        names[key] = tuple(names[key])
+    # parse typealias names
+    pattern = r'typealias\s+([A-Z][a-zA-Z0-9_]+)\s*(:|\{)'
+    matches = re.finditer(pattern, swift_code)
+    for match in matches:
+        names.append(match.group(1))
 
-    return json.dumps(names)
+    names = list(set(names))
+    if 'SceneDelegate' in names:
+        names.remove('SceneDelegate')
+    if 'AppDelegate' in names:
+        names.remove('AppDelegate')
+    return names
 
 
-def apply_rename(project: str, rename_map: str):
-    rename_map = json.loads(rename_map)
+def find_all_names(project: dict):
+    names = []
 
-    for key_type in rename_map.keys():
-        for key, value in rename_map[key_type].items():
-            # pattern is key between non-alphanumeric characters
-            pattern = rf'([^a-zA-Z0-9_]){key}([^a-zA-Z0-9_])'
+    for file_path, file_content in project.items():
+        if file_path.endswith('.swift'):
+            file_names = parse_names(file_content)
+            names += file_names
+    return list(set(names))
 
-            # replace key with value
-            project = re.sub(pattern, rf'\1{value}\2', project)
+
+def rename_item(project: dict, old_name: str, new_name: str):
+    new_project = {}
+    # rename .swift file named after class, rename class itself,
+    # rename references to class in other files including .xib and .storyboard files
+    for file_path, file_content in project.items():
+        if file_path.endswith('.swift'):
+            # old_name surrounded by non-alphanumeric characters
+            pattern = rf'([^a-zA-Z0-9_]){old_name}([^a-zA-Z0-9_])'
+
+            new_path = file_path
+            if file_path.split('/')[-1].split('.')[0] == old_name + '.swift':
+                new_path = file_path.replace(old_name + '.swift', new_name + '.swift')
+
+            new_project[new_path] = re.sub(pattern, rf'\1{new_name}\2', file_content)
+
+        elif file_path.endswith('.xib') or file_path.endswith('.storyboard'):
+            new_project[file_path] = file_content.replace(f'"{old_name}"', f'"{new_name}"')
+
+    return new_project
+
+
+def rename_items(project: dict, names: dict):
+    for old_name, new_name in names.items():
+        project = rename_item(project, old_name, new_name)
 
     return project
+
+
+def generate_rename_map(names: list):
+    names = names
+    new_names = {}
+
+    for name in names:
+        new_names[name] = name + 'Renamed'
+
+    return new_names

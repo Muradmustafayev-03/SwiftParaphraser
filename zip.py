@@ -1,7 +1,7 @@
 import zipfile
 
 
-CHANGEABLE_FILE_TYPES = ('.swift', '.storyboard')
+CHANGEABLE_FILE_TYPES = ('.swift', '.storyboard', '.xib')
 
 
 def list_files_in_zip(zip_path, file_types: tuple[str] = CHANGEABLE_FILE_TYPES):
@@ -9,7 +9,7 @@ def list_files_in_zip(zip_path, file_types: tuple[str] = CHANGEABLE_FILE_TYPES):
     with zipfile.ZipFile(zip_path, 'r') as zip_file:
         for file in zip_file.namelist():
             for file_type in file_types:
-                if file_type in file and '._' not in file:
+                if file.endswith(file_type) and not file.split('/')[-1].startswith('._'):
                     file_list.append(file)
     return file_list
 
@@ -19,7 +19,7 @@ def list_exclude_files_in_zip(zip_path, exclude: tuple[str] = CHANGEABLE_FILE_TY
     with zipfile.ZipFile(zip_path, 'r') as zip_file:
         for file in zip_file.namelist():
             for file_type in exclude:
-                if file_type not in file and '._' not in file:
+                if not file.endswith(file_type) and not file.startswith('._'):
                     file_list.append(file)
     return file_list
 
