@@ -44,10 +44,10 @@ def remove_comments(swift_code: str):
     return swift_code
 
 
-def apply_to_project(project: dict, func: callable):
+def apply_to_project(project: dict, func: callable, *args, **kwargs):
     for file_path, file_content in project.items():
         if file_path.endswith('.swift'):
-            project[file_path] = func(file_content)
+            project[file_path] = func(file_content, *args, **kwargs)
     return project
 
 
@@ -118,7 +118,7 @@ def rename_item(project: dict, old_name: str, new_name: str):
             pattern = rf'([^a-zA-Z0-9_]){old_name}([^a-zA-Z0-9_])'
 
             new_path = file_path
-            if file_path.split('/')[-1].split('.')[0] == old_name + '.swift':
+            if file_path.split('/')[-1] == old_name + '.swift':
                 new_path = file_path.replace(old_name + '.swift', new_name + '.swift')
 
             new_project[new_path] = re.sub(pattern, rf'\1{new_name}\2', file_content)
@@ -134,13 +134,3 @@ def rename_items(project: dict, names: dict):
         project = rename_item(project, old_name, new_name)
 
     return project
-
-
-def generate_rename_map(names: list):
-    names = names
-    new_names = {}
-
-    for name in names:
-        new_names[name] = name + 'Renamed'
-
-    return new_names
