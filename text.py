@@ -88,3 +88,17 @@ def parse_names(project: str):
         names[key] = tuple(names[key])
 
     return json.dumps(names)
+
+
+def apply_rename(project: str, rename_map: str):
+    rename_map = json.loads(rename_map)
+
+    for key_type in rename_map.keys():
+        for key, value in rename_map[key_type].items():
+            # pattern is key between non-alphanumeric characters
+            pattern = rf'([^a-zA-Z0-9_]){key}([^a-zA-Z0-9_])'
+
+            # replace key with value
+            project = re.sub(pattern, rf'\1{value}\2', project)
+
+    return project

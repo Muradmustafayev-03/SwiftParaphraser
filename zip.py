@@ -45,7 +45,7 @@ def read_project_from_zip(zip_path, changeable: bool = True):
     return project
 
 
-def save_zip(zip_path, data):
+def save_zip(zip_path, data: dict[str, str]):
     with zipfile.ZipFile(zip_path, 'w') as zip_file:
         for file_path, file_content in data.items():
             zip_file.writestr(file_path, file_content)
