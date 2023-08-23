@@ -30,7 +30,7 @@ def read_file_content_from_zip(zip_path, file_path):
 
 
 def read_project_from_zip(zip_path, file_types: tuple[str] = CHANGEABLE_FILE_TYPES):
-    file_list = list_files_in_zip(zip_path)
+    file_list = list_files_in_zip(zip_path, file_types)
     project = {}
     for file in file_list:
         project[file] = read_file_content_from_zip(zip_path, file)
