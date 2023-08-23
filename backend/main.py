@@ -21,7 +21,8 @@ def pipeline(source_path, result_path, temperature=1.0):
     project = rename_items(project, rename_map)
 
     project = apply_to_project(project, add_comments, temperature=temperature)
-    project.update(read_project_from_zip(source_path, False))
+
+    project.update(read_project_from_zip(source_path, STATIC_FILE_TYPES))
     save_zip(result_path, project)
 
 
