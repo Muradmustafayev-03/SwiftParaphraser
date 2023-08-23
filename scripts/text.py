@@ -72,18 +72,6 @@ def parse_names(swift_code: str):
     for match in matches:
         names.append(match.group(1))
 
-    # parse protocol names
-    pattern = r'protocol\s+([A-Z][a-zA-Z0-9_]+)\s*(:|\{)'
-    matches = re.finditer(pattern, swift_code)
-    for match in matches:
-        names.append(match.group(1))
-
-    # parse extension names
-    pattern = r'extension\s+([A-Z][a-zA-Z0-9_]+)\s*(:|\{)'
-    matches = re.finditer(pattern, swift_code)
-    for match in matches:
-        names.append(match.group(1))
-
     # parse typealias names
     pattern = r'typealias\s+([A-Z][a-zA-Z0-9_]+)\s*(:|\{)'
     matches = re.finditer(pattern, swift_code)

@@ -21,7 +21,7 @@ def list_exclude_files_in_zip(zip_path, exclude: tuple[str] = CHANGEABLE_FILE_TY
             if file.split('/')[-1].startswith('._'):
                 continue
             file_type = file.split('/')[-1].split('.')[-1]
-            if file_type not in exclude:
+            if '.' + file_type not in exclude:
                 file_list.append(file)
     return file_list
 
