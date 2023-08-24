@@ -38,7 +38,8 @@ def add_comments(code: str, temperature: float = 1.0):
              'Add as many comments to the code as possible. ' \
              'The more comments the better. The larger comment blocks are the better.' \
              'The more detailed the comments are the better.' \
-             'Your response should only consist of the user\'s code with your added comments.' \
+             'Your response must only consist of the user\'s code with your added comments.' \
+             'Your entire unchanged response will be writen to the .swift file.' \
              'If you want to add something, write it in the comments.' \
 
-    return gpt_response(code, system, temperature)
+    return gpt_response(code, system, temperature).replace('```', '//------------------------')

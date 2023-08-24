@@ -54,29 +54,11 @@ def apply_to_project(project: dict, func: callable, *args, **kwargs):
 def parse_names(swift_code: str):
     names = []
 
-    # parse class names
-    pattern = r'class\s+([A-Z][a-zA-Z0-9_]+)\s*(:|\{)'
-    matches = re.finditer(pattern, swift_code)
-    for match in matches:
-        names.append(match.group(1))
-
-    # parse struct names
-    pattern = r'struct\s+([A-Z][a-zA-Z0-9_]+)\s*(:|\{)'
-    matches = re.finditer(pattern, swift_code)
-    for match in matches:
-        names.append(match.group(1))
-
-    # parse enum names
-    pattern = r'enum\s+([A-Z][a-zA-Z0-9_]+)\s*(:|\{)'
-    matches = re.finditer(pattern, swift_code)
-    for match in matches:
-        names.append(match.group(1))
-
-    # parse typealias names
-    pattern = r'typealias\s+([A-Z][a-zA-Z0-9_]+)\s*(:|\{)'
-    matches = re.finditer(pattern, swift_code)
-    for match in matches:
-        names.append(match.group(1))
+    for struct_type in ['class', 'struct', 'enum']:
+        pattern = rf'{struct_type}\s+([A-Z][a-zA-Z0-9_]+)\s*(:|\{{)'
+        matches = re.finditer(pattern, swift_code)
+        for match in matches:
+            names.append(match.group(1))
 
     names = list(set(names))
     if 'SceneDelegate' in names:
