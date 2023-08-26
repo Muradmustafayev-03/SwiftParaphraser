@@ -1,3 +1,4 @@
+regex~=2023.8.8
 openai~=0.27.9
 fastapi~=0.101.1
 uvicorn~=0.23.2

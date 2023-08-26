@@ -1,4 +1,4 @@
-import re
+import regex as re
 
 
 def project_dict_to_str(project: dict):
@@ -44,14 +44,66 @@ def remove_comments(swift_code: str):
     return swift_code
 
 
+def transform_conditions(code):
+    # Define the regular expression pattern
+    guard_pattern = r'(\s*?)guard\s+([\S\s]*)\s*else\s*{([\S\s]*?)}([\S\s]*?)}'
+
+    # Find all matches of the pattern in the input string
+    matches = re.findall(guard_pattern, code)
+
+    # Process each match and perform the transformation
+    for match in matches:
+        indent, condition, else_body, true_body = match
+        true_body = true_body.replace('\n', f'\n\t')
+        else_body = else_body.replace('\n', f'\n\t')
+
+        transformed_string = \
+            f"{indent}if {condition} {{\n{indent}\t{true_body}\n{indent}}} else {{\n{indent}\t{else_body}\n{indent}}}"
+
+        # Replace the matched patterns with the transformed strings
+        code = re.sub(guard_pattern, transformed_string, code, 1)
+
+    return remove_empty_lines(code)
+
+
+def transform_loops(code, index='index'):
+    # Define the regular expression pattern
+    for_pattern = r'(\s*?)for\s+([\S\s]*?)\s+in\s+([\S\s]*?){([\S\s]*?)}'
+
+    # Find all matches of the pattern in the input string
+    matches = re.findall(for_pattern, code)
+
+    # Process each match and perform the transformation
+    for match in matches:
+        indent, val, sequence, body = match
+        body = body.replace('\n', f'\n\t')
+
+        condition = 'true'
+
+        # check if there is a where clause
+        if 'where' in sequence:
+            sequence, condition = sequence.split('where')
+
+        transformed_string = \
+            f"{indent}let sequence = {sequence}\n{indent}var {index} = 0\n{indent}while {index} < sequence.count " \
+            f"{{\n{indent}\tlet {val} = sequence[{index}]\n{indent}\tif ({condition}) {{\n{indent}\t\t" \
+            f"{body}}}\n{indent}\t{index} += 1\n{indent}\t}}"
+
+        # Replace the matched patterns with the transformed strings
+        code = re.sub(for_pattern, transformed_string, code, 1)
+
+    return remove_empty_lines(code)
+
+
 def apply_to_project(project: dict, func: callable, *args, **kwargs):
     for file_path, file_content in project.items():
         if file_path.endswith('.swift'):
+            print(file_path)
             project[file_path] = func(file_content, *args, **kwargs)
     return project
 
 
-def parse_names(swift_code: str):
+def parse_struct_names(swift_code: str):
     names = []
 
     for struct_type in ['class', 'struct', 'enum']:
@@ -73,7 +125,7 @@ def find_all_names(project: dict):
 
     for file_path, file_content in project.items():
         if file_path.endswith('.swift'):
-            file_names = parse_names(file_content)
+            file_names = parse_struct_names(file_content)
             names += file_names
     return list(set(names))
 
@@ -104,3 +156,20 @@ def rename_items(project: dict, names: dict):
         project = rename_item(project, old_name, new_name)
 
     return project
+
+
+def find_all_imports(code: str):
+    pattern = r'^import\s+([a-zA-Z0-9_]+)'
+    matches = re.findall(pattern, code, flags=re.MULTILINE)
+    return matches
+
+
+def add_missing_imports(source, result):
+    source_imports = find_all_imports(source)
+    result_imports = find_all_imports(result)
+
+    for import_name in source_imports:
+        if import_name not in result_imports:
+            result = f'import {import_name}\n' + result
+
+    return result
