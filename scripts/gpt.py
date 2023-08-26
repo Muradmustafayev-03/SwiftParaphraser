@@ -1,7 +1,7 @@
+from .text import add_missing_imports
 from .secret import *
 import openai
 import json
-
 
 openai.api_key = OPENAI_KEY
 openai.organization = ORGANIZATION
@@ -40,6 +40,8 @@ def add_comments(code: str, temperature: float = 1.0):
              'The more detailed the comments are the better.' \
              'Your response must only consist of the user\'s code with your added comments.' \
              'Your entire unchanged response will be writen to the .swift file.' \
-             'If you want to add something, write it in the comments.' \
+             'If you want to add something, write it in the comments.'
 
-    return gpt_response(code, system, temperature).replace('```', '//------------------------')
+    response = gpt_response(code, system, temperature).replace('```', '//------------------------')
+    response = add_missing_imports(code, response)
+    return response
