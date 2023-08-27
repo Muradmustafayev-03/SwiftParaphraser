@@ -18,19 +18,28 @@ def pipeline(source_path, result_path, filename, temperature=1.0):
     project = apply_to_project(project, remove_empty_lines)
     print('finished removing comments and empty lines')
 
-    project = apply_to_project(project, transform_conditions)
+    project = apply_to_project(project, gpt_modify,
+                               exclude=['AppDelegate.swift', 'SceneDelegate.swift'],
+                               temperature=temperature)
+    print('finished gpt modifying')
+
+    # project = apply_to_project(project, transform_conditions)
     project = apply_to_project(project, transform_loops, index='iterationIndex1')
     project = apply_to_project(project, transform_loops, index='iterationIndex2')
     project = apply_to_project(project, transform_loops, index='iterationIndex3')
-    print('finished transforming conditions and loops')
+    print('finished transforming loops')
 
     names = find_all_names(project)
-    rename_map = generate_rename_map(names)
-    project = rename_items(project, rename_map)
+    if names:
+        rename_map = generate_rename_map(names)
+        project = rename_items(project, rename_map)
     print('finished renaming')
 
     project = apply_to_project(project, add_comments, temperature=temperature)
     print('finished adding comments')
+
+    project = apply_to_project(project, fix_syntax)
+    print('finished fixing syntax')
 
     save_project(project)
     print('finished saving project')

@@ -45,3 +45,26 @@ def add_comments(code: str, temperature: float = 1.0):
     response = gpt_response(code, system, temperature).replace('```', '//------------------------')
     response = add_missing_imports(code, response)
     return response
+
+
+def gpt_modify(code: str, temperature: float = 1.0):
+    system = 'You will be given a swift code. Modify the inner structure of this code ' \
+             'keeping its behaviour the same. Do not make any assumptions about the code, ' \
+             'make only the local changes that do not affect the other references to the code. ' \
+             'For the code inside the functions, make it seem more complicated, but not changing ' \
+             'its actual functionality. Your response must only consist of the code.' \
+
+    response = gpt_response(code, system, temperature).replace('```', '//------------------------')
+    response = add_missing_imports(code, response)
+    return response
+
+
+def fix_syntax(code: str, temperature: float = 1.0):
+    system = 'You will be given a swift code. If there are any syntax errors in the code' \
+             'such as missing ; or missing closing brackets, fix those errors and give the' \
+             'corrected code in the response. If you did not find any errors, give the source ' \
+             'code unchanged. Your response must only consist of the code. RESPOND WITH CODE ONLY!' \
+
+    response = gpt_response(code, system, temperature).replace('```', '//------------------------')
+    response = add_missing_imports(code, response)
+    return response

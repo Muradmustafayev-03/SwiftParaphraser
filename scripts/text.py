@@ -113,9 +113,11 @@ def transform_loops(code, index='index'):
     return remove_empty_lines(code)
 
 
-def apply_to_project(project: dict, func: callable, *args, **kwargs):
+def apply_to_project(project: dict, func: callable, exclude=(), *args, **kwargs):
     for file_path, file_content in project.items():
         if file_path.endswith('.swift'):
+            if file_path.split('/')[-1] in exclude:
+                continue
             project[file_path] = func(file_content, *args, **kwargs)
     return project
 
