@@ -24,7 +24,7 @@ def generate_rename_map(names: list, temperature: float = 1.2):
              'The input will be in the following form: ' \
              '[\'name1\', \'name2\', ...]. ' \
              'You must think of alternative names and provide the output in the form: ' \
-             '{\'name1\': \'alt_name1\', \'name2\': \'name2ButDifferent\', ...}. ' \
+             '{"name1": "alt_name1", "name2": "name2ButDifferent", ...}. ' \
              'Your response should only consist of a parsable json string as demonstrated above.' \
              'Longer names are generally better, but they can be arbitrary long.'
     prompt = str(names)

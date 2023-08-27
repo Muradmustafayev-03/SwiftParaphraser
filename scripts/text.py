@@ -1,5 +1,23 @@
 import regex as re
 
+FUNC_PREFIXES_RESTRICTED_TO_RENAME = [
+    'get', 'set', 'willSet', 'didSet', 'AF', 'UI', 'NS', 'CG', 'MK', 'WK', 'SCN', 'SK', 'AV', 'CA', 'CI', 'CL', 'CN',
+    'KF', 'URL', 'JSON', 'Firestore', 'FIR', 'URLSession', 'URLSessionDataTask', 'URLSessionDownloadTask', 'Observ',
+    'with', 'Unsafe', '@', 'mutable'
+]
+
+FUNC_RESTRICTED_TO_RENAME = [
+    'String', 'Int', 'Double', 'Float', 'Bool', 'Array', 'Dictionary', 'Set', 'Optional', 'Any', 'AnyObject', 'AnyClass',
+    'Character', 'Error', 'ErrorType', 'NSRange', 'Selector', 'isEmpty', 'count', 'first', 'last', 'lowercased',
+    'uppercased', 'trimmingCharacters', 'removeAll', 'remove', 'append', 'insert', 'removeFirst', 'removeLast',
+    'removeSubrange', 'removeAll', 'removeValue', 'removeAll', 'removeAll', 'removeAll', 'removeAll', 'removeAll',
+    'hasPrefix', 'hasSuffix', 'contains', 'split', 'joined', 'replacingOccurrences', 'replacingCharacters',
+    'insert', 'remove', 'append', 'first', 'last', 'popLast', 'popFirst', 'removeAll', 'remove', 'removeAll',
+    'filter', 'map', 'flatMap', 'reduce', 'sorted', 'sortedBy', 'sortedByDescending', 'sortedDescending',
+    'updateValue', 'update', 'removeValue', 'remove', 'removeAll', 'remove', 'removeAll', 'removeAll', 'remove',
+    'map', 'insert', 'init', 'deinit', 'subscript', 'description', 'hash', 'copy', 'alloc', 'dealloc', 'application',
+]
+
 
 def project_dict_to_str(project: dict):
     return '\n'.join([f"{file}:\n```\n{content}\n```" for file, content in project.items()])
@@ -98,7 +116,6 @@ def transform_loops(code, index='index'):
 def apply_to_project(project: dict, func: callable, *args, **kwargs):
     for file_path, file_content in project.items():
         if file_path.endswith('.swift'):
-            print(file_path)
             project[file_path] = func(file_content, *args, **kwargs)
     return project
 
@@ -112,6 +129,18 @@ def parse_struct_names(swift_code: str):
         for match in matches:
             names.append(match.group(1))
 
+    # functions that are not overridden
+    pattern = r'(?<!override\s+)func\s+([a-zA-Z0-9_]+)\s*\('
+    matches = re.finditer(pattern, swift_code)
+    for match in matches:
+        name = match.group(1)
+        for prefix in FUNC_PREFIXES_RESTRICTED_TO_RENAME:
+            if name.startswith(prefix):
+                continue
+            if name in FUNC_RESTRICTED_TO_RENAME:
+                continue
+            names.append(name)
+
     names = list(set(names))
     if 'SceneDelegate' in names:
         names.remove('SceneDelegate')
@@ -124,6 +153,8 @@ def find_all_names(project: dict):
     names = []
 
     for file_path, file_content in project.items():
+        if 'AppDelegate' in file_path or 'SceneDelegate' in file_path:
+            continue
         if file_path.endswith('.swift'):
             file_names = parse_struct_names(file_content)
             names += file_names
@@ -135,18 +166,15 @@ def rename_item(project: dict, old_name: str, new_name: str):
     # rename .swift file named after class, rename class itself,
     # rename references to class in other files including .xib and .storyboard files
     for file_path, file_content in project.items():
-        if file_path.endswith('.swift'):
-            # old_name surrounded by non-alphanumeric characters
-            pattern = rf'([^a-zA-Z0-9_]){old_name}([^a-zA-Z0-9_])'
+        word_regex = r'\b' + re.escape(old_name) + r'\b'
+        new_path = file_path
+        new_content = re.sub(word_regex, new_name, file_content)
 
-            new_path = file_path
+        if file_path.endswith('.swift'):
             if file_path.split('/')[-1] == old_name + '.swift':
                 new_path = file_path.replace(old_name + '.swift', new_name + '.swift')
 
-            new_project[new_path] = re.sub(pattern, rf'\1{new_name}\2', file_content)
-
-        elif file_path.endswith('.xib') or file_path.endswith('.storyboard'):
-            new_project[file_path] = file_content.replace(f'"{old_name}"', f'"{new_name}"')
+        new_project[new_path] = new_content
 
     return new_project
 
