@@ -11,19 +11,21 @@ import os
 app = FastAPI()
 
 
-def pipeline(source_path, result_path, filename, temperature=1.0):
-    project = read_project(source_path)
+def pipeline(root_dir, folder, filename, temperature=1.0):
+    project = dir_to_dict(folder)
 
     project = apply_to_project(project, remove_comments)
     project = apply_to_project(project, remove_empty_lines)
     print('finished removing comments and empty lines')
 
-    project = apply_to_project(project, gpt_modify,
-                               exclude=['AppDelegate.swift', 'SceneDelegate.swift'],
-                               temperature=temperature)
-    print('finished gpt modifying')
+    # project = apply_to_project(project, gpt_modify,
+    #                            exclude=['AppDelegate.swift', 'SceneDelegate.swift'],
+    #                            temperature=temperature)
+    # print('finished gpt modifying')
 
-    # project = apply_to_project(project, transform_conditions)
+    project = apply_to_project(project, transform_conditions)
+    print('finished transforming conditions')
+
     project = apply_to_project(project, transform_loops, index='iterationIndex1')
     project = apply_to_project(project, transform_loops, index='iterationIndex2')
     project = apply_to_project(project, transform_loops, index='iterationIndex3')
@@ -35,20 +37,20 @@ def pipeline(source_path, result_path, filename, temperature=1.0):
         project = rename_items(project, rename_map)
     print('finished renaming')
 
+    project = apply_to_project(project, lambda x: x.replace('\nlet ', '\nvar '))
+    print('finished replacing lets with vars')
+
     project = apply_to_project(project, add_comments, temperature=temperature)
     print('finished adding comments')
 
-    project = apply_to_project(project, fix_syntax)
-    print('finished fixing syntax')
+    # project = apply_to_project(project, fix_syntax)
+    # print('finished fixing syntax')
 
-    save_project(project)
+    # save project
+    dict_to_dir(project)
     print('finished saving project')
 
-    copy_files(source_path, result_path)
-    print('finished adding static files')
-
-    zip_dir(result_path, filename)
-    print('finished zipping project')
+    shutil.make_archive(f'{root_dir}/{filename[:-4]}', 'zip', folder)
 
 
 @app.get("/")
@@ -66,28 +68,21 @@ async def paraphrase(request: Request, zip_file: UploadFile = File(...)):
     content = zip_file.file.read()
 
     root_dir = f'../projects/{unique_id}'
-    source_path = f'{root_dir}/{filename[:-4]}/source'
-    unzipped_path = f'{root_dir}/{filename[:-4]}/unzipped'
-    result_path = f'{root_dir}/{filename[:-4]}/result'
+    folder = f'{root_dir}/{filename[:-4]}/'
+    os.makedirs(folder, exist_ok=True)
 
-    try:
-        os.makedirs(source_path)
-        os.makedirs(unzipped_path)
-        os.makedirs(result_path)
-    except FileExistsError:
-        return {"message": "Too many requests. Please try again later."}
-
-    with open(f'{source_path}/{filename}', 'wb') as f:
+    # unzip file and save to folder
+    with open(f'{root_dir}/{filename}', 'wb') as f:
         f.write(content)
 
-    # unzip file
-    unzip(f'{source_path}/{filename}', f'{unzipped_path}/{filename[:-4]}')
+    shutil.unpack_archive(f'{root_dir}/{filename}', folder)
+    os.remove(f'{root_dir}/{filename}')
 
     try:
-        pipeline(unzipped_path, result_path, filename, 1.0)
+        pipeline(root_dir, folder, filename)
         print('finished paraphrasing')
 
-        with open(f'{result_path}/{filename}', "rb") as f:
+        with open(f'{root_dir}/{filename}', "rb") as f:
             result = io.BytesIO(f.read())
 
         return StreamingResponse(result, media_type="application/zip",

@@ -39,6 +39,7 @@ def add_comments(code: str, temperature: float = 1.0):
              'The more comments the better. The larger comment blocks are the better.' \
              'The more detailed the comments are the better.' \
              'Your response must only consist of the user\'s code with your added comments.' \
+             'Do not make any changes within the code, only add the comments.' \
              'Your entire unchanged response will be writen to the .swift file.' \
              'If you want to add something, write it in the comments.'
 

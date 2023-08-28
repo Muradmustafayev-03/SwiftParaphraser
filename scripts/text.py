@@ -16,6 +16,7 @@ FUNC_RESTRICTED_TO_RENAME = [
     'filter', 'map', 'flatMap', 'reduce', 'sorted', 'sortedBy', 'sortedByDescending', 'sortedDescending',
     'updateValue', 'update', 'removeValue', 'remove', 'removeAll', 'remove', 'removeAll', 'removeAll', 'remove',
     'map', 'insert', 'init', 'deinit', 'subscript', 'description', 'hash', 'copy', 'alloc', 'dealloc', 'application',
+    'subscript'
 ]
 
 
@@ -63,20 +64,21 @@ def remove_comments(swift_code: str):
 
 
 def transform_conditions(code):
-    # Define the regular expression pattern
-    guard_pattern = r'(\s*?)guard\s+([\S\s]*)\s*else\s*{([\S\s]*?)}([\S\s]*?)}'
+    # Define the regular expression pattern for guard statements
+    guard_pattern = r'(\s*?)guard\s+([\S\s]*?)\s+else\s+{([\S\s]*?)}'
 
     # Find all matches of the pattern in the input string
     matches = re.findall(guard_pattern, code)
 
     # Process each match and perform the transformation
     for match in matches:
-        indent, condition, else_body, true_body = match
-        true_body = true_body.replace('\n', f'\n\t')
-        else_body = else_body.replace('\n', f'\n\t')
+        indent, condition, else_body = match
+
+        if 'let ' in condition:
+            continue
 
         transformed_string = \
-            f"{indent}if {condition} {{\n{indent}\t{true_body}\n{indent}}} else {{\n{indent}\t{else_body}\n{indent}}}"
+            f"{indent}if !({condition}) {{\n{indent}\t{else_body}\n}}"
 
         # Replace the matched patterns with the transformed strings
         code = re.sub(guard_pattern, transformed_string, code, 1)
@@ -104,8 +106,8 @@ def transform_loops(code, index='index'):
 
         transformed_string = \
             f"{indent}let sequence = {sequence}\n{indent}var {index} = 0\n{indent}while {index} < sequence.count " \
-            f"{{\n{indent}\tlet {val} = sequence[{index}]\n{indent}\tif ({condition}) {{\n{indent}\t\t" \
-            f"{body}}}\n{indent}\t{index} += 1\n{indent}\t}}"
+            f"{{\n{indent}\tlet {val} = sequence[sequence.index(sequence.startIndex, offsetBy:{index})]\n{indent}\tif " \
+            f"({condition}) {{\n{indent}\t\t{body}}}\n{indent}\t{index} += 1\n{indent}\t}}"
 
         # Replace the matched patterns with the transformed strings
         code = re.sub(for_pattern, transformed_string, code, 1)
@@ -143,6 +145,20 @@ def parse_struct_names(swift_code: str):
                 continue
             names.append(name)
 
+    # # variables
+    # pattern = r'var\s+([a-zA-Z0-9_]+)\s*(:|=)'
+    # matches = re.finditer(pattern, swift_code)
+    # for match in matches:
+    #     name = match.group(1)
+    #     names.append(name)
+    #
+    # # constants
+    # pattern = r'let\s+([a-zA-Z0-9_]+)\s*(:|=)'
+    # matches = re.finditer(pattern, swift_code)
+    # for match in matches:
+    #     name = match.group(1)
+    #     names.append(name)
+
     names = list(set(names))
     if 'SceneDelegate' in names:
         names.remove('SceneDelegate')
@@ -176,7 +192,7 @@ def rename_item(project: dict, old_name: str, new_name: str):
             if file_path.split('/')[-1] == old_name + '.swift':
                 new_path = file_path.replace(old_name + '.swift', new_name + '.swift')
 
-        new_project[new_path] = new_content
+        new_project[file_path] = new_content
 
     return new_project
 
