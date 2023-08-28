@@ -20,23 +20,6 @@ FUNC_RESTRICTED_TO_RENAME = [
 ]
 
 
-def project_dict_to_str(project: dict):
-    return '\n'.join([f"{file}:\n```\n{content}\n```" for file, content in project.items()])
-
-
-def project_str_to_dict(project: str):
-    file_data = {}
-    pattern = r'([^:^\n]+):\s*```\s*([\s\S]+?)```'
-    matches = re.finditer(pattern, project, re.DOTALL)
-
-    for match in matches:
-        file_path = match.group(1).strip()
-        file_content = match.group(2).strip()
-        file_data[file_path] = file_content
-
-    return file_data
-
-
 def remove_empty_lines(swift_code: str):
     return '\n'.join([line for line in swift_code.splitlines() if line.strip()])
 
@@ -113,15 +96,6 @@ def transform_loops(code, index='index'):
         code = re.sub(for_pattern, transformed_string, code, 1)
 
     return remove_empty_lines(code)
-
-
-def apply_to_project(project: dict, func: callable, exclude=(), *args, **kwargs):
-    for file_path, file_content in project.items():
-        if file_path.endswith('.swift'):
-            if file_path.split('/')[-1] in exclude:
-                continue
-            project[file_path] = func(file_content, *args, **kwargs)
-    return project
 
 
 def parse_struct_names(swift_code: str):

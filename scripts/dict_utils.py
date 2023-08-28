@@ -30,3 +30,12 @@ def dict_to_dir(data: dict[str, str]):
     for file_path, content in data.items():
         with open(file_path, 'w') as file:
             file.write(content)
+
+
+def apply_to_project(project: dict, func: callable, exclude=(), *args, **kwargs):
+    for file_path, file_content in project.items():
+        if file_path.endswith('.swift'):
+            if file_path.split('/')[-1] in exclude:
+                continue
+            project[file_path] = func(file_content, *args, **kwargs)
+    return project
