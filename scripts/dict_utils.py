@@ -33,9 +33,11 @@ def dict_to_dir(data: dict[str, str]):
 
 
 def apply_to_project(project: dict, func: callable, exclude=(), *args, **kwargs):
+    print(f'Applying {func.__name__} to project...')
+    n = 1
     for file_path, file_content in project.items():
-        if file_path.endswith('.swift'):
-            if file_path.split('/')[-1] in exclude:
-                continue
+        if file_path.endswith('.swift') and not file_path.split('/')[-1] in exclude:
             project[file_path] = func(file_content, *args, **kwargs)
+        print(f'Done: {n} / {len(project)}')
+        n += 1
     return project

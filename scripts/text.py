@@ -7,7 +7,8 @@ FUNC_PREFIXES_RESTRICTED_TO_RENAME = [
 ]
 
 FUNC_RESTRICTED_TO_RENAME = [
-    'String', 'Int', 'Double', 'Float', 'Bool', 'Array', 'Dictionary', 'Set', 'Optional', 'Any', 'AnyObject', 'AnyClass',
+    'String', 'Int', 'Double', 'Float', 'Bool', 'Array', 'Dictionary', 'Set', 'Optional', 'Any', 'AnyObject',
+    'AnyClass',
     'Character', 'Error', 'ErrorType', 'NSRange', 'Selector', 'isEmpty', 'count', 'first', 'last', 'lowercased',
     'uppercased', 'trimmingCharacters', 'removeAll', 'remove', 'append', 'insert', 'removeFirst', 'removeLast',
     'removeSubrange', 'removeAll', 'removeValue', 'removeAll', 'removeAll', 'removeAll', 'removeAll', 'removeAll',
@@ -18,6 +19,11 @@ FUNC_RESTRICTED_TO_RENAME = [
     'map', 'insert', 'init', 'deinit', 'subscript', 'description', 'hash', 'copy', 'alloc', 'dealloc', 'application',
     'subscript'
 ]
+
+
+def remove_whitespace(input_string):
+    # Use regular expression to match whitespace characters and replace them with an empty string
+    return re.sub(r'\s+', '', input_string)
 
 
 def remove_empty_lines(swift_code: str):
@@ -98,16 +104,26 @@ def transform_loops(code, index='index'):
     return remove_empty_lines(code)
 
 
-def parse_struct_names(swift_code: str):
+def parse_type_names(swift_code: str):
     names = []
 
-    for struct_type in ['class', 'struct', 'enum']:
-        pattern = rf'{struct_type}\s+([A-Z][a-zA-Z0-9_]+)\s*(:|\{{)'
+    for typedef in ['class', 'struct', 'enum']:
+        pattern = rf'{typedef}\s+([A-Z][a-zA-Z0-9_]+)\s*(:|\{{)'
         matches = re.finditer(pattern, swift_code)
         for match in matches:
             names.append(match.group(1))
 
-    # functions that are not overridden
+    names = list(set(names))
+    if 'SceneDelegate' in names:
+        names.remove('SceneDelegate')
+    if 'AppDelegate' in names:
+        names.remove('AppDelegate')
+    return names
+
+
+def parse_func_names(swift_code: str):
+    names = []
+
     pattern = r'(?<!override\s+)func\s+([a-zA-Z0-9_]+)\s*\('
     matches = re.finditer(pattern, swift_code)
     for match in matches:
@@ -119,61 +135,93 @@ def parse_struct_names(swift_code: str):
                 continue
             names.append(name)
 
-    # # variables
-    # pattern = r'var\s+([a-zA-Z0-9_]+)\s*(:|=)'
-    # matches = re.finditer(pattern, swift_code)
-    # for match in matches:
-    #     name = match.group(1)
-    #     names.append(name)
-    #
-    # # constants
-    # pattern = r'let\s+([a-zA-Z0-9_]+)\s*(:|=)'
-    # matches = re.finditer(pattern, swift_code)
-    # for match in matches:
-    #     name = match.group(1)
-    #     names.append(name)
-
     names = list(set(names))
-    if 'SceneDelegate' in names:
-        names.remove('SceneDelegate')
-    if 'AppDelegate' in names:
-        names.remove('AppDelegate')
     return names
 
 
-def find_all_names(project: dict):
+def parse_var_names(swift_code: str):
+    names = []
+
+    # variables
+    pattern = r'var\s+([a-zA-Z0-9_]+)\s*(:|=)'
+    matches = re.finditer(pattern, swift_code)
+    for match in matches:
+        name = match.group(1)
+        names.append(name)
+
+    # constants
+    pattern = r'let\s+([a-zA-Z0-9_]+)\s*(:|=)'
+    matches = re.finditer(pattern, swift_code)
+    for match in matches:
+        name = match.group(1)
+        names.append(name)
+
+    names = list(set(names))
+    return names
+
+
+def parse_in_project(project: dict, func: callable):
     names = []
 
     for file_path, file_content in project.items():
         if 'AppDelegate' in file_path or 'SceneDelegate' in file_path:
             continue
         if file_path.endswith('.swift'):
-            file_names = parse_struct_names(file_content)
+            file_names = func(file_content)
             names += file_names
     return list(set(names))
 
 
-def rename_item(project: dict, old_name: str, new_name: str):
+def rename_item(project: dict, old_name: str, new_name: str, is_type: bool = False, rename_files: bool = False):
     new_project = {}
+    renamed_files = []
     # rename .swift file named after class, rename class itself,
     # rename references to class in other files including .xib and .storyboard files
     for file_path, file_content in project.items():
-        word_regex = r'\b' + re.escape(old_name) + r'\b'
-        new_path = file_path
-        new_content = re.sub(word_regex, new_name, file_content)
+        if not is_type:
+            if file_path.endswith('.swift'):
+                pattern = r'\b' + re.escape(old_name) + r'\b'
+                new_content = re.sub(pattern, new_name, file_content)
+                new_project[file_path] = new_content
+            else:
+                new_project[file_path] = file_content
+            continue
 
         if file_path.endswith('.swift'):
-            if file_path.split('/')[-1] == old_name + '.swift':
-                new_path = file_path.replace(old_name + '.swift', new_name + '.swift')
+            new_path = file_path
 
-        new_project[file_path] = new_content
+            if file_path.split('/')[-1] == old_name + '.swift' and rename_files:
+                new_path = file_path.replace(old_name + '.swift', new_name + '.swift')
+                renamed_files.append((old_name, new_name))
+
+            pattern = r'\b' + re.escape(old_name) + r'\b'
+            new_content = re.sub(pattern, new_name, file_content)
+            new_project[new_path] = new_content
+            continue
+
+        if file_path.endswith('.xib') or file_path.endswith('.storyboard'):
+            pattern = r'customClass="' + re.escape(old_name) + r'"'
+            new_content = re.sub(pattern, r'customClass="' + new_name + r'"', file_content)
+
+            for old_filename, new_filename in renamed_files:
+                pattern = r'customModule="' + re.escape(old_filename) + r'"'
+                new_content = re.sub(pattern, r'customModule="' + new_filename + r'"', new_content)
+
+            new_project[file_path] = new_content
+            continue
+
+        if file_path.endswith('.xml') or file_path.endswith('.pbxproj') or file_path.endswith('.plist'):
+            pattern = r'>' + re.escape(old_name) + r'<'
+            new_content = re.sub(pattern, r'>' + new_name + r'<', file_content)
+            new_project[file_path] = new_content
+            continue
 
     return new_project
 
 
-def rename_items(project: dict, names: dict):
+def rename_items(project: dict, names: dict, is_type: bool = False, rename_files: bool = False):
     for old_name, new_name in names.items():
-        project = rename_item(project, old_name, new_name)
+        project = rename_item(project, old_name, new_name, is_type, rename_files)
 
     return project
 

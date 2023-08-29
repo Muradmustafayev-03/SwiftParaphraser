@@ -1,4 +1,4 @@
-from .text import add_missing_imports, remove_comments, remove_empty_lines
+from .text import add_missing_imports, remove_comments, remove_whitespace
 from .secret import *
 import openai
 import json
@@ -53,13 +53,13 @@ def add_comments(code: str, temperature: float = 1.0):
             response = response.split('```')[1]
         response = add_missing_imports(code, response)
 
-        diff1 = set(remove_empty_lines(remove_comments(code))) - set(remove_empty_lines(remove_comments(response)))
-        diff2 = set(remove_empty_lines(remove_comments(response))) - set(remove_empty_lines(remove_comments(code)))
-        if not diff1 and not diff2:
+        clean_code = remove_whitespace(remove_comments(code))
+        clean_response = remove_whitespace(remove_comments(response))
+        difference = [char1 for char1, char2 in zip(clean_code, clean_response) if char1 != char2]
+
+        if not difference:
             return response
         else:
-            print('diff1:', diff1)
-            print('diff2:', diff2)
             print('Commenting failed. Trying again...')
 
 
