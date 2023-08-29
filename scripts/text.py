@@ -143,14 +143,14 @@ def parse_var_names(swift_code: str):
     names = []
 
     # variables
-    pattern = r'var\s+([a-zA-Z0-9_]+)\s*(:|=)'
+    pattern = r'(?<!override\s+)var\s+([a-zA-Z0-9_]+)\s*(:|=)'
     matches = re.finditer(pattern, swift_code)
     for match in matches:
         name = match.group(1)
         names.append(name)
 
     # constants
-    pattern = r'let\s+([a-zA-Z0-9_]+)\s*(:|=)'
+    pattern = r'(?<!override\s+)let\s+([a-zA-Z0-9_]+)\s*(:|=)'
     matches = re.finditer(pattern, swift_code)
     for match in matches:
         name = match.group(1)

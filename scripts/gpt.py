@@ -19,7 +19,7 @@ def gpt_response(prompt: str, system: str, temperature: float = 1.0):
     return json.loads(str(res))['choices'][0]['message']['content']
 
 
-def generate_rename_map(names: list, temperature: float = 1.2):
+def generate_rename_map(names: list, temperature: float = 1.0):
     system = 'The user will give you the list of names to rename. ' \
              'The input will be in the following form: ' \
              '[\'name1\', \'name2\', ...]. ' \
@@ -32,6 +32,7 @@ def generate_rename_map(names: list, temperature: float = 1.2):
     while True:
         try:
             response = gpt_response(prompt, system, temperature)
+            print(response)
             return json.loads(response)
         except json.decoder.JSONDecodeError:
             print('Rename map generation failed. Trying again...')
@@ -46,7 +47,7 @@ def add_comments(code: str, temperature: float = 1.0):
              'Do not dare to make any changes within the code, only add the comments.' \
              'Your entire unchanged response will be writen to the .swift file.' \
 
-    while True:
+    for _ in range(5):
         response = gpt_response(code, system, temperature)
         if '```' in response:
             # extract code from response
@@ -61,6 +62,8 @@ def add_comments(code: str, temperature: float = 1.0):
             return response
         else:
             print('Commenting failed. Trying again...')
+    print('Returned code with no comments')
+    return code
 
 
 def gpt_modify(code: str, temperature: float = 1.0):

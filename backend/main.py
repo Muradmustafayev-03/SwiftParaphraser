@@ -37,11 +37,11 @@ def pipeline(root_dir, folder, filename, temperature=1.0):
         project = rename_items(project, rename_map, is_type=True, rename_files=False)
     print('finished renaming types')
 
-    func_names = parse_in_project(project, parse_func_names)
-    if func_names:
-        rename_map = generate_rename_map(func_names)
-        project = rename_items(project, rename_map)
-    print('finished renaming funcs')
+    # func_names = parse_in_project(project, parse_func_names)
+    # if func_names:
+    #     rename_map = generate_rename_map(func_names)
+    #     project = rename_items(project, rename_map)
+    # print('finished renaming funcs')
 
     # var_names = parse_in_project(project, parse_var_names)
     # if var_names:
