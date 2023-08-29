@@ -4,7 +4,6 @@ from scripts import *
 import uvicorn
 import random
 import shutil
-import json
 import time
 import io
 import os
@@ -34,13 +33,7 @@ def pipeline(root_dir, folder, filename, temperature=1.0):
 
     names = find_all_names(project)
     if names:
-        rename_map = {}
-        while True:
-            try:
-                rename_map = generate_rename_map(names)
-                break
-            except json.decoder.JSONDecodeError:
-                continue
+        rename_map = generate_rename_map(names)
         project = rename_items(project, rename_map)
     print('finished renaming')
 
