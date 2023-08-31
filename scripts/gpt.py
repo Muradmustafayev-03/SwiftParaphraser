@@ -19,25 +19,6 @@ def gpt_response(prompt: str, system: str, temperature: float = 1.0):
     return json.loads(str(res))['choices'][0]['message']['content']
 
 
-def generate_rename_map(names: list, temperature: float = 1.0):
-    system = 'The user will give you the list of names to rename. ' \
-             'The input will be in the following form: ' \
-             '[\'name1\', \'name2\', ...]. ' \
-             'You must think of alternative names and provide the output in the form: ' \
-             '{"name1": "alt_name1", "name2": "name2ButDifferent", ...}. ' \
-             'Your response should only consist of a parsable json string as demonstrated above.' \
-             'Longer names are generally better, but they can be arbitrary long.'
-    prompt = str(names)
-
-    while True:
-        try:
-            response = gpt_response(prompt, system, temperature)
-            print(response)
-            return json.loads(response)
-        except json.decoder.JSONDecodeError:
-            print('Rename map generation failed. Trying again...')
-
-
 def add_comments(code: str, temperature: float = 1.0):
     system = 'The user will give you the swift code. ' \
              'Add as many comments to the code as possible. ' \
@@ -48,7 +29,12 @@ def add_comments(code: str, temperature: float = 1.0):
              'Your entire unchanged response will be writen to the .swift file.' \
 
     for _ in range(5):
-        response = gpt_response(code, system, temperature)
+        try:
+            response = gpt_response(code, system, temperature)
+        except Exception as e:
+            print(e, e.__class__)
+            print('Commenting failed. Trying again...')
+            continue
         if '```' in response:
             # extract code from response
             response = response.split('```')[1]
@@ -56,7 +42,9 @@ def add_comments(code: str, temperature: float = 1.0):
 
         clean_code = remove_whitespace(remove_comments(code))
         clean_response = remove_whitespace(remove_comments(response))
-        difference = [char1 for char1, char2 in zip(clean_code, clean_response) if char1 != char2]
+        left_diff = [char1 for char1, char2 in zip(clean_code, clean_response) if char1 != char2]
+        right_diff = [char2 for char1, char2 in zip(clean_code, clean_response) if char1 != char2]
+        difference = left_diff + right_diff
 
         if not difference:
             return response

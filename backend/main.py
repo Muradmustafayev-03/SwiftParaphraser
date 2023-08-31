@@ -26,31 +26,19 @@ def pipeline(root_dir, folder, filename, temperature=1.0):
     project = apply_to_project(project, transform_conditions)
     print('finished transforming conditions')
 
-    project = apply_to_project(project, transform_loops, index='iterationIndex1')
-    project = apply_to_project(project, transform_loops, index='iterationIndex2')
-    project = apply_to_project(project, transform_loops, index='iterationIndex3')
-    print('finished transforming loops')
+    # project = apply_to_project(project, transform_loops, index='iterationIndex1')
+    # project = apply_to_project(project, transform_loops, index='iterationIndex2')
+    # project = apply_to_project(project, transform_loops, index='iterationIndex3')
+    # print('finished transforming loops')
 
-    type_names = parse_in_project(project, parse_type_names)
-    if type_names:
-        rename_map = generate_rename_map(type_names)
-        project = rename_items(project, rename_map, is_type=True, rename_files=False)
-    print('finished renaming types')
+    # type_names = parse_types_in_project(project)
+    # if type_names:
+    #     rename_map = generate_rename_map(type_names)
+    #     project = rename_types(project, rename_map, rename_files=False)
+    # print('finished renaming types')
 
-    # func_names = parse_in_project(project, parse_func_names)
-    # if func_names:
-    #     rename_map = generate_rename_map(func_names)
-    #     project = rename_items(project, rename_map)
-    # print('finished renaming funcs')
-
-    # var_names = parse_in_project(project, parse_var_names)
-    # if var_names:
-    #     rename_map = generate_rename_map(var_names)
-    #     project = rename_items(project, rename_map)
-    # print('finished renaming vars')
-
-    project = apply_to_project(project, lambda x: x.replace('\nlet ', '\nvar '))
-    print('finished replacing lets with vars')
+    project = apply_to_project(project, rename_local_variables)
+    print('finished renaming local variables')
 
     project = apply_to_project(project, add_comments, temperature=temperature)
     print('finished adding comments')

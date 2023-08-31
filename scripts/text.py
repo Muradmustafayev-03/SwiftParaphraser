@@ -1,25 +1,5 @@
 import regex as re
 
-FUNC_PREFIXES_RESTRICTED_TO_RENAME = [
-    'get', 'set', 'willSet', 'didSet', 'AF', 'UI', 'NS', 'CG', 'MK', 'WK', 'SCN', 'SK', 'AV', 'CA', 'CI', 'CL', 'CN',
-    'KF', 'URL', 'JSON', 'Firestore', 'FIR', 'URLSession', 'URLSessionDataTask', 'URLSessionDownloadTask', 'Observ',
-    'with', 'Unsafe', '@', 'mutable'
-]
-
-FUNC_RESTRICTED_TO_RENAME = [
-    'String', 'Int', 'Double', 'Float', 'Bool', 'Array', 'Dictionary', 'Set', 'Optional', 'Any', 'AnyObject',
-    'AnyClass',
-    'Character', 'Error', 'ErrorType', 'NSRange', 'Selector', 'isEmpty', 'count', 'first', 'last', 'lowercased',
-    'uppercased', 'trimmingCharacters', 'removeAll', 'remove', 'append', 'insert', 'removeFirst', 'removeLast',
-    'removeSubrange', 'removeAll', 'removeValue', 'removeAll', 'removeAll', 'removeAll', 'removeAll', 'removeAll',
-    'hasPrefix', 'hasSuffix', 'contains', 'split', 'joined', 'replacingOccurrences', 'replacingCharacters',
-    'insert', 'remove', 'append', 'first', 'last', 'popLast', 'popFirst', 'removeAll', 'remove', 'removeAll',
-    'filter', 'map', 'flatMap', 'reduce', 'sorted', 'sortedBy', 'sortedByDescending', 'sortedDescending',
-    'updateValue', 'update', 'removeValue', 'remove', 'removeAll', 'remove', 'removeAll', 'removeAll', 'remove',
-    'map', 'insert', 'init', 'deinit', 'subscript', 'description', 'hash', 'copy', 'alloc', 'dealloc', 'application',
-    'subscript'
-]
-
 
 def remove_whitespace(input_string):
     # Use regular expression to match whitespace characters and replace them with an empty string
@@ -52,27 +32,87 @@ def remove_comments(swift_code: str):
     return swift_code
 
 
-def transform_conditions(code):
-    # Define the regular expression pattern for guard statements
-    guard_pattern = r'(\s*?)guard\s+([\S\s]*?)\s+else\s+{([\S\s]*?)}'
+def parse_functions(code: str):
+    pattern = r'(\s*?)func[\S\s]*?{'
+    functions = re.finditer(pattern, code)
 
-    # Find all matches of the pattern in the input string
-    matches = re.findall(guard_pattern, code)
+    parsed_functions = []
+    for match in functions:
+        func_start = match.group(0)
+        open_brackets = 1
+        idx = code.find(func_start) + len(func_start)
 
-    # Process each match and perform the transformation
+        while open_brackets > 0 and idx < len(code):
+            if code[idx] == '{':
+                open_brackets += 1
+            elif code[idx] == '}':
+                open_brackets -= 1
+            idx += 1
+
+        if open_brackets == 0:
+            parsed_functions.append(code[code.find(func_start):idx])
+    return parsed_functions
+
+
+def parse_guard_statements(code: str):
+    guard_pattern = r'(\s*?)guard\s+(?!let\s+)([\S\s]*?)\s+else\s+{'
+    statements = re.finditer(guard_pattern, code)
+
+    parsed_statements = []
+    for match in statements:
+        condition = match.group(2)
+        statement_start = match.group(0)
+        open_brackets = 1
+        idx = code.find(statement_start) + len(statement_start)
+
+        while open_brackets > 0 and idx < len(code):
+            if code[idx] == '{':
+                open_brackets += 1
+            elif code[idx] == '}':
+                open_brackets -= 1
+            idx += 1
+
+        if open_brackets == 0:
+            statement = code[code.find(statement_start):idx]
+            else_body = statement[statement.find('{') + 1: -1]
+            parsed_statements.append((statement, condition, else_body))
+
+    return parsed_statements
+
+
+def parse_loops(code: str):
+    for_pattern = r'(\s*?)for\s+([\S\s]*?)\s+in\s+([\S\s]*?){'
+    matches = re.finditer(for_pattern, code)
+
+    parsed_loops = []
     for match in matches:
-        indent, condition, else_body = match
+        val = match.group(2)
+        sequence = match.group(3)
+        loop_start = match.group(0)
+        open_brackets = 1
+        idx = code.find(loop_start) + len(loop_start)
 
-        if 'let ' in condition:
-            continue
+        while open_brackets > 0 and idx < len(code):
+            if code[idx] == '{':
+                open_brackets += 1
+            elif code[idx] == '}':
+                open_brackets -= 1
+            idx += 1
 
-        transformed_string = \
-            f"{indent}if !({condition}) {{\n{indent}\t{else_body}\n}}"
+        if open_brackets == 0:
+            loop = code[code.find(loop_start):idx]
+            body = loop[loop.find('{') + 1: -1]
+            parsed_loops.append((loop, val, sequence, body))
 
-        # Replace the matched patterns with the transformed strings
-        code = re.sub(guard_pattern, transformed_string, code, 1)
+    return parsed_loops
 
-    return remove_empty_lines(code)
+
+def transform_conditions(code):
+    guard_statements = parse_guard_statements(code)
+    for statement, condition, else_body in guard_statements:
+        transformed_statement = f'\nif !({condition}) {{\n{else_body}\n}}\n'
+        code = code.replace(statement, transformed_statement)
+    return code
 
 
 def transform_loops(code, index='index'):
@@ -102,128 +142,6 @@ def transform_loops(code, index='index'):
         code = re.sub(for_pattern, transformed_string, code, 1)
 
     return remove_empty_lines(code)
-
-
-def parse_type_names(swift_code: str):
-    names = []
-
-    for typedef in ['class', 'struct', 'enum']:
-        pattern = rf'{typedef}\s+([A-Z][a-zA-Z0-9_]+)\s*(:|\{{)'
-        matches = re.finditer(pattern, swift_code)
-        for match in matches:
-            names.append(match.group(1))
-
-    names = list(set(names))
-    if 'SceneDelegate' in names:
-        names.remove('SceneDelegate')
-    if 'AppDelegate' in names:
-        names.remove('AppDelegate')
-    return names
-
-
-def parse_func_names(swift_code: str):
-    names = []
-
-    pattern = r'(?<!override\s+)func\s+([a-zA-Z0-9_]+)\s*\('
-    matches = re.finditer(pattern, swift_code)
-    for match in matches:
-        name = match.group(1)
-        for prefix in FUNC_PREFIXES_RESTRICTED_TO_RENAME:
-            if name.startswith(prefix):
-                continue
-            if name in FUNC_RESTRICTED_TO_RENAME:
-                continue
-            names.append(name)
-
-    names = list(set(names))
-    return names
-
-
-def parse_var_names(swift_code: str):
-    names = []
-
-    # variables
-    pattern = r'(?<!override\s+)var\s+([a-zA-Z0-9_]+)\s*(:|=)'
-    matches = re.finditer(pattern, swift_code)
-    for match in matches:
-        name = match.group(1)
-        names.append(name)
-
-    # constants
-    pattern = r'(?<!override\s+)let\s+([a-zA-Z0-9_]+)\s*(:|=)'
-    matches = re.finditer(pattern, swift_code)
-    for match in matches:
-        name = match.group(1)
-        names.append(name)
-
-    names = list(set(names))
-    return names
-
-
-def parse_in_project(project: dict, func: callable):
-    names = []
-
-    for file_path, file_content in project.items():
-        if 'AppDelegate' in file_path or 'SceneDelegate' in file_path:
-            continue
-        if file_path.endswith('.swift'):
-            file_names = func(file_content)
-            names += file_names
-    return list(set(names))
-
-
-def rename_item(project: dict, old_name: str, new_name: str, is_type: bool = False, rename_files: bool = False):
-    new_project = {}
-    renamed_files = []
-    # rename .swift file named after class, rename class itself,
-    # rename references to class in other files including .xib and .storyboard files
-    for file_path, file_content in project.items():
-        if not is_type:
-            if file_path.endswith('.swift'):
-                pattern = r'\b' + re.escape(old_name) + r'\b'
-                new_content = re.sub(pattern, new_name, file_content)
-                new_project[file_path] = new_content
-            else:
-                new_project[file_path] = file_content
-            continue
-
-        if file_path.endswith('.swift'):
-            new_path = file_path
-
-            if file_path.split('/')[-1] == old_name + '.swift' and rename_files:
-                new_path = file_path.replace(old_name + '.swift', new_name + '.swift')
-                renamed_files.append((old_name, new_name))
-
-            pattern = r'\b' + re.escape(old_name) + r'\b'
-            new_content = re.sub(pattern, new_name, file_content)
-            new_project[new_path] = new_content
-            continue
-
-        if file_path.endswith('.xib') or file_path.endswith('.storyboard'):
-            pattern = r'customClass="' + re.escape(old_name) + r'"'
-            new_content = re.sub(pattern, r'customClass="' + new_name + r'"', file_content)
-
-            for old_filename, new_filename in renamed_files:
-                pattern = r'customModule="' + re.escape(old_filename) + r'"'
-                new_content = re.sub(pattern, r'customModule="' + new_filename + r'"', new_content)
-
-            new_project[file_path] = new_content
-            continue
-
-        if file_path.endswith('.xml') or file_path.endswith('.pbxproj') or file_path.endswith('.plist'):
-            pattern = r'>' + re.escape(old_name) + r'<'
-            new_content = re.sub(pattern, r'>' + new_name + r'<', file_content)
-            new_project[file_path] = new_content
-            continue
-
-    return new_project
-
-
-def rename_items(project: dict, names: dict, is_type: bool = False, rename_files: bool = False):
-    for old_name, new_name in names.items():
-        project = rename_item(project, old_name, new_name, is_type, rename_files)
-
-    return project
 
 
 def find_all_imports(code: str):

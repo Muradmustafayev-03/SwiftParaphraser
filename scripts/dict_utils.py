@@ -16,7 +16,7 @@ def dir_to_dict(dir_path, file_types: tuple[str] = CHANGEABLE_FILE_TYPES) -> dic
 
     project = {}
     for file in file_list:
-        with open(file, 'r') as f:
+        with open(file, 'r', encoding='utf-8') as f:
             project[file] = f.read()
 
     # remove files in file_list from the dir_path
@@ -28,7 +28,7 @@ def dir_to_dict(dir_path, file_types: tuple[str] = CHANGEABLE_FILE_TYPES) -> dic
 
 def dict_to_dir(data: dict[str, str]):
     for file_path, content in data.items():
-        with open(file_path, 'w') as file:
+        with open(file_path, 'w', encoding='utf-8') as file:
             file.write(content)
 
 
