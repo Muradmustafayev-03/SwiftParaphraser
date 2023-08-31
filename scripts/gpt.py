@@ -19,7 +19,7 @@ def gpt_response(prompt: str, system: str, temperature: float = 1.0):
     return json.loads(str(res))['choices'][0]['message']['content']
 
 
-def add_comments(code: str, temperature: float = 1.0):
+def add_comments(code: str, temperature: float = 1.0, max_tries: int = 3):
     system = 'The user will give you the swift code. ' \
              'Add as many comments to the code as possible. ' \
              'The more comments the better. The larger comment blocks are the better.' \
@@ -28,7 +28,7 @@ def add_comments(code: str, temperature: float = 1.0):
              'Do not dare to make any changes within the code, only add the comments.' \
              'Your entire unchanged response will be writen to the .swift file.' \
 
-    for _ in range(5):
+    for _ in range(max_tries):
         try:
             response = gpt_response(code, system, temperature)
         except Exception as e:

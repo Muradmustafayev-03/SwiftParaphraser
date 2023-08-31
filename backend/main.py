@@ -31,16 +31,16 @@ def pipeline(root_dir, folder, filename, temperature=1.0):
     # project = apply_to_project(project, transform_loops, index='iterationIndex3')
     # print('finished transforming loops')
 
-    # type_names = parse_types_in_project(project)
-    # if type_names:
-    #     rename_map = generate_rename_map(type_names)
-    #     project = rename_types(project, rename_map, rename_files=False)
-    # print('finished renaming types')
+    type_names = parse_types_in_project(project, include_types=('struct', 'enum'))
+    if type_names:
+        rename_map = generate_rename_map(type_names)
+        project = rename_types(project, rename_map, rename_files=False)
+    print('finished renaming types')
 
     project = apply_to_project(project, rename_local_variables)
     print('finished renaming local variables')
 
-    project = apply_to_project(project, add_comments, temperature=temperature)
+    project = apply_to_project(project, add_comments, temperature=temperature, max_tries=3)
     print('finished adding comments')
 
     # project = apply_to_project(project, fix_syntax)

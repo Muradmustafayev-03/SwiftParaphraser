@@ -83,10 +83,10 @@ def rename_local_variables(code):
     return code
 
 
-def parse_type_names(swift_code: str):
+def parse_type_names(swift_code: str, include_types: tuple = ('class', 'struct', 'enum')):
     names = []
 
-    for typedef in ['class', 'struct', 'enum']:
+    for typedef in include_types:
         pattern = rf'{typedef}\s+([A-Z][a-zA-Z0-9_]+)\s*(:|\{{)'
         matches = re.finditer(pattern, swift_code)
         for match in matches:
@@ -100,14 +100,14 @@ def parse_type_names(swift_code: str):
     return names
 
 
-def parse_types_in_project(project: dict):
+def parse_types_in_project(project: dict, include_types: tuple = ('class', 'struct', 'enum')):
     names = []
 
     for file_path, file_content in project.items():
         if 'AppDelegate.swift' in file_path or 'SceneDelegate.swift' in file_path:
             continue
         if file_path.endswith('.swift'):
-            file_names = parse_type_names(file_content)
+            file_names = parse_type_names(file_content, include_types)
             names += file_names
     return list(set(names))
 
