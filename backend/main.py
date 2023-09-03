@@ -1,7 +1,7 @@
 from fastapi import FastAPI, UploadFile, File, Request
 from fastapi.responses import StreamingResponse, HTMLResponse
+import multiprocessing
 from scripts import *
-import uvicorn
 import asyncio
 import random
 import shutil
@@ -123,11 +123,11 @@ async def paraphrase(request: Request, zip_file: UploadFile = File(...)):
         return StreamingResponse(result, media_type="application/zip",
                                  headers={"Content-Disposition": f"attachment; filename=paraphrased_{filename}"})
     except Exception as e:
-        raise e
         return {"message": "Something went wrong. Please try again. Error: " + str(e)}
     finally:
         shutil.rmtree(root_dir)
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    import uvicorn
+    uvicorn.run("main:app", host="127.0.0.1", port=8000, workers=multiprocessing.cpu_count())

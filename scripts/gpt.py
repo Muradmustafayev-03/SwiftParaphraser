@@ -1,6 +1,6 @@
 from .text import add_missing_imports, remove_comments, remove_whitespace
+from aiolimiter import AsyncLimiter
 from .secret import *
-import asyncio
 import openai
 import json
 
@@ -8,16 +8,22 @@ openai.api_key = OPENAI_KEY
 openai.organization = ORGANIZATION
 
 
-def gpt_response(prompt: str, system: str, temperature: float = 1.0):
-    res = openai.ChatCompletion.create(
-        model='gpt-3.5-turbo-16k',
-        messages=[
-            {'role': 'system', 'content': system},
-            {'role': 'user', 'content': prompt}
-        ],
-        temperature=temperature
-    )
-    return json.loads(str(res))['choices'][0]['message']['content']
+# Create a rate limiter with a limit of 3500 RPM
+MAX_RPM = 3500
+limiter = AsyncLimiter(MAX_RPM, 60)
+
+
+async def gpt_response(prompt: str, system: str, temperature: float = 1.0):
+    async with limiter:
+        res = openai.ChatCompletion.create(
+            model='gpt-3.5-turbo-16k',
+            messages=[
+                {'role': 'system', 'content': system},
+                {'role': 'user', 'content': prompt}
+            ],
+            temperature=temperature
+        )
+        return json.loads(str(res))['choices'][0]['message']['content']
 
 
 async def add_comments(code: str, temperature: float = 1.0, max_tries: int = 3):
@@ -31,7 +37,7 @@ async def add_comments(code: str, temperature: float = 1.0, max_tries: int = 3):
 
     for _ in range(max_tries):
         try:
-            response = gpt_response(code, system, temperature)
+            response = await gpt_response(code, system, temperature)
         except Exception as e:
             print(e, e.__class__)
             print('Commenting failed. Trying again...')
@@ -63,7 +69,7 @@ async def gpt_modify(code: str, temperature: float = 1.0, max_tries: int = 3):
 
     for _ in range(max_tries):
         try:
-            response = gpt_response(code, system, temperature)
+            response = await gpt_response(code, system, temperature)
         except Exception as e:
             print(e, e.__class__)
             print('GPT modifying failed. Trying again...')
