@@ -2,6 +2,7 @@ from fastapi import FastAPI, UploadFile, File, Request
 from fastapi.responses import StreamingResponse, HTMLResponse
 from scripts import *
 import uvicorn
+import asyncio
 import random
 import shutil
 import time
@@ -11,44 +12,71 @@ import os
 app = FastAPI()
 
 
-def pipeline(root_dir, folder, filename, temperature=1.0):
-    project = dir_to_dict(folder)
+async def preprocess(project: dict):
+    project = await apply_to_project(project, remove_comments)
+    project = await apply_to_project(project, remove_empty_lines)
+    return project
 
-    project = apply_to_project(project, remove_comments)
-    project = apply_to_project(project, remove_empty_lines)
-    print('finished removing comments and empty lines')
 
-    # project = apply_to_project(project, gpt_modify,
-    #                            exclude=['AppDelegate.swift', 'SceneDelegate.swift'],
-    #                            temperature=temperature)
-    # print('finished gpt modifying')
+async def pipeline(project: dict,
+                   gpt_modification=False, modification_temperature=0.6, modification_max_tries=3,
+                   condition_transformation=True, loop_transformation=True,
+                   type_renaming=True, types_to_rename=('struct', 'enum', 'protocol'),
+                   file_renaming=False, variable_renaming=True, function_transformation=False,
+                   comment_adding=True, comment_temperature=1.0, comment_max_tries=3):
+    """
+    Project paraphrasing pipeline.
+    :param project: dict, project to paraphrase
+    :param gpt_modification: bool, whether to use GPT-3.5 Turbo to modify the project, recommended being False for stability
+    :param modification_temperature: float between 0 qnd 2, temperature for GPT-3.5 Turbo, recommended to set lower for stability
+    :param modification_max_tries: maximum number of tries to modify the project (in case of failure)
+    :param condition_transformation: bool, whether to transform conditions, stable, recommended being True
+    :param loop_transformation: bool, whether to transform loops, stable, recommended being True
+    :param type_renaming: bool, whether to rename types, semi-stable, recommended being True for smaller projects
+    :param types_to_rename: tuple of strings, types to rename, recommended being ('struct', 'enum', 'protocol')
+    :param file_renaming: bool, whether to rename files, causes `Name` not found in Storyboard error, recommended being False
+    :param variable_renaming: bool, whether to rename variables, stable, recommended being True
+    :param function_transformation: bool, whether to transform functions, not stable, recommended being False
+    :param comment_adding: bool, whether to add comments, stable, recommended being True (takes a long time)
+    :param comment_temperature: float between 0 and 2, temperature for GPT-3.5 Turbo, lower values to save time and avoid fails, higher values for more diversity
+    :param comment_max_tries: maximum number of tries to add comments (in case of failure), lower no save time, higher to ensure comments are added
+    """
 
-    project = apply_to_project(project, transform_conditions)
-    print('finished transforming conditions')
+    if gpt_modification:
+        project = await apply_to_project(project, gpt_modify, exclude=['AppDelegate.swift', 'SceneDelegate.swift'],
+                                         temperature=modification_temperature, max_tries=modification_max_tries)
+        print('finished gpt modifying')
 
-    project = apply_to_project(project, transform_loops)
-    print('finished transforming loops')
+    if condition_transformation:
+        project = await apply_to_project(project, transform_conditions)
+        print('finished transforming conditions')
 
-    type_names = parse_types_in_project(project, include_types=('struct', 'enum', 'protocol'))
-    if type_names:
-        rename_map = generate_rename_map(type_names)
-        project = rename_types(project, rename_map, rename_files=False)
-    print('finished renaming types')
+    if loop_transformation:
+        project = await apply_to_project(project, transform_loops)
+        print('finished transforming loops')
 
-    project = apply_to_project(project, rename_variables)
-    print('finished renaming local variables')
+    if type_renaming:
+        type_names = parse_types_in_project(project, include_types=types_to_rename)
+        if type_names:
+            rename_map = generate_rename_map(type_names)
+            project = rename_types(project, rename_map, rename_files=file_renaming)
+        print('finished renaming types')
 
-    # project = apply_to_project(project, transform_functions, exclude=['AppDelegate.swift', 'SceneDelegate.swift'])
-    # print('finished transforming functions')
+    if variable_renaming:
+        project = await apply_to_project(project, rename_variables)
+        print('finished renaming local variables')
 
-    project = apply_to_project(project, add_comments, temperature=temperature, max_tries=3)
-    print('finished adding comments')
+    if function_transformation:
+        project = await apply_to_project(project, transform_functions,
+                                         exclude=['AppDelegate.swift', 'SceneDelegate.swift'])
+        print('finished transforming functions')
 
-    # save project
-    dict_to_dir(project)
-    print('finished saving project')
+    if comment_adding:
+        project = await apply_to_project(project, add_comments, temperature=comment_temperature,
+                                         max_tries=comment_max_tries)
+        print('finished adding comments')
 
-    shutil.make_archive(f'{root_dir}/{filename[:-4]}', 'zip', folder)
+    return project
 
 
 @app.get("/")
@@ -77,8 +105,17 @@ async def paraphrase(request: Request, zip_file: UploadFile = File(...)):
     os.remove(f'{root_dir}/{filename}')
 
     try:
-        pipeline(root_dir, folder, filename)
-        print('finished paraphrasing')
+        project = dir_to_dict(folder)
+        project = await preprocess(project)  # Asynchronously preprocess the project
+        project = await pipeline(project)
+        # asynchronously save project
+        dict_to_dir(project)
+        print('finished saving project')
+
+        # Create a ZIP archive asynchronously
+        await asyncio.to_thread(
+            lambda: shutil.make_archive(f'{root_dir}/{filename[:-4]}', 'zip', folder)
+        )
 
         with open(f'{root_dir}/{filename}', "rb") as f:
             result = io.BytesIO(f.read())
@@ -86,6 +123,7 @@ async def paraphrase(request: Request, zip_file: UploadFile = File(...)):
         return StreamingResponse(result, media_type="application/zip",
                                  headers={"Content-Disposition": f"attachment; filename=paraphrased_{filename}"})
     except Exception as e:
+        raise e
         return {"message": "Something went wrong. Please try again. Error: " + str(e)}
     finally:
         shutil.rmtree(root_dir)

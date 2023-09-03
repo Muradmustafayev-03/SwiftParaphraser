@@ -7,11 +7,11 @@ def remove_whitespace(input_string):
     return re.sub(r'\s+', '', input_string)
 
 
-def remove_empty_lines(swift_code: str):
+async def remove_empty_lines(swift_code: str):
     return '\n'.join([line for line in swift_code.splitlines() if line.strip()])
 
 
-def remove_comments(swift_code: str):
+async def remove_comments(swift_code: str):
     # Find all strings like "...//..." and replace them with placeholders
     pattern = r'"(.*?//.*?)"'
     preserved_strings = re.findall(pattern, swift_code)
@@ -68,7 +68,7 @@ def parse_parameters(parameters: str):
     return parameters
 
 
-def transform_functions(code: str):
+async def transform_functions(code: str):
     functions = parse_functions(code)
 
     for name, parameters, body, entire_function, declaration in functions:
@@ -155,13 +155,13 @@ def parse_loops(code: str):
     return parsed_loops
 
 
-def rename_variables(code: str):
+async def rename_variables(code: str):
     functions = parse_functions(code)
     functions = [function[3] for function in functions]
     return rename_local_variables(code, functions)
 
 
-def transform_conditions(code):
+async def transform_conditions(code):
     guard_statements = parse_guard_statements(code)
     for statement, condition, else_body in guard_statements:
         transformed_statement = f'\nif !({condition}) {{\n{else_body}\n}}\n'
@@ -169,7 +169,7 @@ def transform_conditions(code):
     return code
 
 
-def transform_loops(code):
+async def transform_loops(code):
     for_loops = parse_loops(code)
     n = 0
     for loop, val, sequence, body in for_loops:

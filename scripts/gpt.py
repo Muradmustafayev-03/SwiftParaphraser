@@ -1,5 +1,6 @@
 from .text import add_missing_imports, remove_comments, remove_whitespace
 from .secret import *
+import asyncio
 import openai
 import json
 
@@ -19,7 +20,7 @@ def gpt_response(prompt: str, system: str, temperature: float = 1.0):
     return json.loads(str(res))['choices'][0]['message']['content']
 
 
-def add_comments(code: str, temperature: float = 1.0, max_tries: int = 3):
+async def add_comments(code: str, temperature: float = 1.0, max_tries: int = 3):
     system = 'The user will give you the swift code. ' \
              'Add as many comments to the code as possible. ' \
              'The more comments the better. The larger comment blocks are the better.' \
@@ -40,8 +41,8 @@ def add_comments(code: str, temperature: float = 1.0, max_tries: int = 3):
             response = response.split('```')[1]
         response = add_missing_imports(code, response)
 
-        clean_code = remove_whitespace(remove_comments(code))
-        clean_response = remove_whitespace(remove_comments(response))
+        clean_code = remove_whitespace(await remove_comments(code))
+        clean_response = remove_whitespace(await remove_comments(response))
         left_diff = [char1 for char1, char2 in zip(clean_code, clean_response) if char1 != char2]
         right_diff = [char2 for char1, char2 in zip(clean_code, clean_response) if char1 != char2]
         difference = left_diff + right_diff
@@ -54,7 +55,7 @@ def add_comments(code: str, temperature: float = 1.0, max_tries: int = 3):
     return code
 
 
-def gpt_modify(code: str, temperature: float = 1.0, max_tries: int = 3):
+async def gpt_modify(code: str, temperature: float = 1.0, max_tries: int = 3):
     system = 'You will be given a swift code. Modify the inner structure of this code ' \
              'keeping its behaviour the same. Do not make any assumptions about the code, ' \
              'make changes only if you are sure it will work inside the project.' \
