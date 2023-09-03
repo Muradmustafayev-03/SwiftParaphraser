@@ -1,4 +1,3 @@
-from .text import parse_functions
 from .constants import *
 import regex as re
 import random
@@ -47,6 +46,14 @@ def new_var_name(name: str):
         return generate_random_name(prefix)
 
 
+def new_func_name(name: str):
+    name = open_abbreviation(name)
+    name = first_letter_lower(name)
+
+    prefix = random.choice(['func', 'function'])
+    return prefix + random.choice(ADJECTIVES) + name
+
+
 def new_type_name(name: str):
     name = open_abbreviation(name)
     name = first_letter_upper(name)
@@ -57,10 +64,7 @@ def new_type_name(name: str):
         return generate_random_name('Type')
 
 
-def rename_local_variables(code):
-    # variables declared in functions
-    functions = parse_functions(code)
-
+def rename_local_variables(code, functions: list[str]):
     for function in functions:
         var_pattern = r'(?<!override)\s*var\s+([a-zA-Z_]+)'
         variables = re.finditer(var_pattern, function)

@@ -1,3 +1,4 @@
+from .rename_utils import rename_local_variables, generate_random_name, new_func_name
 import regex as re
 
 
@@ -33,14 +34,16 @@ def remove_comments(swift_code: str):
 
 
 def parse_functions(code: str):
-    pattern = r'(\s*?)func[\S\s]*?{'
+    pattern = r'(?:(public|private|protected|internal|fileprivate|open|override|@objc)\s+)?(static\s+)?func\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(\s*(.*?)\s*\)\s*(?:\s*->\s*(?:.*?)?)?\s*{'
     functions = re.finditer(pattern, code)
 
     parsed_functions = []
     for match in functions:
-        func_start = match.group(0)
+        declaration = match.group(0)
+        name = match.group(3)
+        parameters = match.group(4)
         open_brackets = 1
-        idx = code.find(func_start) + len(func_start)
+        idx = code.find(declaration) + len(declaration)
 
         while open_brackets > 0 and idx < len(code):
             if code[idx] == '{':
@@ -50,8 +53,53 @@ def parse_functions(code: str):
             idx += 1
 
         if open_brackets == 0:
-            parsed_functions.append(code[code.find(func_start):idx])
+            body = code[len(declaration):idx - 1]
+            entire_function = code[code.find(declaration):idx]
+            parsed_functions.append((name, parameters, body, entire_function, declaration))
     return parsed_functions
+
+
+def parse_parameters(parameters: str):
+    parameters = parameters.split(',')
+    parameters = [parameter.strip() for parameter in parameters]
+    parameters = [parameter.split(':')[0] for parameter in parameters]
+    parameters = [(parameter.split()[0], parameter.split()[1]) if len(parameter.split()) > 1 else
+                  (parameter, parameter) for parameter in parameters]
+    return parameters
+
+
+def transform_functions(code: str):
+    functions = parse_functions(code)
+
+    for name, parameters, body, entire_function, declaration in functions:
+        parameters = parse_parameters(parameters)
+        new_name = new_func_name(name)
+
+        # starting from func keyword
+        helper_function = entire_function[entire_function.find('func'):].replace(name, new_name)
+
+        if 'return ' in body:
+            wrapper_body = f"""
+let result = {new_name}({', '.join([parameter[1] for parameter in parameters])})
+return result
+            """
+        else:
+            wrapper_body = f"""
+self.{new_name}({', '.join([parameter[1] for parameter in parameters])})
+            """
+
+        wrapper_function = f"""
+{declaration}
+{wrapper_body}
+}}
+        """
+
+        replacement = f"""
+\nstatic {helper_function}\n
+\n{wrapper_function}\n
+        """
+        code = code.replace(entire_function, replacement)
+    return code
 
 
 def parse_guard_statements(code: str):
@@ -107,6 +155,12 @@ def parse_loops(code: str):
     return parsed_loops
 
 
+def rename_variables(code: str):
+    functions = parse_functions(code)
+    functions = [function[3] for function in functions]
+    return rename_local_variables(code, functions)
+
+
 def transform_conditions(code):
     guard_statements = parse_guard_statements(code)
     for statement, condition, else_body in guard_statements:
@@ -115,33 +169,30 @@ def transform_conditions(code):
     return code
 
 
-def transform_loops(code, index='index'):
-    # Define the regular expression pattern
-    for_pattern = r'(\s*?)for\s+([\S\s]*?)\s+in\s+([\S\s]*?){([\S\s]*?)}'
-
-    # Find all matches of the pattern in the input string
-    matches = re.findall(for_pattern, code)
-
-    # Process each match and perform the transformation
-    for match in matches:
-        indent, val, sequence, body = match
-        body = body.replace('\n', f'\n\t')
-
+def transform_loops(code):
+    for_loops = parse_loops(code)
+    n = 0
+    for loop, val, sequence, body in for_loops:
         condition = 'true'
-
-        # check if there is a where clause
         if 'where' in sequence:
             sequence, condition = sequence.split('where')
 
-        transformed_string = \
-            f"{indent}let sequence = {sequence}\n{indent}var {index} = 0\n{indent}while {index} < sequence.count " \
-            f"{{\n{indent}\tlet {val} = sequence[sequence.index(sequence.startIndex, offsetBy:{index})]\n{indent}\tif " \
-            f"({condition}) {{\n{indent}\t\t{body}}}\n{indent}\t{index} += 1\n{indent}\t}}"
+        sequence_name = generate_random_name(prefix='sequence', suffix=str(n))
+        index_name = generate_random_name(prefix='index', suffix=str(n))
 
-        # Replace the matched patterns with the transformed strings
-        code = re.sub(for_pattern, transformed_string, code, 1)
-
-    return remove_empty_lines(code)
+        transformed_loop = f"""
+let {sequence_name} = Array({sequence})
+var {index_name} = 0
+while {index_name} < {sequence_name}.count {{
+    if {condition} {{
+        let {val} = {sequence_name}[{index_name}]
+        {body}
+    }}
+    {index_name} += 1
+}}
+"""
+        code = code.replace(loop, transformed_loop)
+    return code
 
 
 def find_all_imports(code: str):

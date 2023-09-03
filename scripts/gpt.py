@@ -54,28 +54,23 @@ def add_comments(code: str, temperature: float = 1.0, max_tries: int = 3):
     return code
 
 
-def gpt_modify(code: str, temperature: float = 1.0):
+def gpt_modify(code: str, temperature: float = 1.0, max_tries: int = 3):
     system = 'You will be given a swift code. Modify the inner structure of this code ' \
              'keeping its behaviour the same. Do not make any assumptions about the code, ' \
-             'make only the local changes that do not affect the other references to the code. ' \
+             'make changes only if you are sure it will work inside the project.' \
+             'Make only the local changes that do not affect the other references to the code. ' \
 
-    response = gpt_response(code, system, temperature)
-    if '```' in response:
-        # extract code from response
-        response = response.split('```')[1]
-    response = add_missing_imports(code, response)
-    return response
-
-
-def fix_syntax(code: str, temperature: float = 1.0):
-    system = 'You will be given a swift code. If there are any syntax errors in the code' \
-             'such as missing ; or missing closing brackets, fix those errors and give the' \
-             'corrected code in the response. If you did not find any errors, give the source ' \
-             'code unchanged. Your response must only consist of the code. RESPOND WITH CODE ONLY!' \
-
-    response = gpt_response(code, system, temperature)
-    if '```' in response:
-        # extract code from response
-        response = response.split('```')[1]
-    response = add_missing_imports(code, response)
-    return response
+    for _ in range(max_tries):
+        try:
+            response = gpt_response(code, system, temperature)
+        except Exception as e:
+            print(e, e.__class__)
+            print('GPT modifying failed. Trying again...')
+            continue
+        if '```' in response:
+            # extract code from response
+            response = response.split('```')[1]
+        response = add_missing_imports(code, response)
+        # cut everything after the last closing bracket
+        response = response[:response.rfind('}') + 1]
+        return response

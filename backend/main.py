@@ -26,25 +26,23 @@ def pipeline(root_dir, folder, filename, temperature=1.0):
     project = apply_to_project(project, transform_conditions)
     print('finished transforming conditions')
 
-    # project = apply_to_project(project, transform_loops, index='iterationIndex1')
-    # project = apply_to_project(project, transform_loops, index='iterationIndex2')
-    # project = apply_to_project(project, transform_loops, index='iterationIndex3')
-    # print('finished transforming loops')
+    project = apply_to_project(project, transform_loops)
+    print('finished transforming loops')
 
-    type_names = parse_types_in_project(project, include_types=('struct', 'enum'))
+    type_names = parse_types_in_project(project, include_types=('struct', 'enum', 'protocol'))
     if type_names:
         rename_map = generate_rename_map(type_names)
         project = rename_types(project, rename_map, rename_files=False)
     print('finished renaming types')
 
-    project = apply_to_project(project, rename_local_variables)
+    project = apply_to_project(project, rename_variables)
     print('finished renaming local variables')
+
+    # project = apply_to_project(project, transform_functions, exclude=['AppDelegate.swift', 'SceneDelegate.swift'])
+    # print('finished transforming functions')
 
     project = apply_to_project(project, add_comments, temperature=temperature, max_tries=3)
     print('finished adding comments')
-
-    # project = apply_to_project(project, fix_syntax)
-    # print('finished fixing syntax')
 
     # save project
     dict_to_dir(project)
@@ -88,7 +86,6 @@ async def paraphrase(request: Request, zip_file: UploadFile = File(...)):
         return StreamingResponse(result, media_type="application/zip",
                                  headers={"Content-Disposition": f"attachment; filename=paraphrased_{filename}"})
     except Exception as e:
-        raise e
         return {"message": "Something went wrong. Please try again. Error: " + str(e)}
     finally:
         shutil.rmtree(root_dir)
