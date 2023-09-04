@@ -8,7 +8,7 @@ import time
 from fastapi import FastAPI, UploadFile, File, Request, Query
 from fastapi.responses import StreamingResponse, HTMLResponse
 
-from pipeline import *
+from .pipeline import *
 
 app = FastAPI()
 
@@ -126,4 +126,4 @@ async def paraphrase(
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, workers=multiprocessing.cpu_count())
+    uvicorn.run("api.main:app", host="127.0.0.1", port=8000, workers=multiprocessing.cpu_count())
