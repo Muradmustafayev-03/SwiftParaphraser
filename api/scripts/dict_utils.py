@@ -6,7 +6,14 @@ STATIC_FILE_TYPES = ('json', '.png', '.jpg', '.jpeg', '.gif', '.pdf', '.txt', '.
                      '.wav', '.mp3', '.mp4', '.mov', '.avi')
 
 
-def dir_to_dict(dir_path, file_types: tuple[str] = CHANGEABLE_FILE_TYPES) -> dict[str, str]:
+def dir_to_dict(dir_path: str, file_types: tuple[str] = CHANGEABLE_FILE_TYPES) -> dict[str, str]:
+    """
+    Converts a directory to a dictionary where the keys are the file paths and the values are the file contents.
+
+    :param dir_path: path to the directory
+    :param file_types: tuple of file types to include in the dictionary
+    :return: dictionary where the keys are the file paths and the values are the file contents
+    """
     file_list = []
     for root, dirs, files in os.walk(dir_path):
         for file in files:
@@ -27,12 +34,28 @@ def dir_to_dict(dir_path, file_types: tuple[str] = CHANGEABLE_FILE_TYPES) -> dic
 
 
 def dict_to_dir(data: dict[str, str]):
+    """
+    Converts a dictionary to a directory where the keys are the file paths and the values are the file contents.
+
+    :param data: dictionary where the keys are the file paths and the values are the file contents
+    """
     for file_path, content in data.items():
         with open(file_path, 'w', encoding='utf-8') as file:
             file.write(content)
 
 
 async def apply_to_project(project: dict, func: callable, exclude=(), *args, **kwargs):
+    """
+    Applies a function to a project. The function must take a file content as the first argument.
+
+
+    :param project:
+    :param func:
+    :param exclude:
+    :param args:
+    :param kwargs:
+    :return:
+    """
     print(f'Applying {func.__name__} to project...')
 
     async def process_file(file_path, file_content):

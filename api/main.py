@@ -6,18 +6,11 @@ import shutil
 import time
 
 from fastapi import FastAPI, UploadFile, File, Request, Query
-from fastapi.responses import StreamingResponse, HTMLResponse
+from fastapi.responses import StreamingResponse
 
 from .pipeline import *
 
 app = FastAPI()
-
-
-@app.get("/")
-async def root():
-    with open("../frontend/index.html") as f:
-        html_content = f.read()
-    return HTMLResponse(content=html_content)
 
 
 @app.post("/api/v1/paraphrase")

@@ -4,6 +4,9 @@ from .constants import *
 
 
 def open_abbreviation(name: str):
+    """
+    Replaces abbreviations with their full form and vice versa.
+    """
     abbreviations = list(ABBREVIATIONS.items())
     random.shuffle(abbreviations)
     for abbr, opening in abbreviations:
@@ -15,14 +18,27 @@ def open_abbreviation(name: str):
 
 
 def first_letter_upper(name: str):
+    """
+    Capitalizes the first letter of the name.
+    """
     return name[0].upper() + name[1:] if len(name) > 0 else name
 
 
 def first_letter_lower(name: str):
+    """
+    Makes the first letter of the name lowercase.
+    """
     return name[0].lower() + name[1:] if len(name) > 0 else name
 
 
 def generate_random_name(prefix='', suffix=''):
+    """
+    Generates a random name.
+
+    :param prefix: prefix to add to the name
+    :param suffix: suffix to add to the name
+    :return: generated name
+    """
     name = ''
     for _ in range(random.randint(5, 15)):
         letter = random.choice(ALPHABET)
@@ -35,6 +51,12 @@ def generate_random_name(prefix='', suffix=''):
 
 
 def new_var_name(name: str):
+    """
+    Generates a new variable name based on the old one or generates a random name.
+
+    :param name: old variable name
+    :return: new variable name
+    """
     name = open_abbreviation(name)
     name = first_letter_upper(name)
 
@@ -47,6 +69,12 @@ def new_var_name(name: str):
 
 
 def new_func_name(name: str):
+    """
+    Generates a new function name based on the old one or generates a random name.
+
+    :param name: old function name
+    :return: new function name
+    """
     name = open_abbreviation(name)
     name = first_letter_lower(name)
 
@@ -55,6 +83,12 @@ def new_func_name(name: str):
 
 
 def new_type_name(name: str):
+    """
+    Generates a new type name based on the old one or generates a random name.
+
+    :param name: old type name
+    :return: new type name
+    """
     name = open_abbreviation(name)
     name = first_letter_upper(name)
 
@@ -65,6 +99,13 @@ def new_type_name(name: str):
 
 
 def rename_local_variables(code, functions: list[str]):
+    """
+    Renames local variables in the code.
+
+    :param code: source code
+    :param functions: list of functions in the code
+    :return: code with renamed local variables
+    """
     for function in functions:
         var_pattern = r'(?<!override)\s*var\s+([a-zA-Z_]+)'
         variables = re.finditer(var_pattern, function)
@@ -88,6 +129,13 @@ def rename_local_variables(code, functions: list[str]):
 
 
 def parse_type_names(swift_code: str, include_types: tuple = ('class', 'struct', 'enum')):
+    """
+    Parses type names from the Swift code. Types are specified in the include_types parameter.
+
+    :param swift_code: Swift code to parse
+    :param include_types: tuple of types to parse
+    :return: list of parsed type names
+    """
     names = []
 
     for typedef in include_types:
@@ -105,6 +153,13 @@ def parse_type_names(swift_code: str, include_types: tuple = ('class', 'struct',
 
 
 def parse_types_in_project(project: dict, include_types: tuple = ('class', 'struct', 'enum')):
+    """
+    Parses type names from the project. Types are specified in the include_types parameter.
+
+    :param project: dict, project to parse
+    :param include_types: tuple of types to parse
+    :return: list of parsed type names
+    """
     names = []
 
     for file_path, file_content in project.items():
@@ -117,10 +172,26 @@ def parse_types_in_project(project: dict, include_types: tuple = ('class', 'stru
 
 
 def generate_rename_map(names: list[str]):
+    """
+    Generates a renaming map (dictionary) for the given names.
+
+
+    :param names: names to rename
+    :return: dict, renaming map in the format {old_name: new_name}
+    """
     return {name: new_type_name(name) for name in names}
 
 
 def rename_type(project: dict, old_name: str, new_name: str, rename_files: bool = False):
+    """
+    Renames the type in the project. If rename_files is True, the files will be renamed as well.
+
+    :param project: project to rename the type in
+    :param old_name: old type name
+    :param new_name: new type name
+    :param rename_files: bool, whether to rename files or not
+    :return: dict, renamed project
+    """
     new_project = {}
     renamed_files = []
 
@@ -163,6 +234,14 @@ def rename_type(project: dict, old_name: str, new_name: str, rename_files: bool 
 
 
 def rename_types(project, rename_map, rename_files=False):
+    """
+    Renames types in the project according to the renaming map.
+
+    :param project: project to rename types in
+    :param rename_map: renaming map in the format {old_name: new_name}
+    :param rename_files: bool, whether to rename files or not
+    :return: dict, renamed project
+    """
     for old_name, new_name in rename_map.items():
         project = rename_type(project, old_name, new_name, rename_files)
     return project

@@ -2,16 +2,34 @@ import regex as re
 from .rename_utils import rename_local_variables, generate_random_name, new_func_name
 
 
-def remove_whitespace(input_string):
+def remove_whitespace(input_string: str) -> str:
+    """
+    Removes all whitespace characters from a string.
+
+    :param input_string: input string
+    :return: output string with no whitespace characters
+    """
     # Use regular expression to match whitespace characters and replace them with an empty string
     return re.sub(r'\s+', '', input_string)
 
 
-async def remove_empty_lines(swift_code: str):
+async def remove_empty_lines(swift_code: str) -> str:
+    """
+    Removes all empty lines from a string.
+
+    :param swift_code: input string
+    :return: output string with no empty lines
+    """
     return '\n'.join([line for line in swift_code.splitlines() if line.strip()])
 
 
-async def remove_comments(swift_code: str):
+async def remove_comments(swift_code: str) -> str:
+    """
+    Removes all comments from a string. Preserves strings like "...//...".
+
+    :param swift_code: input code string
+    :return: output code string with no comments
+    """
     # Find all strings like "...//..." and replace them with placeholders
     pattern = r'"(.*?//.*?)"'
     preserved_strings = re.findall(pattern, swift_code)
@@ -33,7 +51,13 @@ async def remove_comments(swift_code: str):
     return swift_code
 
 
-def parse_functions(code: str):
+def parse_functions(code: str) -> list:
+    """
+    Parses all functions from a string. Returns a list of tuples (name, parameters, body, entire_function, declaration).
+
+    :param code: input code string
+    :return: list of tuples (name, parameters, body, entire_function, declaration)
+    """
     pattern = r'(?:(public|private|protected|internal|fileprivate|open|override|@objc)\s+)?(static\s+)?func\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(\s*(.*?)\s*\)\s*(?:\s*->\s*(?:.*?)?)?\s*{'
     functions = re.finditer(pattern, code)
 
@@ -59,7 +83,13 @@ def parse_functions(code: str):
     return parsed_functions
 
 
-def parse_parameters(parameters: str):
+def parse_parameters(parameters: str) -> list[tuple[str, str]]:
+    """
+    Parses all parameters from a string (pre-parsed from a function). Returns a list of tuples (type, name).
+
+    :param parameters: input parameters string
+    :return: list of tuples (name, type)
+    """
     parameters = parameters.split(',')
     parameters = [parameter.strip() for parameter in parameters]
     parameters = [parameter.split(':')[0] for parameter in parameters]
@@ -68,7 +98,13 @@ def parse_parameters(parameters: str):
     return parameters
 
 
-async def transform_functions(code: str):
+async def transform_functions(code: str) -> str:
+    """
+    Transforms all functions in a string by converting them to wrapper functions and adding helper functions.
+
+    :param code: input code string
+    :return: output code string
+    """
     functions = parse_functions(code)
 
     for name, parameters, body, entire_function, declaration in functions:
@@ -102,7 +138,13 @@ self.{new_name}({', '.join([parameter[1] for parameter in parameters])})
     return code
 
 
-def parse_guard_statements(code: str):
+def parse_guard_statements(code: str) -> list[tuple[str, str, str]]:
+    """
+    Parses all guard statements from a string. Returns a list of tuples (statement, condition, else_body).
+
+    :param code: input code string
+    :return: list of tuples (statement, condition, else_body)
+    """
     guard_pattern = r'(\s*?)guard\s+(?!let\s+)([\S\s]*?)\s+else\s+{'
     statements = re.finditer(guard_pattern, code)
 
@@ -128,7 +170,13 @@ def parse_guard_statements(code: str):
     return parsed_statements
 
 
-def parse_loops(code: str):
+def parse_loops(code: str) -> list[tuple[str, str, str, str]]:
+    """
+    Parses all loops from a string. Returns a list of tuples (statement, variable_name, sequence_name, loop_body).
+
+    :param code: input code string
+    :return: list of tuples (statement, variable_name, sequence_name, loop_body)
+    """
     for_pattern = r'(\s*?)for\s+([\S\s]*?)\s+in\s+([\S\s]*?){'
     matches = re.finditer(for_pattern, code)
 
@@ -155,13 +203,25 @@ def parse_loops(code: str):
     return parsed_loops
 
 
-async def rename_variables(code: str):
+async def rename_variables(code: str) -> str:
+    """
+    Renames all variables in a string to random names.
+
+    :param code: input code string
+    :return: output code string
+    """
     functions = parse_functions(code)
     functions = [function[3] for function in functions]
     return rename_local_variables(code, functions)
 
 
-async def transform_conditions(code):
+async def transform_conditions(code: str) -> str:
+    """
+    Transforms all guard statements in a string by converting them to if statements.
+
+    :param code: input code string
+    :return: output code string
+    """
     guard_statements = parse_guard_statements(code)
     for statement, condition, else_body in guard_statements:
         transformed_statement = f'\nif !({condition}) {{\n{else_body}\n}}\n'
@@ -169,7 +229,13 @@ async def transform_conditions(code):
     return code
 
 
-async def transform_loops(code):
+async def transform_loops(code: str) -> str:
+    """
+    Transforms all loops in a string by converting them to while loops.
+
+    :param code: input code string
+    :return: output code string
+    """
     for_loops = parse_loops(code)
     n = 0
     for loop, val, sequence, body in for_loops:
@@ -195,13 +261,26 @@ while {index_name} < {sequence_name}.count {{
     return code
 
 
-def find_all_imports(code: str):
+def find_all_imports(code: str) -> list[str]:
+    """
+    Finds all imports in a string.
+
+    :param code: input code string
+    :return: list of import names
+    """
     pattern = r'^import\s+([a-zA-Z0-9_]+)'
     matches = re.findall(pattern, code, flags=re.MULTILINE)
     return matches
 
 
-def add_missing_imports(source, result):
+def add_missing_imports(source: str, result: str) -> str:
+    """
+    Adds missing imports from source to result.
+
+    :param source: code before transformation
+    :param result: code after transformation
+    :return: result with missing imports added
+    """
     source_imports = find_all_imports(source)
     result_imports = find_all_imports(result)
 

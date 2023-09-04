@@ -99,4 +99,3 @@ VERBS = ['Do', 'Make', 'Create', 'Build', 'Generate', 'Construct', 'Compose', 'F
 
 
 ALPHABET = 'abcdefghijklmnopqrstuvwxyz'
-
