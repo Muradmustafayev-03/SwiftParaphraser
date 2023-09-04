@@ -1,8 +1,10 @@
-from .text import add_missing_imports, remove_comments, remove_whitespace
-from aiolimiter import AsyncLimiter
-from .secret import *
-import openai
 import json
+
+import openai
+from aiolimiter import AsyncLimiter
+
+from .secret import *
+from .text import add_missing_imports, remove_comments, remove_whitespace
 
 openai.api_key = OPENAI_KEY
 openai.organization = ORGANIZATION

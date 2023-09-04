@@ -1,6 +1,6 @@
-from .constants import *
-import regex as re
 import random
+import regex as re
+from .constants import *
 
 
 def open_abbreviation(name: str):
