@@ -13,7 +13,14 @@ MAX_RPM = 3500
 limiter = AsyncLimiter(MAX_RPM, 60)
 
 
-async def gpt_response(prompt: str, system: str, temperature: float = 1.0):
+async def gpt_response(prompt: str, system: str, temperature: float = 1.0) -> str:
+    """
+    Send prompt to GPT-3 and return the response.
+
+    :param prompt: str, prompt to send to GPT-3.5 Turbo
+    :param system: str, system message to send to GPT-3.5 Turbo
+    :param temperature: float between 0 and 2, temperature for GPT-3.5 Turbo
+    """
     async with limiter:
         res = openai.ChatCompletion.create(
             model='gpt-3.5-turbo-16k',
