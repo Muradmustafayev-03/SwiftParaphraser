@@ -44,23 +44,27 @@ async def paraphrase(
     "http://localhost:8000/api/v1/paraphrase?gpt_modification=true&modification_temperature=0.8&variable_renaming=false"
 
     :param request: request object
-    :param zip_file: zip file containing a swift project
+    :param zip_file: zip file containing a swift project. Required.
 
-    :param gpt_modification: bool, whether to use GPT-3.5 Turbo to modify the project, recommended being False for stability
-    :param modification_temperature: float between 0 qnd 2, temperature for GPT-3.5 Turbo, recommended to set lower for stability
-    :param modification_max_tries: maximum number of tries to modify the project (in case of failure)
-    :param condition_transformation: bool, whether to transform conditions, stable, recommended being True
-    :param loop_transformation: bool, whether to transform loops, stable, recommended being True
-    :param type_renaming: bool, whether to rename types, semi-stable, recommended being True for smaller projects
-    :param types_to_rename: tuple of strings, types to rename, recommended being ('struct', 'enum', 'protocol')
-    :param file_renaming: bool, whether to rename files, causes `Name` not found in Storyboard error, recommended being False
-    :param variable_renaming: bool, whether to rename variables, stable, recommended being True
-    :param function_transformation: bool, whether to transform functions, not stable, recommended being False
-    :param comment_adding: bool, whether to add comments, stable, recommended being True (takes a long time)
-    :param comment_temperature: float between 0 and 2, temperature for GPT-3.5 Turbo, lower values to save time and avoid fails, higher values for more diversity
-    :param comment_max_tries: maximum number of tries to add comments (in case of failure), lower no save time, higher to ensure comments are added
+    :param gpt_modification: bool, whether to use GPT-3.5 Turbo to modify the project, recommended being False for stability. Default: False.
+    :param modification_temperature: float between 0 qnd 2, temperature for GPT-3.5 Turbo, recommended to set lower for stability.
+    Applies only if gpt_modification is True. Default: 0.6.
+    :param modification_max_tries: maximum number of tries to modify a file (in case of failure). Applies only if gpt_modification is True. Default: 3.
+    :param condition_transformation: bool, whether to transform conditions, stable, recommended being True. Default: True.
+    :param loop_transformation: bool, whether to transform loops, stable, recommended being True. Default: True.
+    :param type_renaming: bool, whether to rename types, semi-stable, recommended being True for smaller projects. Default: True.
+    :param types_to_rename: tuple of strings, types to rename, recommended being ('struct', 'enum', 'protocol').
+    Possible types are: 'class', 'struct', 'enum', 'protocol'. Applies only if type_renaming is True. Default: ('struct', 'enum', 'protocol').
+    :param file_renaming: bool, whether to rename files, causes `Name` not found in Storyboard error, recommended being False. Default: False.
+    :param variable_renaming: bool, whether to rename variables, stable, recommended being True. Default: True.
+    :param function_transformation: bool, whether to transform functions, not stable, recommended being False. Default: False.
+    :param comment_adding: bool, whether to add comments, stable, recommended being True (takes a long time). Default: True.
+    :param comment_temperature: float between 0 and 2, temperature for GPT-3.5 Turbo, lower values to save time and avoid fails,
+    higher values for more diversity. Default: 1.0.
+    :param comment_max_tries: maximum number of tries to add comments (in case of failure), lower no save time, higher
+    to ensure comments are added. Default: 3.
 
-    :return: zip file containing the paraphrased swift project or json with error message
+    :return: zip file containing the paraphrased swift project or json with error message.
     """
 
     # check if zip file is provided
