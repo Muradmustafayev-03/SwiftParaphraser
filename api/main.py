@@ -67,7 +67,7 @@ async def paraphrase(
     filename = zip_file.filename
     content = zip_file.file.read()
 
-    root_dir = f'../projects/{unique_id}'
+    root_dir = f'projects/{unique_id}'
     folder = f'{root_dir}/{filename[:-4]}/'
     os.makedirs(folder, exist_ok=True)
 
