@@ -20,21 +20,21 @@ async def root():
 
 @app.post("/api/v1/paraphrase")
 async def paraphrase(
-    request: Request,
-    zip_file: UploadFile = File(...),
-    gpt_modification: bool = Query(False),
-    modification_temperature: float = Query(0.6),
-    modification_max_tries: int = Query(3),
-    condition_transformation: bool = Query(True),
-    loop_transformation: bool = Query(True),
-    type_renaming: bool = Query(True),
-    types_to_rename: str = Query("struct,enum,protocol"),
-    file_renaming: bool = Query(False),
-    variable_renaming: bool = Query(True),
-    function_transformation: bool = Query(False),
-    comment_adding: bool = Query(True),
-    comment_temperature: float = Query(1.0),
-    comment_max_tries: int = Query(3),
+        request: Request,
+        zip_file: UploadFile = File(...),
+        gpt_modification: bool = Query(False),
+        modification_temperature: float = Query(0.6),
+        modification_max_tries: int = Query(3),
+        condition_transformation: bool = Query(True),
+        loop_transformation: bool = Query(True),
+        type_renaming: bool = Query(True),
+        types_to_rename: str = Query("struct,enum,protocol"),
+        file_renaming: bool = Query(False),
+        variable_renaming: bool = Query(True),
+        function_transformation: bool = Query(False),
+        comment_adding: bool = Query(True),
+        comment_temperature: float = Query(1.0),
+        comment_max_tries: int = Query(3),
 ):
     """
     Endpoint for paraphrasing a zip file containing a swift project.
@@ -106,10 +106,7 @@ async def paraphrase(
         dict_to_dir(project)
         print('finished saving project')
 
-        # Create a ZIP archive asynchronously
-        await asyncio.to_thread(
-            lambda: shutil.make_archive(f'{root_dir}/{filename[:-4]}', 'zip', folder)
-        )
+        shutil.make_archive(f'{root_dir}/{filename[:-4]}', 'zip', folder)
 
         with open(f'{root_dir}/{filename}', "rb") as f:
             result = io.BytesIO(f.read())
@@ -124,4 +121,5 @@ async def paraphrase(
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run("api.main:app", host="127.0.0.1", port=8000, workers=multiprocessing.cpu_count())
