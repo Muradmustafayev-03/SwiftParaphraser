@@ -13,6 +13,11 @@ from .pipeline import *
 app = FastAPI()
 
 
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
+
+
 @app.post("/api/v1/paraphrase")
 async def paraphrase(
     request: Request,
