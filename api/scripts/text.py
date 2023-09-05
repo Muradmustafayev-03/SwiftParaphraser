@@ -83,7 +83,7 @@ def parse_functions(code: str) -> list:
     return parsed_functions
 
 
-def parse_parameters(parameters: str) -> list[tuple[str, str]]:
+def parse_parameters(parameters: str) -> list:
     """
     Parses all parameters from a string (pre-parsed from a function). Returns a list of tuples (type, name).
 
@@ -138,7 +138,7 @@ self.{new_name}({', '.join([parameter[1] for parameter in parameters])})
     return code
 
 
-def parse_guard_statements(code: str) -> list[tuple[str, str, str]]:
+def parse_guard_statements(code: str) -> list:
     """
     Parses all guard statements from a string. Returns a list of tuples (statement, condition, else_body).
 
@@ -170,7 +170,7 @@ def parse_guard_statements(code: str) -> list[tuple[str, str, str]]:
     return parsed_statements
 
 
-def parse_loops(code: str) -> list[tuple[str, str, str, str]]:
+def parse_loops(code: str) -> list:
     """
     Parses all loops from a string. Returns a list of tuples (statement, variable_name, sequence_name, loop_body).
 
@@ -261,7 +261,7 @@ while {index_name} < {sequence_name}.count {{
     return code
 
 
-def find_all_imports(code: str) -> list[str]:
+def find_all_imports(code: str) -> list:
     """
     Finds all imports in a string.
 

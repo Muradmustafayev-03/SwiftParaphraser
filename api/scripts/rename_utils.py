@@ -98,7 +98,7 @@ def new_type_name(name: str):
         return generate_random_name('Type')
 
 
-def rename_local_variables(code, functions: list[str]):
+def rename_local_variables(code, functions: list):
     """
     Renames local variables in the code.
 
@@ -171,7 +171,7 @@ def parse_types_in_project(project: dict, include_types: tuple = ('class', 'stru
     return list(set(names))
 
 
-def generate_rename_map(names: list[str]):
+def generate_rename_map(names: list):
     """
     Generates a renaming map (dictionary) for the given names.
 
@@ -233,7 +233,7 @@ def rename_type(project: dict, old_name: str, new_name: str, rename_files: bool 
     return new_project
 
 
-def rename_types(project, rename_map, rename_files=False):
+def rename_types(project: dict, rename_map: dict, rename_files=False):
     """
     Renames types in the project according to the renaming map.
 

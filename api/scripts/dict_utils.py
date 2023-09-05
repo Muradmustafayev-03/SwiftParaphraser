@@ -6,7 +6,7 @@ STATIC_FILE_TYPES = ('json', '.png', '.jpg', '.jpeg', '.gif', '.pdf', '.txt', '.
                      '.wav', '.mp3', '.mp4', '.mov', '.avi')
 
 
-def dir_to_dict(dir_path: str, file_types: tuple[str] = CHANGEABLE_FILE_TYPES) -> dict[str, str]:
+def dir_to_dict(dir_path: str, file_types: tuple = CHANGEABLE_FILE_TYPES) -> dict:
     """
     Converts a directory to a dictionary where the keys are the file paths and the values are the file contents.
 
@@ -33,7 +33,7 @@ def dir_to_dict(dir_path: str, file_types: tuple[str] = CHANGEABLE_FILE_TYPES) -
     return project
 
 
-def dict_to_dir(data: dict[str, str]):
+def dict_to_dir(data: dict):
     """
     Converts a dictionary to a directory where the keys are the file paths and the values are the file contents.
 
