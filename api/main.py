@@ -6,10 +6,28 @@ import time
 
 from fastapi import FastAPI, UploadFile, File, Request, Query
 from fastapi.responses import StreamingResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 from .pipeline import *
 
 app = FastAPI()
+
+
+# # Define your CORS configuration
+# origins = [
+#     "http://127.0.0.1",
+#     "http://127.0.0.1:8000",
+#     "https://swiftparaphraser-production.up.railway.app",
+# ]
+
+# Add CORS middleware to the FastAPI app
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,  # Set this to True if you want to allow credentials (e.g., cookies)
+    allow_methods=["*"],  # You can specify HTTP methods here (e.g., ["GET", "POST"])
+    allow_headers=["*"],  # You can specify HTTP headers here
+)
 
 
 @app.get("/")
