@@ -118,9 +118,9 @@ def rename_local_variables(code, functions: list):
             old_pattern = rf'(?<![a-zA-Z_.]){var_name}(?![a-zA-Z_])'
 
             # exclude declaration and assignment to itself at the same time
-            if re.search(rf'var\s+{old_pattern}\s*=\s*{old_pattern}', function):
+            if re.search(rf'var\s+{var_name}\s*=\s*{var_name}', function):
                 continue
-            if re.search(rf'var\s+{old_pattern}\s*:\s*{old_pattern}', function):
+            if re.search(rf'var\s+{var_name}\s*:\s*{var_name}', function):
                 continue
 
             new_func_body = re.sub(old_pattern, new_name, func_body)
