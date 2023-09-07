@@ -123,7 +123,12 @@ def rename_local_variables(code, functions: list):
             if re.search(rf'var\s+{var_name}\s*:\s*{var_name}', function):
                 continue
 
-            new_func_body = re.sub(old_pattern, new_name, func_body)
+            # pattern like (var_name = var_name) or (var_name: var_name)
+            pattern = rf'(?<![a-zA-Z_.]){var_name}\s*(:|=)\s*{var_name}(?![a-zA-Z_])'
+            # replace with (new_name = var_name) or (new_name: var_name)
+            new_func_body = re.sub(pattern, rf'{new_name}\1{var_name}', func_body)
+
+            new_func_body = re.sub(old_pattern, new_name, new_func_body)
             new_function = function.replace(func_body, new_func_body)
             code = code.replace(function, new_function)
 
