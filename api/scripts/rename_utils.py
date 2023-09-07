@@ -205,7 +205,7 @@ def rename_type(project: dict, old_name: str, new_name: str, rename_files: bool 
                 renamed_files.append((old_name, new_name))
 
             # pattern if not declaration variable or function name
-            pattern = r'(?<!let)(?<!var)(?<!func)(?<!\.)\b' + re.escape(old_name) + r'\b'
+            pattern = r'\b' + re.escape(old_name) + r'\b'
             new_project[new_path] = re.sub(pattern, new_name, file_content)
             continue
 
