@@ -9,7 +9,6 @@ async def preprocess(project: dict) -> dict:
     """
     project = await apply_to_project(project, remove_comments)
     project = await apply_to_project(project, remove_empty_lines)
-    project = await apply_to_project(project, lambda x: x.replace('\nclass func ', '\nstatic func '))
     return project
 
 
