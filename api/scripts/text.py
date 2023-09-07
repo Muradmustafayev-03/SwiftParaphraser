@@ -250,8 +250,8 @@ async def transform_loops(code: str) -> str:
 let {sequence_name} = Array({sequence})
 var {index_name} = 0
 while {index_name} < {sequence_name}.count {{
+    let {val} = {sequence_name}[{index_name}]
     if {condition} {{
-        let {val} = {sequence_name}[{index_name}]
         {body}
     }}
     {index_name} += 1
