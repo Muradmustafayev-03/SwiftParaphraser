@@ -204,6 +204,9 @@ def rename_type(project: dict, old_name: str, new_name: str, rename_files: bool 
                 if rename_files:
                     new_path = file_path.replace(old_name + '.swift', new_name + '.swift')
                     renamed_files.append((old_name, new_name))
+                else:
+                    new_project[file_path] = file_content
+                    continue
 
             # pattern if not declaration variable or function name
             pattern = r'(?<!let)(?<!var)(?<!func)(?<!\.)\b' + re.escape(old_name) + r'\b'
