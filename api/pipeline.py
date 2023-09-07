@@ -3,13 +3,13 @@ from api import *
 
 async def preprocess(project: dict) -> dict:
     """
-    Preprocess the project. Remove comments and empty lines.
-
+    Preprocess the project. Remove comments and empty lines, change 'class func' to 'static func'.
     :param project: dict, project to preprocess
     :return: dict, preprocessed project
     """
     project = await apply_to_project(project, remove_comments)
     project = await apply_to_project(project, remove_empty_lines)
+    project = await apply_to_project(project, lambda x: x.replace('\nclass func ', '\nstatic func '))
     return project
 
 

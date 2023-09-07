@@ -58,14 +58,14 @@ def parse_functions(code: str) -> list:
     :param code: input code string
     :return: list of tuples (name, parameters, body, entire_function, declaration)
     """
-    pattern = r'(?:(public|private|protected|internal|fileprivate|open|override|@objc)\s+)?(static\s+)?func\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(\s*(.*?)\s*\)\s*(?:\s*->\s*(?:.*?)?)?\s*{'
+    pattern = r'(?:(?<!class)(\s*?)(public|private|protected|internal|fileprivate|open|override|@objc)\s+)?(static\s+)?func\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(\s*(.*?)\s*\)\s*(?:\s*->\s*(?:.*?)?)?\s*{'
     functions = re.finditer(pattern, code)
 
     parsed_functions = []
     for match in functions:
         declaration = match.group(0)
-        name = match.group(3)
-        parameters = match.group(4)
+        name = match.group(4)
+        parameters = match.group(5)
         open_brackets = 1
         idx = code.find(declaration) + len(declaration)
 

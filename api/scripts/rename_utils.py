@@ -107,6 +107,7 @@ def rename_local_variables(code, functions: list):
     :return: code with renamed local variables
     """
     for function in functions:
+        func_body = function[function.find('{') + 1:function.rfind('}')]
         var_pattern = r'(?<!override)\s*var\s+([a-zA-Z_]+)'
         variables = re.finditer(var_pattern, function)
 
@@ -122,7 +123,8 @@ def rename_local_variables(code, functions: list):
             if re.search(rf'var\s+{old_pattern}\s*:\s*{old_pattern}', function):
                 continue
 
-            new_function = re.sub(old_pattern, new_name, function)
+            new_func_body = re.sub(old_pattern, new_name, func_body)
+            new_function = function.replace(func_body, new_func_body)
             code = code.replace(function, new_function)
 
     return code
@@ -163,11 +165,10 @@ def parse_types_in_project(project: dict, include_types: tuple = ('class', 'stru
     names = []
 
     for file_path, file_content in project.items():
-        if 'AppDelegate.swift' in file_path or 'SceneDelegate.swift' in file_path:
+        if 'AppDelegate' in file_path or 'SceneDelegate' in file_path:
             continue
         if file_path.endswith('.swift'):
-            file_names = parse_type_names(file_content, include_types)
-            names += file_names
+            names += parse_type_names(file_content, include_types)
     return list(set(names))
 
 
@@ -199,14 +200,16 @@ def rename_type(project: dict, old_name: str, new_name: str, rename_files: bool 
         if file_path.endswith('.swift'):
             new_path = file_path
 
-            if file_path.split('/')[-1] == old_name + '.swift' and rename_files:
-                new_path = file_path.replace(old_name + '.swift', new_name + '.swift')
-                renamed_files.append((old_name, new_name))
+            if file_path.split('/')[-1] == old_name + '.swift':
+                if rename_files:
+                    new_path = file_path.replace(old_name + '.swift', new_name + '.swift')
+                    renamed_files.append((old_name, new_name))
+                else:
+                    continue
 
             # pattern if not declaration variable or function name
             pattern = r'(?<!let)(?<!var)(?<!func)(?<!\.)\b' + re.escape(old_name) + r'\b'
-            new_content = re.sub(pattern, new_name, file_content)
-            new_project[new_path] = new_content
+            new_project[new_path] = re.sub(pattern, new_name, file_content)
             continue
 
         elif file_path.endswith('.xib') or file_path.endswith('.storyboard'):
@@ -222,8 +225,7 @@ def rename_type(project: dict, old_name: str, new_name: str, rename_files: bool 
 
         elif file_path.endswith('.xml') or file_path.endswith('.pbxproj') or file_path.endswith('.plist'):
             pattern = r'>' + re.escape(old_name) + r'<'
-            new_content = re.sub(pattern, r'>' + new_name + r'<', file_content)
-            new_project[file_path] = new_content
+            new_project[file_path] = re.sub(pattern, r'>' + new_name + r'<', file_content)
             continue
 
         else:
