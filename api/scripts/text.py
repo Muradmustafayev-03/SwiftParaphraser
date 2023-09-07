@@ -177,7 +177,7 @@ def parse_loops(code: str) -> list:
     :param code: input code string
     :return: list of tuples (statement, variable_name, sequence_name, loop_body)
     """
-    for_pattern = r'(\s*?)for\s+([\S\s]*?)\s+in\s+([\S\s]*?){'
+    for_pattern = r'(\s*?)for\s+([a-zA-Z0-9_]+?)\s+in\s+([\S\s]+?){'
     matches = re.finditer(for_pattern, code)
 
     parsed_loops = []
