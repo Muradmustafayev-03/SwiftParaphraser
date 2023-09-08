@@ -150,7 +150,7 @@ def parse_guard_statements(code: str) -> list:
 
     parsed_statements = []
     for match in statements:
-        condition = match.group(2)
+        condition = match.group(1)
         statement_start = match.group(0)
         open_brackets = 1
         idx = code.find(statement_start) + len(statement_start)
