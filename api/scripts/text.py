@@ -145,7 +145,7 @@ def parse_guard_statements(code: str) -> list:
     :param code: input code string
     :return: list of tuples (statement, condition, else_body)
     """
-    guard_pattern = r'(\s*?)guard\s+(?!let\s+)([\S\s]*?)\s+else\s+{'
+    guard_pattern = r'[\s*?]guard\s+([\S\s]*?)\s+else\s+{'
     statements = re.finditer(guard_pattern, code)
 
     parsed_statements = []
@@ -224,6 +224,12 @@ async def transform_conditions(code: str) -> str:
     """
     guard_statements = parse_guard_statements(code)
     for statement, condition, else_body in guard_statements:
+
+        # skip guard let statements
+        pattern = r'\b' + 'let' + r'\b'
+        if re.search(pattern, condition):
+            continue
+
         transformed_statement = f'\nif !({condition}) {{\n{else_body}\n}}\n'
         code = code.replace(statement, transformed_statement)
     return code
