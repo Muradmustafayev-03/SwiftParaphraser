@@ -16,7 +16,7 @@ async def pipeline(project: dict,
                    gpt_modification=False, modification_temperature=0.6, modification_max_tries=3,
                    condition_transformation=True, loop_transformation=True,
                    type_renaming=True, types_to_rename=('struct', 'enum', 'protocol'),
-                   file_renaming=False, variable_renaming=True, function_transformation=False,
+                   file_renaming=False, variable_renaming=True,
                    comment_adding=True, comment_temperature=1.0, comment_max_tries=3):
     """
     Project paraphrasing pipeline.
@@ -60,11 +60,6 @@ async def pipeline(project: dict,
     if variable_renaming:
         project = await apply_to_project(project, rename_variables)
         print('finished renaming local variables')
-
-    if function_transformation:
-        project = await apply_to_project(project, transform_functions,
-                                         exclude=['AppDelegate.swift', 'SceneDelegate.swift'])
-        print('finished transforming functions')
 
     if comment_adding:
         project = await apply_to_project(project, add_comments, temperature=comment_temperature,
