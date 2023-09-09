@@ -49,11 +49,11 @@ async def apply_to_project(project: dict, func: callable, exclude=(), *args, **k
     Applies a function to a project. The function must take a file content as the first argument.
 
 
-    :param project:
-    :param func:
-    :param exclude:
-    :param args:
-    :param kwargs:
+    :param project: project to apply the function to
+    :param func: function to apply
+    :param exclude: tuple of file names to exclude from the function
+    :param args: args to pass to the function
+    :param kwargs: kwargs to pass to the function
     :return:
     """
     print(f'Applying {func.__name__} to project...')
