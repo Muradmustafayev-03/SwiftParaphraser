@@ -237,7 +237,7 @@ async def transform_conditions(code: str) -> str:
             name = generate_random_name(prefix='condition', suffix=str(len(names)))
             names.append(name)
             transformed_statement += f'''
-let {name} = false
+var {name} = false
 if {condition.strip()} {{
     {name} = true
 }}
