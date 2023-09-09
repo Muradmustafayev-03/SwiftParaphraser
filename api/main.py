@@ -48,6 +48,7 @@ async def paraphrase(
         types_to_rename: str = Query("struct,enum,protocol"),
         file_renaming: bool = Query(False),
         variable_renaming: bool = Query(True),
+        function_transformation: bool = Query(False),
         comment_adding: bool = Query(True),
         comment_temperature: float = Query(1.0),
         comment_max_tries: int = Query(3),
@@ -73,6 +74,7 @@ async def paraphrase(
     Possible types are: 'class', 'struct', 'enum', 'protocol'. Applies only if type_renaming is True. Default: ('struct', 'enum', 'protocol').
     :param file_renaming: bool, whether to rename files, causes `Name` not found in Storyboard error, recommended being False. Default: False.
     :param variable_renaming: bool, whether to rename variables, stable, recommended being True. Default: True.
+    :param function_transformation: bool, whether to transform functions, not stable, recommended being False. Default: False.
     :param comment_adding: bool, whether to add comments, stable, recommended being True (takes a long time). Default: True.
     :param comment_temperature: float between 0 and 2, temperature for GPT-3.5 Turbo, lower values to save time and avoid fails,
     higher values for more diversity. Default: 1.0.
@@ -116,6 +118,7 @@ async def paraphrase(
             types_to_rename=types_to_rename.split(','),  # Convert comma-separated string to a list
             file_renaming=file_renaming,
             variable_renaming=variable_renaming,
+            function_transformation=function_transformation,
             comment_adding=comment_adding,
             comment_temperature=comment_temperature,
             comment_max_tries=comment_max_tries,

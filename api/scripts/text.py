@@ -1,5 +1,6 @@
 import regex as re
-from .rename_utils import rename_local_variables, generate_random_name
+
+from .rename_utils import rename_local_variables, generate_random_name, new_func_name
 
 
 def remove_whitespace(input_string: str) -> str:
@@ -96,6 +97,46 @@ def parse_parameters(parameters: str) -> list:
     parameters = [(parameter.split()[0], parameter.split()[1]) if len(parameter.split()) > 1 else
                   (parameter, parameter) for parameter in parameters]
     return parameters
+
+
+async def transform_functions(code: str) -> str:
+    """
+    Transforms all functions in a string by converting them to wrapper functions and adding helper functions.
+
+    :param code: input code string
+    :return: output code string
+    """
+    functions = parse_functions(code)
+
+    for name, parameters, body, entire_function, declaration in functions:
+        parameters = parse_parameters(parameters)
+        new_name = new_func_name(name)
+
+        # starting from func keyword
+        helper_function = entire_function[entire_function.find('func'):].replace(name, new_name)
+
+        if 'return ' in body:
+            wrapper_body = f"""
+let result = {new_name}({', '.join([parameter[1] for parameter in parameters])})
+return result
+            """
+        else:
+            wrapper_body = f"""
+self.{new_name}({', '.join([parameter[1] for parameter in parameters])})
+            """
+
+        wrapper_function = f"""
+{declaration}
+{wrapper_body}
+}}
+        """
+
+        replacement = f"""
+\nstatic {helper_function}\n
+\n{wrapper_function}\n
+        """
+        code = code.replace(entire_function, replacement)
+    return code
 
 
 def parse_guard_statements(code: str) -> list:
