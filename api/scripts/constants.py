@@ -20,12 +20,9 @@ SYSTEM_FRAMEWORK_PREFIXES = [
     "AR",   # ARKit
     "PDF",  # PDFKit
     "VN",   # Vision
-    "UIPageControl",  # Specific UIKit type
-    "NSAttributedStringKey",  # Specific Foundation type
-    "SCNAudio",  # SceneKit Audio
+    "SCN",  # SceneKit
     "PK",  # PassKit
     "AS",  # AuthenticationServices
-    "AVCapture",  # AVFoundation Capture
     "CM",  # CoreMotion
     "HMC",  # HomeKit
     "WC",  # WatchConnectivity
@@ -33,23 +30,13 @@ SYSTEM_FRAMEWORK_PREFIXES = [
     "UN",  # UserNotifications
     "LA",  # LocalAuthentication
     "VN",  # Vision
-    "WKInterface",  # WatchKit Interface
-    "WCSession",  # WatchConnectivity Session
-    "WCSessionDelegate",  # WatchConnectivity Session Delegate
-    "MPMediaItem",  # MediaPlayer Media Item
+    "WK",  # WatchKit
+    "WC",  # WatchConnectivity
+    "MP",  # MediaPlayer
     "MTK",  # MetalKit
-    "MTKView",  # MetalKit View
-    "AVPlayer",  # AVFoundation Player
-    "AVCapture",  # AVFoundation Capture
-    "AVCaptureDevice",  # AVFoundation Capture Device
-    "AVPlayerItem",  # AVFoundation Player Item
-    "VNRequest",  # Vision Request
+    "VN",  # Vision
     "HK",  # HealthKit
-    "UNUserNotificationCenter",  # UserNotifications Center
-    "UNNotification",  # UserNotifications Notification
-    "UNNotificationRequest",  # UserNotifications Notification Request
-    "UNNotificationContent",  # UserNotifications Notification Content
-    "UNNotificationResponse",  # UserNotifications Notification Response
+    "UN",  # UserNotifications
 ]
 
 ABBREVIATIONS = {
