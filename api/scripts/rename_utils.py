@@ -1,6 +1,7 @@
 import random
 import regex as re
 from .constants import *
+from .dict_utils import project_contains_string
 
 
 def open_abbreviation(name: str):
@@ -195,6 +196,9 @@ def rename_type(project: dict, old_name: str, new_name: str, rename_files: bool 
     """
     new_project = {}
     renamed_files = []
+
+    if project_contains_string(project, f'@{old_name}'):
+        return project
 
     for file_path, file_content in project.items():
         if file_path.endswith('.swift'):
