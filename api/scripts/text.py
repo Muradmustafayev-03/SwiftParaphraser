@@ -226,10 +226,10 @@ async def transform_conditions(code: str) -> str:
     guard_statements = parse_guard_statements(code)
     for statement, conditions, else_body in guard_statements:
 
-        # # skip guard let statements
-        # pattern = r'\b' + 'let' + r'\b'
-        # if re.search(pattern, condition):
-        #     continue
+        # skip guard let statements
+        pattern = r'\b' + 'let' + r'\b'
+        if re.search(pattern, conditions):
+            continue
 
         transformed_statement = ''
 
