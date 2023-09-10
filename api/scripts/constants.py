@@ -1,22 +1,4 @@
-FUNC_PREFIXES_RESTRICTED_TO_RENAME = [
-    'get', 'set', 'willSet', 'didSet', 'AF', 'UI', 'NS', 'CG', 'MK', 'WK', 'SCN', 'SK', 'AV', 'CA', 'CI', 'CL', 'CN',
-    'KF', 'URL', 'JSON', 'Firestore', 'FIR', 'URLSession', 'URLSessionDataTask', 'URLSessionDownloadTask', 'Observ',
-    'with', 'Unsafe', '@', 'mutable'
-]
-
-FUNC_RESTRICTED_TO_RENAME = [
-    'String', 'Int', 'Double', 'Float', 'Bool', 'Array', 'Dictionary', 'Set', 'Optional', 'Any', 'AnyObject',
-    'AnyClass',
-    'Character', 'Error', 'ErrorType', 'NSRange', 'Selector', 'isEmpty', 'count', 'first', 'last', 'lowercased',
-    'uppercased', 'trimmingCharacters', 'removeAll', 'remove', 'append', 'insert', 'removeFirst', 'removeLast',
-    'removeSubrange', 'removeAll', 'removeValue', 'removeAll', 'removeAll', 'removeAll', 'removeAll', 'removeAll',
-    'hasPrefix', 'hasSuffix', 'contains', 'split', 'joined', 'replacingOccurrences', 'replacingCharacters',
-    'insert', 'remove', 'append', 'first', 'last', 'popLast', 'popFirst', 'removeAll', 'remove', 'removeAll',
-    'filter', 'map', 'flatMap', 'reduce', 'sorted', 'sortedBy', 'sortedByDescending', 'sortedDescending',
-    'updateValue', 'update', 'removeValue', 'remove', 'removeAll', 'remove', 'removeAll', 'removeAll', 'remove',
-    'map', 'insert', 'init', 'deinit', 'subscript', 'description', 'hash', 'copy', 'alloc', 'dealloc', 'application',
-    'subscript'
-]
+BUILT_IN_TYPES = ['CVarArg', 'RangeReplaceableCollection', 'Character', 'SignedInteger', 'Comparable', 'RandomAccessCollection', 'ExpressibleByUnicodeScalarLiteral', 'ClosedRange', 'BidirectionalCollection', 'AnyHashable', 'SIMD16', 'ExpressibleByFloatLiteral', 'OpaquePointer', 'SIMD8Storage', 'LosslessStringConvertible', 'AutoreleasingUnsafeMutablePointer', 'CustomStringConvertible', 'ExpressibleByStringLiteral', 'CustomReflectable', 'Numeric', 'Tuple', 'MemoryLayout', 'ExpressibleByExtendedGraphemeClusterLiteral', 'FixedWidthInteger', 'Array', 'Range', 'ExpressibleByStringInterpolation', 'SIMD3', 'UInt', 'BinaryInteger', 'Void', 'SIMD4', 'MutableCollection', 'FloatingPoint', 'Float16', 'CustomDebugStringConvertible', 'Any', 'ExpressibleByBooleanLiteral', 'ExpressibleByNilLiteral', 'Hashable', 'SIMD4Storage', 'Float', 'UnsafeRawPointer', 'ExpressibleByArrayLiteral', 'UnsafePointer', 'Collection', 'RawRepresentable', 'SIMD16Storage', 'UnsafeMutableRawPointer', 'Encodable', 'AnyObject', 'Error', 'BinaryFloatingPoint', 'StaticString', 'AnyClass', 'SIMD8', 'Double', 'Equatable', 'ExpressibleByTupleLiteral', 'ExpressibleByIntegerLiteral', 'Decodable', 'Int', 'Bool', 'Self', 'ExpressibleByDictionaryLiteral', 'StringProtocol', 'String', 'UnsafeMutablePointer', 'KeyPath', 'UnsignedInteger', 'Set', 'SignedNumeric', 'Dictionary', 'SIMD2Storage', 'SIMD', 'Mirror', 'Strideable', 'IntegerArithmetic', 'Never', 'Optional', 'Boolean', 'IteratorProtocol', 'SIMD2', 'ObjectIdentifier', 'Sequence', 'Float80']
 
 ABBREVIATIONS = {
     "VC": "ViewController",
