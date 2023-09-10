@@ -99,34 +99,63 @@ def new_type_name(name: str):
         return generate_random_name('Type')
 
 
-def rename_local_variables(code, functions: list):
+def rename_local_variables(code, function: str):
     """
     Renames local variables in the code.
 
     :param code: source code
-    :param functions: list of functions in the code
+    :param function: function to rename local variables in
     :return: code with renamed local variables
     """
-    for function in functions:
-        func_body = function[function.find('{') + 1:function.rfind('}')]
-        var_pattern = r'(?<!override)\s*var\s+([a-zA-Z_]+)'
-        variables = re.finditer(var_pattern, function)
+    func_body = function[function.find('{') + 1:function.rfind('}')]
+    var_pattern = r'(?<!override)\s*var\s+([a-zA-Z_]+)'
+    variables = re.finditer(var_pattern, function)
 
-        for var_match in variables:
-            var_name = var_match.group(1)
-            new_name = new_var_name(var_name)
+    for var_match in variables:
+        var_name = var_match.group(1)
+        new_name = new_var_name(var_name)
 
-            old_pattern = rf'(?<![a-zA-Z_.]){var_name}(?![a-zA-Z_])'
+        old_pattern = rf'(?<![a-zA-Z_.]){var_name}(?![a-zA-Z_])'
 
-            # exclude declaration and assignment to itself at the same time
-            if re.search(rf'{var_name}\s*=\s*{var_name}', function):
-                continue
-            if re.search(rf'{var_name}\s*:\s*{var_name}', function):
-                continue
+        # exclude declaration and assignment to itself at the same time
+        if re.search(rf'{var_name}\s*=\s*{var_name}', function):
+            continue
+        if re.search(rf'{var_name}\s*:\s*{var_name}', function):
+            continue
 
-            new_func_body = re.sub(old_pattern, new_name, func_body)
-            new_function = function.replace(func_body, new_func_body)
-            code = code.replace(function, new_function)
+        new_func_body = re.sub(old_pattern, new_name, func_body)
+        new_function = function.replace(func_body, new_func_body)
+        code = code.replace(function, new_function)
+
+    return code
+
+
+async def rename_variables(code: str) -> str:
+    """
+    Renames all variables in a string to random names.
+
+    :param code: input code string
+    :return: output code string
+    """
+
+    # parsing functions
+    pattern = re.compile(r'(?:(?<!class)(\s*?)(public|private|protected|internal|fileprivate|open|override|@objc)\s+)?(static\s+)?func\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(\s*(.*?)\s*\)\s*(?:\s*->\s*(?:.*?)?)?\s*{')
+    functions = [match.group(0) for match in pattern.finditer(code)]
+
+    for declaration in functions:
+        open_brackets = 1
+        idx = code.find(declaration) + len(declaration)
+
+        while open_brackets > 0 and idx < len(code):
+            if code[idx] == '{':
+                open_brackets += 1
+            elif code[idx] == '}':
+                open_brackets -= 1
+            idx += 1
+
+        if open_brackets == 0:
+            entire_function = code[code.find(declaration):idx]
+            code = rename_local_variables(code, entire_function)
 
     return code
 

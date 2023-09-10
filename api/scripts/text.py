@@ -1,5 +1,5 @@
 import regex as re
-from .rename_utils import rename_local_variables, generate_random_name
+from .rename_utils import generate_random_name
 
 
 def remove_whitespace(input_string: str) -> str:
@@ -51,64 +51,37 @@ async def remove_comments(swift_code: str) -> str:
     return swift_code
 
 
-def parse_functions(code: str) -> list:
+def transform_condition(statement: str, condition: str, else_body: str) -> str:
     """
-    Parses all functions from a string. Returns a list of tuples (name, parameters, body, entire_function, declaration).
+    Transforms a guard statement by converting it to an if statement.
+
+    :param statement: input guard statement
+    :param condition: input condition
+    :param else_body: input else body
+    :return: output if statement
+    """
+    # skip guard let and guard var statements
+    if re.search(r'\b' + 'let' + r'\b', condition):
+        return statement
+    if re.search(r'\b' + 'var' + r'\b', condition):
+        return statement
+
+    transformed_statement = f'\nif !({condition}) {{\n{else_body}\n}}\n'
+    return transformed_statement
+
+
+async def transform_conditions(code: str) -> str:
+    """
+    Transforms all guard statements in a string by converting them to if statements.
 
     :param code: input code string
-    :return: list of tuples (name, parameters, body, entire_function, declaration)
-    """
-    pattern = r'(?:(?<!class)(\s*?)(public|private|protected|internal|fileprivate|open|override|@objc)\s+)?(static\s+)?func\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(\s*(.*?)\s*\)\s*(?:\s*->\s*(?:.*?)?)?\s*{'
-    functions = re.finditer(pattern, code)
-
-    parsed_functions = []
-    for match in functions:
-        declaration = match.group(0)
-        name = match.group(4)
-        parameters = match.group(5)
-        open_brackets = 1
-        idx = code.find(declaration) + len(declaration)
-
-        while open_brackets > 0 and idx < len(code):
-            if code[idx] == '{':
-                open_brackets += 1
-            elif code[idx] == '}':
-                open_brackets -= 1
-            idx += 1
-
-        if open_brackets == 0:
-            body = code[len(declaration):idx - 1]
-            entire_function = code[code.find(declaration):idx]
-            parsed_functions.append((name, parameters, body, entire_function, declaration))
-    return parsed_functions
-
-
-def parse_parameters(parameters: str) -> list:
-    """
-    Parses all parameters from a string (pre-parsed from a function). Returns a list of tuples (type, name).
-
-    :param parameters: input parameters string
-    :return: list of tuples (name, type)
-    """
-    parameters = parameters.split(',')
-    parameters = [parameter.strip() for parameter in parameters]
-    parameters = [parameter.split(':')[0] for parameter in parameters]
-    parameters = [(parameter.split()[0], parameter.split()[1]) if len(parameter.split()) > 1 else
-                  (parameter, parameter) for parameter in parameters]
-    return parameters
-
-
-def parse_guard_statements(code: str) -> list:
-    """
-    Parses all guard statements from a string. Returns a list of tuples (statement, condition, else_body).
-
-    :param code: input code string
-    :return: list of tuples (statement, condition, else_body)
+    :return: output code string
     """
     guard_pattern = r'[\s*?]guard\s+([\S\s]*?)\s+else\s+{'
     statements = re.finditer(guard_pattern, code)
 
-    parsed_statements = []
+    transformed_code = code  # Create a new string to store the transformed code
+
     for match in statements:
         condition = match.group(1)
         statement_start = match.group(0)
@@ -125,22 +98,56 @@ def parse_guard_statements(code: str) -> list:
         if open_brackets == 0:
             statement = code[code.find(statement_start):idx]
             else_body = statement[statement.find('{') + 1: -1]
-            parsed_statements.append((statement, condition, else_body))
+            transformed_statement = transform_condition(statement, condition, else_body)
+            transformed_code = transformed_code.replace(statement, transformed_statement)
 
-    return parsed_statements
+    return transformed_code
 
 
-def parse_loops(code: str) -> list:
+def generate_while_loop(val: str, sequence: str, body: str, n: int) -> str:
     """
-    Parses all loops from a string. Returns a list of tuples (statement, variable_name, sequence_name, loop_body).
+    Generates a while loop given a variable name, a sequence, and a body.
+
+    :param val: Variable name
+    :param sequence: Sequence to iterate over
+    :param body: Loop body
+    :param n: Unique identifier
+    :return: Generated while loop
+    """
+    condition = 'true'
+    if 'where' in sequence:
+        sequence, condition = sequence.split('where')
+
+    sequence_name = generate_random_name(prefix='sequence', suffix=str(n))
+    index_name = generate_random_name(prefix='index', suffix=str(n))
+
+    transformed_loop = f"""
+    let {sequence_name} = Array({sequence})
+    var {index_name} = 0
+    while {index_name} < {sequence_name}.count {{
+        let {val} = {sequence_name}[{index_name}]
+        if {condition} {{
+            {body}
+        }}
+        {index_name} += 1
+    }}
+    """
+    return transformed_loop
+
+
+async def transform_loops(code: str) -> str:
+    """
+    Transforms all for loops in a string by converting them to while loops.
 
     :param code: input code string
-    :return: list of tuples (statement, variable_name, sequence_name, loop_body)
+    :return: output code string
     """
     for_pattern = r'(\s*?)for\s+([a-zA-Z0-9_]+?)\s+in\s+([\S\s]+?){'
     matches = re.finditer(for_pattern, code)
 
-    parsed_loops = []
+    transformed_code = code  # Create a new string to store the transformed code
+    n = 0
+
     for match in matches:
         val = match.group(2)
         sequence = match.group(3)
@@ -158,73 +165,11 @@ def parse_loops(code: str) -> list:
         if open_brackets == 0:
             loop = code[code.find(loop_start):idx]
             body = loop[loop.find('{') + 1: -1]
-            parsed_loops.append((loop, val, sequence, body))
+            transformed_loop = generate_while_loop(val, sequence, body, n)
+            transformed_code = transformed_code.replace(loop, transformed_loop)
+            n += 1
 
-    return parsed_loops
-
-
-async def rename_variables(code: str) -> str:
-    """
-    Renames all variables in a string to random names.
-
-    :param code: input code string
-    :return: output code string
-    """
-    functions = parse_functions(code)
-    functions = [function[3] for function in functions]
-    return rename_local_variables(code, functions)
-
-
-async def transform_conditions(code: str) -> str:
-    """
-    Transforms all guard statements in a string by converting them to if statements.
-
-    :param code: input code string
-    :return: output code string
-    """
-    guard_statements = parse_guard_statements(code)
-    for statement, condition, else_body in guard_statements:
-
-        # skip guard let statements
-        pattern = r'\b' + 'let' + r'\b'
-        if re.search(pattern, condition):
-            continue
-
-        transformed_statement = f'\nif !({condition}) {{\n{else_body}\n}}\n'
-        code = code.replace(statement, transformed_statement)
-    return code
-
-
-async def transform_loops(code: str) -> str:
-    """
-    Transforms all loops in a string by converting them to while loops.
-
-    :param code: input code string
-    :return: output code string
-    """
-    for_loops = parse_loops(code)
-    n = 0
-    for loop, val, sequence, body in for_loops:
-        condition = 'true'
-        if 'where' in sequence:
-            sequence, condition = sequence.split('where')
-
-        sequence_name = generate_random_name(prefix='sequence', suffix=str(n))
-        index_name = generate_random_name(prefix='index', suffix=str(n))
-
-        transformed_loop = f"""
-let {sequence_name} = Array({sequence})
-var {index_name} = 0
-while {index_name} < {sequence_name}.count {{
-    let {val} = {sequence_name}[{index_name}]
-    if {condition} {{
-        {body}
-    }}
-    {index_name} += 1
-}}
-"""
-        code = code.replace(loop, transformed_loop)
-    return code
+    return transformed_code
 
 
 def find_all_imports(code: str) -> list:
