@@ -224,29 +224,14 @@ async def transform_conditions(code: str) -> str:
     :return: output code string
     """
     guard_statements = parse_guard_statements(code)
-    for statement, conditions, else_body in guard_statements:
+    for statement, condition, else_body in guard_statements:
 
         # skip guard let statements
         pattern = r'\b' + 'let' + r'\b'
-        if re.search(pattern, conditions):
+        if re.search(pattern, condition):
             continue
 
-        transformed_statement = ''
-
-        names = []
-        for condition in conditions.split(','):
-            name = generate_random_name(prefix='condition', suffix=str(len(names)))
-            names.append(name)
-            transformed_statement += f'''
-var {name} = false
-if {condition.strip()} {{
-    {name} = true
-}}
-'''
-
-        summary_condition = ' && '.join(names)
-
-        transformed_statement += f'\nif !({summary_condition}) {{\n{else_body}\n}}\n'
+        transformed_statement = f'\nif !({condition}) {{\n{else_body}\n}}\n'
         code = code.replace(statement, transformed_statement)
     return code
 
