@@ -247,7 +247,6 @@ if {condition.strip()} {{
         summary_condition = ' && '.join(names)
 
         transformed_statement += f'\nif !({summary_condition}) {{\n{else_body}\n}}\n'
-        print(transformed_statement)
         code = code.replace(statement, transformed_statement)
     return code
 

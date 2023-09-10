@@ -145,7 +145,9 @@ def parse_type_names(swift_code: str, include_types: tuple = ('class', 'struct',
         pattern = rf'{typedef}\s+([A-Z][a-zA-Z0-9_]+)\s*(:|\{{)'
         matches = re.finditer(pattern, swift_code)
         for match in matches:
-            names.append(match.group(1))
+            name = match.group(1)
+            if name not in BUILT_IN_TYPES:
+                names.append(match.group(1))
 
     names = list(set(names))
     if 'SceneDelegate' in names:
