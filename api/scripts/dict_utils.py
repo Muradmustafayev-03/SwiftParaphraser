@@ -71,3 +71,17 @@ async def apply_to_project(project: dict, func: callable, exclude=(), *args, **k
     processed_project = dict(processed_files)
 
     return processed_project
+
+
+def project_contains_string(project: dict, string: str) -> bool:
+    """
+    Checks if a project contains a string.
+
+    :param project: project to check
+    :param string: string to check
+    :return: True if the project contains the string, False otherwise
+    """
+    for file_content in project.values():
+        if string in file_content:
+            return True
+    return False
