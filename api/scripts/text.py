@@ -66,6 +66,8 @@ def transform_condition(statement: str, condition: str, else_body: str) -> str:
     if re.search(r'\b' + 'var' + r'\b', condition):
         return statement
 
+    condition = condition.replace(',', ' &&')
+
     transformed_statement = f'\nif !({condition}) {{\n{else_body}\n}}\n'
     return transformed_statement
 
