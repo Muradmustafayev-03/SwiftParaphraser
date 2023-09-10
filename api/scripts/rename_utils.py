@@ -146,6 +146,13 @@ def parse_type_names(swift_code: str, include_types: tuple = ('class', 'struct',
         matches = re.finditer(pattern, swift_code)
         for match in matches:
             name = match.group(1)
+            skip = False
+            for prefix in SYSTEM_FRAMEWORK_PREFIXES:
+                if name.startswith(prefix):
+                    skip = True
+                    break
+            if skip:
+                continue
             if name not in BUILT_IN_TYPES:
                 names.append(match.group(1))
 
