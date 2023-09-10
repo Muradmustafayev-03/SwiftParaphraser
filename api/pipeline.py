@@ -16,7 +16,7 @@ async def pipeline(project: dict,
                    gpt_modification=False, modification_temperature=0.6, modification_max_tries=3,
                    condition_transformation=True, loop_transformation=True,
                    type_renaming=True, types_to_rename=('struct', 'enum', 'protocol'),
-                   file_renaming=False, variable_renaming=True, function_transformation=False,
+                   file_renaming=False, variable_renaming=True,
                    comment_adding=True, comment_temperature=1.0, comment_max_tries=3):
     """
     Project paraphrasing pipeline.
@@ -31,7 +31,6 @@ async def pipeline(project: dict,
     :param types_to_rename: tuple of strings, types to rename, recommended being ('struct', 'enum', 'protocol')
     :param file_renaming: bool, whether to rename files, causes `Name` not found in Storyboard error, recommended being False
     :param variable_renaming: bool, whether to rename variables, stable, recommended being True
-    :param function_transformation: bool, whether to transform functions, not stable, recommended being False
     :param comment_adding: bool, whether to add comments, stable, recommended being True (takes a long time)
     :param comment_temperature: float between 0 and 2, temperature for GPT-3.5 Turbo, lower values to save time and avoid fails, higher values for more diversity
     :param comment_max_tries: maximum number of tries to add comments (in case of failure), lower no save time, higher to ensure comments are added
@@ -60,11 +59,6 @@ async def pipeline(project: dict,
     if variable_renaming:
         project = await apply_to_project(project, rename_variables)
         print('finished renaming local variables')
-
-    if function_transformation:
-        project = await apply_to_project(project, transform_functions,
-                                         exclude=['AppDelegate.swift', 'SceneDelegate.swift'])
-        print('finished transforming functions')
 
     if comment_adding:
         project = await apply_to_project(project, add_comments, temperature=comment_temperature,
