@@ -19,7 +19,7 @@ def dir_to_dict(dir_path: str, file_types: tuple = CHANGEABLE_FILE_TYPES) -> dic
     for root, dirs, files in os.walk(dir_path):
         # skip files in frameworks
         is_in_framework = False
-        for folder in root.split('/'):
+        for folder in root.split('\\'):
             if folder in FRAMEWORKS:
                 is_in_framework = True
                 break
@@ -29,6 +29,8 @@ def dir_to_dict(dir_path: str, file_types: tuple = CHANGEABLE_FILE_TYPES) -> dic
             for file_type in file_types:
                 if file.endswith(file_type) and not file.startswith('._'):
                     file_list.append((os.path.join(root, file)).replace('\\', '/'))
+
+    print(f'Found {len(file_list)} changeable files in {dir_path}')
 
     project = {}
     for file in file_list:
