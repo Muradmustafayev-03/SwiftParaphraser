@@ -1,3 +1,4 @@
+from .constants import FRAMEWORKS
 import asyncio
 import os
 
@@ -16,6 +17,14 @@ def dir_to_dict(dir_path: str, file_types: tuple = CHANGEABLE_FILE_TYPES) -> dic
     """
     file_list = []
     for root, dirs, files in os.walk(dir_path):
+        # skip files in frameworks
+        is_in_framework = False
+        for folder in root.split('/'):
+            if folder in FRAMEWORKS:
+                is_in_framework = True
+                break
+        if is_in_framework:
+            continue
         for file in files:
             for file_type in file_types:
                 if file.endswith(file_type) and not file.startswith('._'):
