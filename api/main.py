@@ -132,7 +132,6 @@ async def paraphrase(
         return StreamingResponse(result, media_type="application/zip",
                                  headers={"Content-Disposition": f"attachment; filename=paraphrased_{filename}"})
     except Exception as e:
-        raise e
         return {"message": "Something went wrong. Please try again. Error: " + str(e)}
     finally:
         shutil.rmtree(root_dir)

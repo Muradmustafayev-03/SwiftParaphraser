@@ -51,6 +51,20 @@ async def remove_comments(swift_code: str) -> str:
     return swift_code
 
 
+def split_conditions(condition: str) -> list:
+    # split the condition by "," but ignore "," inside brackets and strings
+    # Regular expression to match commas outside of parentheses and quotes
+    pattern = r',(?=(?:[^\(\)]*\([^()]*\))*[^\(\)]*$)(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)'
+
+    # Use re.split to split the string based on the pattern
+    split_result = re.split(pattern, condition)
+
+    # Remove any leading or trailing whitespace from each element in the result
+    split_result = [s.strip() for s in split_result]
+
+    return split_result
+
+
 def transform_condition(statement: str, condition: str, else_body: str) -> str:
     """
     Transforms a guard statement by converting it to an if statement.
@@ -66,7 +80,7 @@ def transform_condition(statement: str, condition: str, else_body: str) -> str:
     if re.search(r'\b' + 'var' + r'\b', condition):
         return statement
 
-    condition = condition.replace(',', ' &&')
+    condition = " && ".join(split_conditions(condition))
 
     transformed_statement = f'\nif !({condition}) {{\n{else_body}\n}}\n'
     return transformed_statement
