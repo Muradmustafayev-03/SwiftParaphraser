@@ -1,6 +1,5 @@
 CHANGEABLE_FILE_TYPES = ('.swift', '.xml', '.xib', '.storyboard')
 
-BUILT_IN_TYPES = ['CVarArg', 'RangeReplaceableCollection', 'Character', 'SignedInteger', 'Comparable', 'RandomAccessCollection', 'ExpressibleByUnicodeScalarLiteral', 'ClosedRange', 'BidirectionalCollection', 'AnyHashable', 'SIMD16', 'ExpressibleByFloatLiteral', 'OpaquePointer', 'SIMD8Storage', 'LosslessStringConvertible', 'AutoreleasingUnsafeMutablePointer', 'CustomStringConvertible', 'ExpressibleByStringLiteral', 'CustomReflectable', 'Numeric', 'Tuple', 'MemoryLayout', 'ExpressibleByExtendedGraphemeClusterLiteral', 'FixedWidthInteger', 'Array', 'Range', 'ExpressibleByStringInterpolation', 'SIMD3', 'UInt', 'BinaryInteger', 'Void', 'SIMD4', 'MutableCollection', 'FloatingPoint', 'Float16', 'CustomDebugStringConvertible', 'Any', 'ExpressibleByBooleanLiteral', 'ExpressibleByNilLiteral', 'Hashable', 'SIMD4Storage', 'Float', 'UnsafeRawPointer', 'ExpressibleByArrayLiteral', 'UnsafePointer', 'Collection', 'RawRepresentable', 'SIMD16Storage', 'UnsafeMutableRawPointer', 'Encodable', 'AnyObject', 'Error', 'BinaryFloatingPoint', 'StaticString', 'AnyClass', 'SIMD8', 'Double', 'Equatable', 'ExpressibleByTupleLiteral', 'ExpressibleByIntegerLiteral', 'Decodable', 'Int', 'Bool', 'Self', 'ExpressibleByDictionaryLiteral', 'StringProtocol', 'String', 'UnsafeMutablePointer', 'KeyPath', 'UnsignedInteger', 'Set', 'SignedNumeric', 'Dictionary', 'SIMD2Storage', 'SIMD', 'Mirror', 'Strideable', 'IntegerArithmetic', 'Never', 'Optional', 'Boolean', 'IteratorProtocol', 'SIMD2', 'ObjectIdentifier', 'Sequence', 'Float80', 'Input', 'Output']
 # FRAMEWORKS = ['FirebaseCoreInternal', 'FirebaseCore', 'Gifu', 'SwiftyDropbox', 'AlamofireNetworkActivityIndicator', 'AVFoundation', 'SDWebImage', 'CoreServices', 'Uniform Type Identifiers (UTIs)', 'SwiftyBeaver', 'FirebaseRemoteConfig', 'LocalAuthentication', 'R.swift', 'SnapKit', 'EventKit', 'Moya', 'ModelIO', 'CoreMotion', 'Socket.IO-Client-Swift', 'Foundation', 'Social', 'AlamofireObjectMapper', 'SpriteKit', 'Network', 'NotificationCenter', 'WatchConnectivity', 'AlamofireCore', 'CoreAnimation', 'Photos', 'WebKit', 'IQKeyboardManager', 'AdSupport', 'OHHTTPStubs', 'GCDWebServer', 'ObjectMapper', 'AuthenticationServices', 'PKHUD', 'CoreNFC', 'FirebaseAppDistribution', 'CoreFoundation', 'AlamofireXMLRPC', 'MediaPlayer', 'GameController', 'FirebaseCrashlytics', 'PDFKit', 'OAuthSwift', 'CoreMedia', 'SwiftMessages', 'HomeKit', 'FileProvider', 'PushKit', 'PhotosUI', 'CoreVideo', 'CloudKit', 'AlamofireNetworkReachability', 'SwiftKeychainWrapper', 'Nimble', 'FirebaseABTesting', 'Firebase', 'FirebasePredictions', 'RealmSwift', 'CoreText', 'Starscream', 'QuartzCore', 'Speech', 'Combine', 'SwiftUI', 'Accessibility', 'HealthKit', 'ReplayKit', 'CoreMIDI', 'FirebaseMLKit', 'Realm', 'FirebaseInAppMessaging', 'FirebaseDynamicLinks', 'SwiftWebSocket', 'FirebaseStorage', 'FSPagerView', 'IGListKit', 'CryptoSwift', 'Zip', 'CoreHaptics', 'MapKit', 'HanekeSwift', 'Cosmos', 'Hue', 'CoreData', 'StoreKit', 'LinkPresentation', 'MessageUI', 'PromiseKit', 'FirebaseRealtimeDatabase', 'FirebaseMessaging', 'UserNotifications', 'ARKit', 'Charts', 'Hero', 'CoreBluetooth', 'SwiftyJSON', 'CountryPickerView', 'SafariServices', 'Quick', 'FirebaseAppIndexing', 'Lottie', 'FirebaseTestLab', 'Eureka', 'CoreAudio', 'Alamofire', 'SceneKit', 'AFNetworking', 'CallKit', 'QuickLook', 'Contacts', 'Media Player', 'CoreGraphics', 'MetalKit', 'Promises', 'AudioToolbox', 'CoreML', 'SwiftLint', 'FirebaseFirestore', 'Intents', 'Gaming', 'CoreTelephony', 'FirebaseAuth', 'SQLite.swift', 'FirebasePerformance', 'SkyFloatingLabelTextField', 'NVActivityIndicatorView', 'Accelerate', 'CryptoKit', 'Onboard', 'ExternalAccessory', 'CoreLocation', 'Metal', 'URLSession', 'JWTDecode', 'Kingfisher', 'Vapor', 'ReSwift', 'WatchKit', 'RxDataSources', 'RxSwift', 'NotificationView', 'VideoToolbox', 'MediaAccessibility', 'SkeletonView', 'FirebaseCloudFunctions', 'FirebaseUI', 'KeychainSwift', 'Natural Language', 'FirebaseAppCheck', 'AlamofireImage', 'FirebaseAnalytics', 'UIKit', 'NotificationBanner', 'Result', 'Vision', 'SwiftyUserDefaults', 'AVKit', 'PassKit', 'MultipeerConnectivity', 'System', 'SwiftyStoreKit', 'XCTest', 'SwiftGen', 'SwiftDate', 'CoreImage', 'CoreSpotlight', 'GameplayKit', 'CoreAudioKit', 'MetalPerformanceShaders', 'UserInterface']
 FRAMEWORKS = [
     "Alamofire",
@@ -53,45 +52,6 @@ FRAMEWORKS = [
     "NVActivityIndicatorView",
     "SnapKit",
     "Quick"
-]
-
-SYSTEM_FRAMEWORK_PREFIXES = [
-    "UI",   # UIKit
-    "NS",   # Foundation
-    "CG",   # Core Graphics
-    "MK",   # MapKit
-    "WK",   # WatchKit
-    "SCN",  # SceneKit
-    "AV",   # AVFoundation
-    "CN",   # Contacts
-    "CK",   # CloudKit
-    "MP",   # MediaPlayer
-    "MF",   # MessageUI
-    "CL",   # Core Location
-    "SK",   # StoreKit
-    "EK",   # EventKit
-    "MTL",  # Metal
-    "GK",   # GameKit
-    "AR",   # ARKit
-    "PDF",  # PDFKit
-    "VN",   # Vision
-    "SCN",  # SceneKit
-    "PK",  # PassKit
-    "AS",  # AuthenticationServices
-    "CM",  # CoreMotion
-    "HMC",  # HomeKit
-    "WC",  # WatchConnectivity
-    "HM",  # HealthKit
-    "UN",  # UserNotifications
-    "LA",  # LocalAuthentication
-    "VN",  # Vision
-    "WK",  # WatchKit
-    "WC",  # WatchConnectivity
-    "MP",  # MediaPlayer
-    "MTK",  # MetalKit
-    "VN",  # Vision
-    "HK",  # HealthKit
-    "UN",  # UserNotifications
 ]
 
 ABBREVIATIONS = {
@@ -168,10 +128,6 @@ ADJECTIVES = ['My', 'New', 'Alternative', 'Custom', 'Awesome', 'Cool', 'Nice',
               'Swift', 'Fancy', 'Other', 'Another', 'Top', 'Variant', 'Adapted', 'Customized',
               'Personalized', 'Personal', 'Private', 'Public', 'Open', 'Closed', 'Internal',
               'External', 'Global', 'Local', 'Static', 'Dynamic', 'Abstract', 'Final', 'Alt']
-
-
-VERBS = ['Do', 'Make', 'Create', 'Build', 'Generate', 'Construct', 'Compose', 'Form', 'Develop',
-         'Get', 'Fetch', 'Obtain', 'Acquire', 'Receive', 'Return', 'Provide', 'Give', 'Add']
 
 
 ALPHABET = 'abcdefghijklmnopqrstuvwxyz'

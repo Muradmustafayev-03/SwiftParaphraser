@@ -2,17 +2,6 @@ import regex as re
 from .rename_utils import generate_random_name
 
 
-def remove_whitespace(input_string: str) -> str:
-    """
-    Removes all whitespace characters from a string.
-
-    :param input_string: input string
-    :return: output string with no whitespace characters
-    """
-    # Use regular expression to match whitespace characters and replace them with an empty string
-    return re.sub(r'\s+', '', input_string)
-
-
 async def remove_empty_lines(swift_code: str) -> str:
     """
     Removes all empty lines from a string.
@@ -205,21 +194,3 @@ def find_all_imports(code: str) -> list:
     pattern = r'^import\s+([a-zA-Z0-9_]+)'
     matches = re.findall(pattern, code, flags=re.MULTILINE)
     return matches
-
-
-def add_missing_imports(source: str, result: str) -> str:
-    """
-    Adds missing imports from source to result.
-
-    :param source: code before transformation
-    :param result: code after transformation
-    :return: result with missing imports added
-    """
-    source_imports = find_all_imports(source)
-    result_imports = find_all_imports(result)
-
-    for import_name in source_imports:
-        if import_name not in result_imports:
-            result = f'import {import_name}\n' + result
-
-    return result
