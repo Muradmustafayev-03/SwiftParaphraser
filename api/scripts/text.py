@@ -171,6 +171,13 @@ async def transform_loops(code: str) -> str:
         open_brackets = 1
         idx = code.find(loop_start) + len(loop_start)
 
+        if loop_start.count('(') > loop_start.count(')'):
+            continue
+        if loop_start.count('[') > loop_start.count(']'):
+            continue
+        if loop_start.count('{') - 1 > loop_start.count('}'):
+            continue
+
         while open_brackets > 0 and idx < len(code):
             if code[idx] == '{':
                 open_brackets += 1
