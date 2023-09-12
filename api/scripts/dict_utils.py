@@ -15,7 +15,7 @@ def dir_to_dict(dir_path: str, file_types: tuple = CHANGEABLE_FILE_TYPES) -> dic
     for root, dirs, files in os.walk(dir_path):
         # skip files in frameworks
         is_in_framework = False
-        for folder in root.split('\\'):
+        for folder in root.replace('\\', '/').split('/'):
             if folder in FRAMEWORKS:
                 is_in_framework = True
                 break
@@ -31,7 +31,7 @@ def dir_to_dict(dir_path: str, file_types: tuple = CHANGEABLE_FILE_TYPES) -> dic
     project = {}
     for file in file_list:
         with open(file, 'r', encoding='utf-8') as f:
-            project[file] = f.read()
+            project[file.replace('\\', '/')] = f.read()
 
     # remove files in file_list from the dir_path
     for file in file_list:
