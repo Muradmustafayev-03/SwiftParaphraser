@@ -235,6 +235,12 @@ def rename_type(project: dict, old_name: str, new_name: str, rename_files: bool 
     new_project = {}
     renamed_files = []
 
+    if project_contains_string(project, f'@{old_name}'):
+        return project
+
+    if project_contains_string(project, f'typealias {old_name}'):
+        return project
+
     for file_path, file_content in project.items():
         if file_path.endswith('.swift'):
             new_path = file_path
@@ -243,8 +249,8 @@ def rename_type(project: dict, old_name: str, new_name: str, rename_files: bool 
                 new_path = file_path.replace(old_name + '.swift', new_name + '.swift')
                 renamed_files.append((old_name, new_name))
 
-            # pattern if not declaration variable or function name
-            pattern = r'\b' + re.escape(old_name) + r'\b'
+            # pattern if old name is not surrounded by alphanumeric characters
+            pattern = rf'(?<![a-zA-Z0-9_]){old_name}(?![a-zA-Z0-9_])'
             new_project[new_path] = re.sub(pattern, new_name, file_content)
             continue
 
