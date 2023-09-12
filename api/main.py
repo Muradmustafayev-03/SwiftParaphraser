@@ -133,8 +133,8 @@ async def paraphrase(
                                  headers={"Content-Disposition": f"attachment; filename=paraphrased_{filename}"})
     except Exception as e:
         return {"message": "Something went wrong. Please try again. Error: " + str(e)}
-    # finally:
-    #     shutil.rmtree(root_dir)
+    finally:
+        shutil.rmtree(root_dir)
 
 
 if __name__ == "__main__":
