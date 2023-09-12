@@ -1,10 +1,6 @@
-from .constants import FRAMEWORKS
+from .constants import FRAMEWORKS, CHANGEABLE_FILE_TYPES
 import asyncio
 import os
-
-CHANGEABLE_FILE_TYPES = ('.swift', '.xml', '.xib', '.storyboard', '.plist')
-STATIC_FILE_TYPES = ('json', '.png', '.jpg', '.jpeg', '.gif', '.pdf', '.txt', '.md', '.html', '.css', '.js',
-                     '.wav', '.mp3', '.mp4', '.mov', '.avi')
 
 
 def dir_to_dict(dir_path: str, file_types: tuple = CHANGEABLE_FILE_TYPES) -> dict:
