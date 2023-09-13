@@ -2,18 +2,7 @@ import regex as re
 from .rename_utils import generate_random_name
 
 
-def remove_whitespace(input_string: str) -> str:
-    """
-    Removes all whitespace characters from a string.
-
-    :param input_string: input string
-    :return: output string with no whitespace characters
-    """
-    # Use regular expression to match whitespace characters and replace them with an empty string
-    return re.sub(r'\s+', '', input_string)
-
-
-async def remove_empty_lines(swift_code: str) -> str:
+def remove_empty_lines(swift_code: str) -> str:
     """
     Removes all empty lines from a string.
 
@@ -23,7 +12,7 @@ async def remove_empty_lines(swift_code: str) -> str:
     return '\n'.join([line for line in swift_code.splitlines() if line.strip()])
 
 
-async def remove_comments(swift_code: str) -> str:
+def remove_comments(swift_code: str) -> str:
     """
     Removes all comments from a string. Preserves strings like "...//...".
 
@@ -86,7 +75,7 @@ def transform_condition(statement: str, condition: str, else_body: str) -> str:
     return transformed_statement
 
 
-async def transform_conditions(code: str) -> str:
+def transform_conditions(code: str) -> str:
     """
     Transforms all guard statements in a string by converting them to if statements.
 
@@ -151,7 +140,7 @@ def generate_while_loop(val: str, sequence: str, body: str, n: int) -> str:
     return transformed_loop
 
 
-async def transform_loops(code: str) -> str:
+def transform_loops(code: str) -> str:
     """
     Transforms all for loops in a string by converting them to while loops.
 
@@ -207,19 +196,5 @@ def find_all_imports(code: str) -> list:
     return matches
 
 
-def add_missing_imports(source: str, result: str) -> str:
-    """
-    Adds missing imports from source to result.
-
-    :param source: code before transformation
-    :param result: code after transformation
-    :return: result with missing imports added
-    """
-    source_imports = find_all_imports(source)
-    result_imports = find_all_imports(result)
-
-    for import_name in source_imports:
-        if import_name not in result_imports:
-            result = f'import {import_name}\n' + result
-
-    return result
+def add_comments(project: dict) -> dict:
+    return project

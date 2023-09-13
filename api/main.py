@@ -39,9 +39,6 @@ async def root():
 async def paraphrase(
         request: Request,
         zip_file: UploadFile = File(...),
-        gpt_modification: bool = Query(False),
-        modification_temperature: float = Query(0.6),
-        modification_max_tries: int = Query(3),
         condition_transformation: bool = Query(True),
         loop_transformation: bool = Query(True),
         type_renaming: bool = Query(True),
@@ -49,8 +46,6 @@ async def paraphrase(
         file_renaming: bool = Query(False),
         variable_renaming: bool = Query(True),
         comment_adding: bool = Query(True),
-        comment_temperature: float = Query(1.0),
-        comment_max_tries: int = Query(3),
 ):
     """
     Endpoint for paraphrasing a zip file containing a swift project.
@@ -62,10 +57,6 @@ async def paraphrase(
     :param request: request object
     :param zip_file: zip file containing a swift project. Required.
 
-    :param gpt_modification: bool, whether to use GPT-3.5 Turbo to modify the project, recommended being False for stability. Default: False.
-    :param modification_temperature: float between 0 qnd 2, temperature for GPT-3.5 Turbo, recommended to set lower for stability.
-    Applies only if gpt_modification is True. Default: 0.6.
-    :param modification_max_tries: maximum number of tries to modify a file (in case of failure). Applies only if gpt_modification is True. Default: 3.
     :param condition_transformation: bool, whether to transform conditions, stable, recommended being True. Default: True.
     :param loop_transformation: bool, whether to transform loops, stable, recommended being True. Default: True.
     :param type_renaming: bool, whether to rename types, semi-stable, recommended being True for smaller projects. Default: True.
@@ -74,10 +65,6 @@ async def paraphrase(
     :param file_renaming: bool, whether to rename files, causes `Name` not found in Storyboard error, recommended being False. Default: False.
     :param variable_renaming: bool, whether to rename variables, stable, recommended being True. Default: True.
     :param comment_adding: bool, whether to add comments, stable, recommended being True (takes a long time). Default: True.
-    :param comment_temperature: float between 0 and 2, temperature for GPT-3.5 Turbo, lower values to save time and avoid fails,
-    higher values for more diversity. Default: 1.0.
-    :param comment_max_tries: maximum number of tries to add comments (in case of failure), lower no save time, higher
-    to ensure comments are added. Default: 3.
 
     :return: zip file containing the paraphrased swift project or json with error message.
     """
@@ -104,12 +91,9 @@ async def paraphrase(
 
     try:
         project = dir_to_dict(folder)
-        project = await preprocess(project)
-        project = await pipeline(
+        project = preprocess(project)
+        project = pipeline(
             project,
-            gpt_modification=gpt_modification,
-            modification_temperature=modification_temperature,
-            modification_max_tries=modification_max_tries,
             condition_transformation=condition_transformation,
             loop_transformation=loop_transformation,
             type_renaming=type_renaming,
@@ -117,8 +101,6 @@ async def paraphrase(
             file_renaming=file_renaming,
             variable_renaming=variable_renaming,
             comment_adding=comment_adding,
-            comment_temperature=comment_temperature,
-            comment_max_tries=comment_max_tries,
         )
 
         dict_to_dir(project)

@@ -69,20 +69,6 @@ def new_var_name(name: str):
         return generate_random_name(prefix)
 
 
-def new_func_name(name: str):
-    """
-    Generates a new function name based on the old one or generates a random name.
-
-    :param name: old function name
-    :return: new function name
-    """
-    name = open_abbreviation(name)
-    name = first_letter_lower(name)
-
-    prefix = random.choice(['func', 'function'])
-    return prefix + random.choice(ADJECTIVES) + name
-
-
 def new_type_name(name: str):
     """
     Generates a new type name based on the old one or generates a random name.
@@ -130,7 +116,7 @@ def rename_local_variables(code, function: str):
     return code
 
 
-async def rename_variables(code: str) -> str:
+def rename_variables(code: str) -> str:
     """
     Renames all variables in a string to random names.
 
@@ -174,16 +160,7 @@ def parse_type_names(swift_code: str, include_types: tuple = ('class', 'struct',
         pattern = rf'{typedef}\s+([A-Z][a-zA-Z0-9_]+)\s*(:|\{{)'
         matches = re.finditer(pattern, swift_code)
         for match in matches:
-            name = match.group(1)
-            skip = False
-            for prefix in SYSTEM_FRAMEWORK_PREFIXES:
-                if name.startswith(prefix):
-                    skip = True
-                    break
-            if skip:
-                continue
-            if name not in BUILT_IN_TYPES:
-                names.append(match.group(1))
+            names.append(match.group(1))
 
     names = list(set(names))
     if 'SceneDelegate' in names:

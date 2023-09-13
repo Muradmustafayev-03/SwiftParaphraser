@@ -1,5 +1,5 @@
 from .constants import FRAMEWORKS, CHANGEABLE_FILE_TYPES
-import asyncio
+import sys
 import os
 
 
@@ -13,14 +13,9 @@ def dir_to_dict(dir_path: str, file_types: tuple = CHANGEABLE_FILE_TYPES) -> dic
     """
     file_list = []
     for root, dirs, files in os.walk(dir_path):
-        # skip files in frameworks
-        is_in_framework = False
-        for folder in root.replace('\\', '/').split('/'):
-            if folder in FRAMEWORKS:
-                is_in_framework = True
-                break
-        if is_in_framework:
-            continue
+        # Check if any folder in the path is in FRAMEWORKS
+        if any(folder in FRAMEWORKS for folder in root.replace('\\', '/').split('/')):
+            continue  # skip files in frameworks
         for file in files:
             for file_type in file_types:
                 if file.endswith(file_type) and not file.startswith('._'):
@@ -51,10 +46,9 @@ def dict_to_dir(data: dict):
             file.write(content)
 
 
-async def apply_to_project(project: dict, func: callable, exclude=(), *args, **kwargs):
+def apply_to_project(project: dict, func: callable, exclude=(), *args, **kwargs):
     """
     Applies a function to a project. The function must take a file content as the first argument.
-
 
     :param project: project to apply the function to
     :param func: function to apply
@@ -63,21 +57,28 @@ async def apply_to_project(project: dict, func: callable, exclude=(), *args, **k
     :param kwargs: kwargs to pass to the function
     :return:
     """
-    print(f'Applying {func.__name__} to project...')
 
-    async def process_file(file_path, file_content):
+    def print_progress_bar(iteration, total, bar_length=50, prefix=''):
+        progress = (iteration / total)
+        arrow = '=' * int(round(bar_length * progress))
+        spaces = ' ' * (bar_length - len(arrow))
+        sys.stdout.write(f'\r{prefix} [{arrow + spaces}]')
+        sys.stdout.flush()
+
+    print(f'\nApplying {func.__name__} to project...')
+
+    total_files = len(project)
+    done = 0
+
+    print_progress_bar(done, total_files)
+
+    for file_path, file_content in project.items():
         if file_path.endswith('.swift') and file_path.split('/')[-1] not in exclude:
-            result = await func(file_content, *args, **kwargs)
-            return file_path, result
-        return file_path, file_content
+            project[file_path] = func(file_content, *args, **kwargs)
+        done += 1
+        print_progress_bar(done, total_files, prefix=f'Done: {done} / {total_files}')
 
-    processed_files = await asyncio.gather(
-        *[process_file(file_path, file_content) for file_path, file_content in project.items()]
-    )
-
-    processed_project = dict(processed_files)
-
-    return processed_project
+    return project
 
 
 def project_contains_string(project: dict, string: str) -> bool:
