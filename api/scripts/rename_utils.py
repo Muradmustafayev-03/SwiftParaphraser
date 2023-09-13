@@ -115,7 +115,7 @@ def rename_local_variables(code, function: str):
         if first_occurrence_idx < declaration_idx:
             continue
 
-        pattern = r'(|,' + r's*' + var_name + r':'
+        pattern = r'\(|,' + r's*' + var_name + r':'
         if re.search(pattern, func_body):
             continue
 
