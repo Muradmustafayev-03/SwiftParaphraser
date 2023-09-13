@@ -116,6 +116,7 @@ def rename_local_variables(code, function: str):
             continue
 
         new_func_body = re.sub(old_pattern, new_name, func_body)
+        new_func_body = new_func_body.replace(f'...{var_name}', f'...{new_name}')
         new_function = function.replace(func_body, new_func_body)
         code = code.replace(function, new_function)
 
