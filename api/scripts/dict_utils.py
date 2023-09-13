@@ -13,14 +13,9 @@ def dir_to_dict(dir_path: str, file_types: tuple = CHANGEABLE_FILE_TYPES) -> dic
     """
     file_list = []
     for root, dirs, files in os.walk(dir_path):
-        # skip files in frameworks
-        is_in_framework = False
-        for folder in root.replace('\\', '/').split('/'):
-            if folder in FRAMEWORKS:
-                is_in_framework = True
-                break
-        if is_in_framework:
-            continue
+        # Check if any folder in the path is in FRAMEWORKS
+        if any(folder in FRAMEWORKS for folder in root.replace('\\', '/').split('/')):
+            continue  # skip files in frameworks
         for file in files:
             for file_type in file_types:
                 if file.endswith(file_type) and not file.startswith('._'):
