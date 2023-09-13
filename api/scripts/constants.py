@@ -52,7 +52,9 @@ FRAMEWORKS = [
     "NVActivityIndicatorView",
     "SnapKit",
     "Quick",
-    "Gifu"
+    "Gifu",
+    "SwiftyDropbox",
+    "SwiftyStoreKit",
 ]
 
 ABBREVIATIONS = {
