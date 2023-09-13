@@ -109,6 +109,12 @@ def rename_local_variables(code, function: str):
         if re.search(rf'{var_name}\s*:\s*{var_name}', function):
             continue
 
+        # check if var_name is used before declaration
+        declaration_idx = function.find(var_match.group(0))
+        first_occurrence_idx = function.find(var_name)
+        if first_occurrence_idx < declaration_idx:
+            continue
+
         new_func_body = re.sub(old_pattern, new_name, func_body)
         new_function = function.replace(func_body, new_func_body)
         code = code.replace(function, new_function)
