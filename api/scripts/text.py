@@ -194,3 +194,7 @@ def find_all_imports(code: str) -> list:
     pattern = r'^import\s+([a-zA-Z0-9_]+)'
     matches = re.findall(pattern, code, flags=re.MULTILINE)
     return matches
+
+
+async def add_comments(project: dict) -> dict:
+    return project
