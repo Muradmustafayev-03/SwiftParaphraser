@@ -91,8 +91,8 @@ async def paraphrase(
 
     try:
         project = dir_to_dict(folder)
-        project = await preprocess(project)
-        project = await pipeline(
+        project = preprocess(project)
+        project = pipeline(
             project,
             condition_transformation=condition_transformation,
             loop_transformation=loop_transformation,

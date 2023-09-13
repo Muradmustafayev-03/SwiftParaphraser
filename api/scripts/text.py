@@ -2,7 +2,7 @@ import regex as re
 from .rename_utils import generate_random_name
 
 
-async def remove_empty_lines(swift_code: str) -> str:
+def remove_empty_lines(swift_code: str) -> str:
     """
     Removes all empty lines from a string.
 
@@ -12,7 +12,7 @@ async def remove_empty_lines(swift_code: str) -> str:
     return '\n'.join([line for line in swift_code.splitlines() if line.strip()])
 
 
-async def remove_comments(swift_code: str) -> str:
+def remove_comments(swift_code: str) -> str:
     """
     Removes all comments from a string. Preserves strings like "...//...".
 
@@ -75,7 +75,7 @@ def transform_condition(statement: str, condition: str, else_body: str) -> str:
     return transformed_statement
 
 
-async def transform_conditions(code: str) -> str:
+def transform_conditions(code: str) -> str:
     """
     Transforms all guard statements in a string by converting them to if statements.
 
@@ -140,7 +140,7 @@ def generate_while_loop(val: str, sequence: str, body: str, n: int) -> str:
     return transformed_loop
 
 
-async def transform_loops(code: str) -> str:
+def transform_loops(code: str) -> str:
     """
     Transforms all for loops in a string by converting them to while loops.
 
@@ -196,5 +196,5 @@ def find_all_imports(code: str) -> list:
     return matches
 
 
-async def add_comments(project: dict) -> dict:
+def add_comments(project: dict) -> dict:
     return project

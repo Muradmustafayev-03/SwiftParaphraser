@@ -51,10 +51,9 @@ def dict_to_dir(data: dict):
             file.write(content)
 
 
-async def apply_to_project(project: dict, func: callable, exclude=(), *args, **kwargs):
+def apply_to_project(project: dict, func: callable, exclude=(), *args, **kwargs):
     """
     Applies a function to a project. The function must take a file content as the first argument.
-
 
     :param project: project to apply the function to
     :param func: function to apply
@@ -65,19 +64,13 @@ async def apply_to_project(project: dict, func: callable, exclude=(), *args, **k
     """
     print(f'Applying {func.__name__} to project...')
 
-    async def process_file(file_path, file_content):
+    n = 0
+    for file_path, file_content in project.items():
         if file_path.endswith('.swift') and file_path.split('/')[-1] not in exclude:
-            result = await func(file_content, *args, **kwargs)
-            return file_path, result
-        return file_path, file_content
-
-    processed_files = await asyncio.gather(
-        *[process_file(file_path, file_content) for file_path, file_content in project.items()]
-    )
-
-    processed_project = dict(processed_files)
-
-    return processed_project
+            project[file_path] = func(file_content, *args, **kwargs)
+        n += 1
+        print(f'Done: {n} / {len(project)}')
+    return project
 
 
 def project_contains_string(project: dict, string: str) -> bool:

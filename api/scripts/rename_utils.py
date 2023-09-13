@@ -116,7 +116,7 @@ def rename_local_variables(code, function: str):
     return code
 
 
-async def rename_variables(code: str) -> str:
+def rename_variables(code: str) -> str:
     """
     Renames all variables in a string to random names.
 

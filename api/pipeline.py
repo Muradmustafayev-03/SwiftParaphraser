@@ -1,18 +1,18 @@
 from api import *
 
 
-async def preprocess(project: dict) -> dict:
+def preprocess(project: dict) -> dict:
     """
     Preprocess the project. Remove comments and empty lines, change 'class func' to 'static func'.
     :param project: dict, project to preprocess
     :return: dict, preprocessed project
     """
-    project = await apply_to_project(project, remove_comments)
-    project = await apply_to_project(project, remove_empty_lines)
+    project = apply_to_project(project, remove_comments)
+    project = apply_to_project(project, remove_empty_lines)
     return project
 
 
-async def pipeline(project: dict,
+def pipeline(project: dict,
                    condition_transformation=True, loop_transformation=True,
                    type_renaming=True, types_to_rename=('struct', 'enum', 'protocol'),
                    file_renaming=False, variable_renaming=True, comment_adding=True):
@@ -30,11 +30,11 @@ async def pipeline(project: dict,
     """
 
     if condition_transformation:
-        project = await apply_to_project(project, transform_conditions)
+        project = apply_to_project(project, transform_conditions)
         print('finished transforming conditions')
 
     if loop_transformation:
-        project = await apply_to_project(project, transform_loops)
+        project = apply_to_project(project, transform_loops)
         print('finished transforming loops')
 
     if type_renaming:
@@ -45,11 +45,11 @@ async def pipeline(project: dict,
         print('finished renaming types')
 
     if variable_renaming:
-        project = await apply_to_project(project, rename_variables)
+        project = apply_to_project(project, rename_variables)
         print('finished renaming local variables')
 
     if comment_adding:
-        project = await apply_to_project(project, add_comments)
+        project = apply_to_project(project, add_comments)
         print('finished adding comments')
 
     return project
