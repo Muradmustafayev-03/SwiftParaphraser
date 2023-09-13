@@ -1,5 +1,5 @@
 from .constants import FRAMEWORKS, CHANGEABLE_FILE_TYPES
-import asyncio
+import sys
 import os
 
 
@@ -62,14 +62,27 @@ def apply_to_project(project: dict, func: callable, exclude=(), *args, **kwargs)
     :param kwargs: kwargs to pass to the function
     :return:
     """
-    print(f'Applying {func.__name__} to project...')
 
-    n = 0
+    def print_progress_bar(iteration, total, bar_length=50, prefix=''):
+        progress = (iteration / total)
+        arrow = '=' * int(round(bar_length * progress))
+        spaces = ' ' * (bar_length - len(arrow))
+        sys.stdout.write(f'\r{prefix} [{arrow + spaces}]')
+        sys.stdout.flush()
+
+    print(f'\nApplying {func.__name__} to project...')
+
+    total_files = len(project)
+    done = 0
+
+    print_progress_bar(done, total_files)
+
     for file_path, file_content in project.items():
         if file_path.endswith('.swift') and file_path.split('/')[-1] not in exclude:
             project[file_path] = func(file_content, *args, **kwargs)
-        n += 1
-        print(f'Done: {n} / {len(project)}')
+        done += 1
+        print_progress_bar(done, total_files, prefix=f'Done: {done} / {total_files}')
+
     return project
 
 

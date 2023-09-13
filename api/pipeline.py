@@ -31,25 +31,22 @@ def pipeline(project: dict,
 
     if condition_transformation:
         project = apply_to_project(project, transform_conditions)
-        print('finished transforming conditions')
 
     if loop_transformation:
         project = apply_to_project(project, transform_loops)
-        print('finished transforming loops')
 
     if type_renaming:
+        print('\n\nStarted renaming types...')
         type_names = parse_types_in_project(project, include_types=types_to_rename)
         if type_names:
             rename_map = generate_rename_map(type_names)
             project = rename_types(project, rename_map, rename_files=file_renaming)
-        print('finished renaming types')
+        print('Finished renaming types.')
 
     if variable_renaming:
         project = apply_to_project(project, rename_variables)
-        print('finished renaming local variables')
 
     if comment_adding:
         project = apply_to_project(project, add_comments)
-        print('finished adding comments')
 
     return project
