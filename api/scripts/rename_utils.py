@@ -115,6 +115,10 @@ def rename_local_variables(code, function: str):
         if first_occurrence_idx < declaration_idx:
             continue
 
+        pattern = r'(|,' + r's*' + var_name + r':'
+        if re.search(pattern, func_body):
+            continue
+
         new_func_body = re.sub(old_pattern, new_name, func_body)
         new_func_body = new_func_body.replace(f'...{var_name}', f'...{new_name}')
         new_function = function.replace(func_body, new_func_body)
