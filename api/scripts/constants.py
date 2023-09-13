@@ -51,7 +51,8 @@ FRAMEWORKS = [
     "HanekeSwift",
     "NVActivityIndicatorView",
     "SnapKit",
-    "Quick"
+    "Quick",
+    "Gifu"
 ]
 
 ABBREVIATIONS = {
