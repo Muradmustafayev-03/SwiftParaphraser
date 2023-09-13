@@ -94,11 +94,11 @@ def rename_local_variables(code, function: str):
     :return: code with renamed local variables
     """
     func_body = function[function.find('{') + 1:function.rfind('}')]
-    var_pattern = r'(?<!override)\s*var\s+([a-zA-Z_]+)'
+    var_pattern = r'(?<!override)\s*(var|let)\s+([a-zA-Z_]+)'
     variables = re.finditer(var_pattern, function)
 
     for var_match in variables:
-        var_name = var_match.group(1)
+        var_name = var_match.group(2)
         new_name = new_var_name(var_name)
 
         old_pattern = rf'(?<![a-zA-Z_.]){var_name}(?![a-zA-Z_])'
