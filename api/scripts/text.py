@@ -54,32 +54,63 @@ def split_conditions(condition: str) -> list:
     return split_result
 
 
-def transform_condition(statement: str, condition: str, else_body: str) -> str:
+def transform_condition(statement: str, condition: str, else_body: str, comment_adding: bool = False) -> str:
     """
     Transforms a guard statement by converting it to an if statement.
 
     :param statement: input guard statement
     :param condition: input condition
     :param else_body: input else body
+    :param comment_adding: bool, whether to add comments
     :return: output if statement
     """
     # skip guard let and guard var statements
     if re.search(r'\b' + 'let' + r'\b', condition):
-        return statement
+        if comment_adding:
+            return f"""
+/* In order to proceed the following operations, the  condition {condition} must be satisfied: */
+/* Conversion of the guard statement here is not supported because it is a guard let statement which is unsafe to transform. */
+{statement}
+/* Guarded that {condition} condition is true, the following will be proceeded: */
+"""
+        else:
+            return statement
     if re.search(r'\b' + 'var' + r'\b', condition):
+        if comment_adding:
+            return f"""
+/* In order to proceed the following operations, the  condition {condition} must be satisfied: */
+/* Conversion of the guard statement here is not supported because it is a guard var statement which is unsafe to transform. */
+{statement}
+/* Guarded that {condition} condition is true, the following will be proceeded: */
+"""
         return statement
 
     condition = " && ".join(split_conditions(condition))
 
     transformed_statement = f'\nif !({condition}) {{\n{else_body}\n}}\n'
+    if comment_adding:
+        transformed_statement = f"""
+
+/* In order to proceed the following operations, the  condition {condition} must be satisfied: */
+if !({condition}) {{ /* check the case if {condition} is false */
+
+/* In this case, the following operations will be executed: */
+{else_body} /* Exit statement so that the following operations will not be executed */
+
+}}
+
+/* Guarded that {condition} condition is true, the following will be proceeded: */
+
+"""
     return transformed_statement
 
 
-def transform_conditions(code: str) -> str:
+def transform_conditions(code: str, comment_adding: bool = False) -> str:
     """
     Transforms all guard statements in a string by converting them to if statements.
 
     :param code: input code string
+    :param comment_adding: bool, whether to add comments
     :return: output code string
     """
     guard_pattern = r'[\s*?]guard\s+([\S\s]*?)\s+else\s+{'
@@ -103,7 +134,7 @@ def transform_conditions(code: str) -> str:
         if open_brackets == 0:
             statement = code[code.find(statement_start):idx]
             else_body = statement[statement.find('{') + 1: -1]
-            transformed_statement = transform_condition(statement, condition, else_body)
+            transformed_statement = transform_condition(statement, condition, else_body, comment_adding=comment_adding)
             transformed_code = transformed_code.replace(statement, transformed_statement)
 
     return transformed_code

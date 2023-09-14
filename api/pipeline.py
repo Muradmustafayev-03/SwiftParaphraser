@@ -30,7 +30,7 @@ def pipeline(project: dict,
     """
 
     if condition_transformation:
-        project = apply_to_project(project, transform_conditions)
+        project = apply_to_project(project, transform_conditions, comment_adding=comment_adding)
 
     if loop_transformation:
         project = apply_to_project(project, transform_loops)
