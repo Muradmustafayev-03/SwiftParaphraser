@@ -140,7 +140,7 @@ def transform_conditions(code: str, comment_adding: bool = False) -> str:
     return transformed_code
 
 
-def generate_while_loop(val: str, sequence: str, body: str, n: int) -> str:
+def generate_while_loop(val: str, sequence: str, body: str, n: int, comment_adding: bool = False) -> str:
     """
     Generates a while loop given a variable name, a sequence, and a body.
 
@@ -148,6 +148,7 @@ def generate_while_loop(val: str, sequence: str, body: str, n: int) -> str:
     :param sequence: Sequence to iterate over
     :param body: Loop body
     :param n: Unique identifier
+    :param comment_adding: bool, whether to add comments
     :return: Generated while loop
     """
     condition = 'true'
@@ -168,10 +169,29 @@ def generate_while_loop(val: str, sequence: str, body: str, n: int) -> str:
         {index_name} += 1
     }}
     """
+
+    if comment_adding:
+        transformed_loop = f"""
+    // we will iterate over the sequence {sequence} and check the condition {condition}
+    let {sequence_name} = Array({sequence}) // declare a new array to store the sequence {sequence}
+    var {index_name} = 0 // declare a new variable to store the index of the sequence {sequence}
+    // while the index {index_name} is less than the length of the sequence {sequence_name}
+    while {index_name} < {sequence_name}.count {{
+        // the value of the sequence {sequence_name} at index {index_name} is {sequence_name}[{index_name}]
+        let {val} = {sequence_name}[{index_name}]
+        if {condition} {{ // check the condition {condition}
+            // if the condition {condition} is true, the following operations will be executed:
+            {body}
+        }}
+        // increment the index {index_name} by 1 to proceed to the next iteration
+        {index_name} += 1
+    }}
+    """
+
     return transformed_loop
 
 
-def transform_loops(code: str) -> str:
+def transform_loops(code: str, comment_adding: bool = False) -> str:
     """
     Transforms all for loops in a string by converting them to while loops.
 
@@ -208,24 +228,8 @@ def transform_loops(code: str) -> str:
         if open_brackets == 0:
             loop = code[code.find(loop_start):idx]
             body = loop[loop.find('{') + 1: -1]
-            transformed_loop = generate_while_loop(val, sequence, body, n)
+            transformed_loop = generate_while_loop(val, sequence, body, n, comment_adding)
             transformed_code = transformed_code.replace(loop, transformed_loop)
             n += 1
 
     return transformed_code
-
-
-def find_all_imports(code: str) -> list:
-    """
-    Finds all imports in a string.
-
-    :param code: input code string
-    :return: list of import names
-    """
-    pattern = r'^import\s+([a-zA-Z0-9_]+)'
-    matches = re.findall(pattern, code, flags=re.MULTILINE)
-    return matches
-
-
-def add_comments(project: dict) -> dict:
-    return project
