@@ -196,6 +196,7 @@ def transform_loops(code: str, comment_adding: bool = False) -> str:
     Transforms all for loops in a string by converting them to while loops.
 
     :param code: input code string
+    :param comment_adding: bool, whether to add comments
     :return: output code string
     """
     for_pattern = r'(\s*?)for\s+([a-zA-Z0-9_]+?)\s+in\s+([\S\s]+?){'
