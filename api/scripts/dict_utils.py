@@ -1,4 +1,4 @@
-from .constants import FRAMEWORKS, CHANGEABLE_FILE_TYPES
+from .constants import CHANGEABLE_FILE_TYPES
 import sys
 import os
 
@@ -14,7 +14,7 @@ def dir_to_dict(dir_path: str, file_types: tuple = CHANGEABLE_FILE_TYPES) -> dic
     file_list = []
     for root, dirs, files in os.walk(dir_path):
         # Check if any folder in the path is in FRAMEWORKS
-        if any(folder in FRAMEWORKS for folder in root.replace('\\', '/').split('/')):
+        if 'Pods' in root.replace('\\', '/').split('/'):
             continue  # skip files in frameworks
         for file in files:
             for file_type in file_types:
