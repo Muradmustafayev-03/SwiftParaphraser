@@ -184,7 +184,7 @@ def add_comments_to_calls(code: str) -> str:
         arguments = match.group(2)
 
         comment = f'/* call the function {name} with arguments {arguments} */'
-        code = code.replace(match.group(0), match.group(0) + '  ' + comment)
+        code = code.replace(match.group(0), match.group(0) + '  ' + comment + '\n')
 
     return code
 
