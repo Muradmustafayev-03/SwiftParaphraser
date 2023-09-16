@@ -170,27 +170,6 @@ def add_comments_to_assignments(code: str) -> str:
     return code
 
 
-def add_comments_to_calls(code: str) -> str:
-    """
-    Adds comments to all function calls in a string.
-
-    :param code: input code string
-    :return: output code string
-    """
-    pattern = r'([a-zA-Z0-9_]+)\s*\(([\S\s]*?)\)'
-    matches = re.finditer(pattern, code)
-    for match in matches:
-        if match.group(0).count('(') > match.group(0).count(')'):
-            continue
-        name = match.group(1)
-        arguments = match.group(2)
-
-        comment = f'/* call the function {name} with arguments {arguments} */'
-        code = code.replace(match.group(0), match.group(0) + '  ' + comment + '\n')
-
-    return code
-
-
 def add_comments_to_conditionals(code: str) -> str:
     """
     Adds comments to all conditionals in a string.
@@ -247,6 +226,5 @@ def add_comments(code: str) -> str:
     code = add_comments_to_imports(code)
     code = add_comments_to_declarations(code)
     code = add_comments_to_assignments(code)
-    code = add_comments_to_calls(code)
     code = add_comments_to_conditionals(code)
     return code
