@@ -24,6 +24,21 @@ def remove_all_imports(code: str) -> str:
     return re.sub(pattern, '', code, flags=re.MULTILINE)
 
 
+def cut_before_first_import(code: str) -> (str, str):
+    """
+    Cuts the code before the first import.
+
+    :param code: input code string
+    :return: tuple of (prefix, remaining code)
+    """
+    pattern = r'^import\s+([a-zA-Z0-9_]+)'
+    match = re.search(pattern, code, flags=re.MULTILINE)
+    if match is None:
+        return '', code
+    else:
+        return code[:match.start()], code[match.start():]
+
+
 def add_comments_to_imports(code: str) -> str:
     """
     Adds comments to all imports in a string.
@@ -31,13 +46,14 @@ def add_comments_to_imports(code: str) -> str:
     :param code: input code string
     :return: output code string
     """
+    prefix, code = cut_before_first_import(code)
     imports = find_all_imports(code)
     code = remove_all_imports(code)
     heading = '// MARK: - Imports\n'
     for import_name in imports:
         heading += f'import {import_name} // importing {import_name}\n'
     heading += '// MARK: - End of imports\n\n'
-    return heading + code
+    return prefix + '\n' + heading + '\n' + code
 
 
 def add_comments_to_declarations(code: str) -> str:
