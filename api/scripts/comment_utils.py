@@ -180,6 +180,8 @@ def add_comments_to_calls(code: str) -> str:
     pattern = r'([a-zA-Z0-9_]+)\s*\(([\S\s]*?)\)'
     matches = re.finditer(pattern, code)
     for match in matches:
+        if match.group(0).count('(') > match.group(0).count(')'):
+            continue
         name = match.group(1)
         arguments = match.group(2)
 
