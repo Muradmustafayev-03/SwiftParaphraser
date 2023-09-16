@@ -29,11 +29,14 @@ def pipeline(project: dict,
     :param comment_adding: bool, whether to add comments, stable, recommended being True (takes a long time)
     """
 
+    if comment_adding:
+        project = apply_to_project(project, add_comments)
+
     if condition_transformation:
         project = apply_to_project(project, transform_conditions, comment_adding=comment_adding)
 
     if loop_transformation:
-        project = apply_to_project(project, transform_loops)
+        project = apply_to_project(project, transform_loops, comment_adding=comment_adding)
 
     if type_renaming:
         print('\n\nStarted renaming types...')
@@ -45,8 +48,5 @@ def pipeline(project: dict,
 
     if variable_renaming:
         project = apply_to_project(project, rename_variables)
-
-    if comment_adding:
-        project = apply_to_project(project, add_comments)
 
     return project
