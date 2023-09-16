@@ -158,14 +158,14 @@ def add_comments_to_assignments(code: str) -> str:
     :param code: input code string
     :return: output code string
     """
-    pattern = r'([a-zA-Z0-9_]+)\s*=\s*([\S\s]+?)'
+    pattern = r'([a-zA-Z0-9_]+)\s*=\s*([\S\s]+)'
     matches = re.finditer(pattern, code)
     for match in matches:
         name = match.group(1)
         value = match.group(2)
 
         comment = f'/* assign the value {value} to the variable {name} */'
-        code = code.replace(match.group(0), match.group(0) + '  ' + comment)
+        code = code.replace(match.group(0), match.group(0).rstrip() + '  ' + comment)
 
     return code
 
@@ -184,7 +184,7 @@ def add_comments_to_calls(code: str) -> str:
         arguments = match.group(2)
 
         comment = f'/* call the function {name} with arguments {arguments} */'
-        code = code.replace(match.group(0), match.group(0) + '  ' + comment)
+        code = code.replace(match.group(0), match.group(0) + '  ' + comment + '\n')
 
     return code
 
