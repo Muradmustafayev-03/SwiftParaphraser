@@ -31,12 +31,9 @@ def cut_before_first_import(code: str) -> (str, str):
     :param code: input code string
     :return: tuple of (prefix, remaining code)
     """
-    pattern = r'^import\s+([a-zA-Z0-9_]+)'
-    match = re.search(pattern, code, flags=re.MULTILINE)
-    if match is None:
-        return '', code
-    else:
-        return code[:match.start()], code[match.start():]
+    prefix = code[:code.find('import')]
+    code = code[code.find('import'):]
+    return prefix, code
 
 
 def add_comments_to_imports(code: str) -> str:
