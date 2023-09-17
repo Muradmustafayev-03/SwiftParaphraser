@@ -153,7 +153,7 @@ def add_comments_to_assignments(code: str) -> str:
         value = match.group(2)
 
         comment = f'/* assign the value {value} to the variable {name} */'
-        code = code.replace(match.group(0), match.group(0).rstrip() + '  ' + comment)
+        code = code.replace(match.group(0), match.group(0).rstrip() + '  ' + comment + '\n')
 
     return code
 
