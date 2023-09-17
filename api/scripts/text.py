@@ -92,7 +92,7 @@ def transform_condition(statement: str, condition: str, else_body: str, comment_
         transformed_statement = f"""
 
 /* In order to proceed the following operations, the  condition {condition} must be satisfied: */
-if !({condition}) {{ /* check the case if {condition} is false */
+if !({condition}) {{ /* check the case when {condition} is false */
 
 /* In this case, the following operations will be executed: */
 {else_body} /* Exit statement so that the following operations will not be executed */
