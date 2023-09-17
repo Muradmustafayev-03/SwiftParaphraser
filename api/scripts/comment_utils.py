@@ -13,17 +13,6 @@ def find_all_imports(code: str) -> list:
     return matches
 
 
-def remove_all_imports(code: str) -> str:
-    """
-    Removes all imports from a string.
-
-    :param code: input code string
-    :return: output code string
-    """
-    pattern = r'^import\s+([a-zA-Z0-9_]+)'
-    return re.sub(pattern, '', code, flags=re.MULTILINE)
-
-
 def add_comments_to_imports(code: str) -> str:
     """
     Adds comments to all imports in a string.
@@ -31,16 +20,12 @@ def add_comments_to_imports(code: str) -> str:
     :param code: input code string
     :return: output code string
     """
-    if not code.strip().startswith('import'):
-        return code
 
     imports = find_all_imports(code)
-    code = remove_all_imports(code)
-    heading = '// MARK: - Imports\n'
-    for import_name in imports:
-        heading += f'import {import_name} // importing {import_name}\n'
-    heading += '// MARK: - End of imports\n\n'
-    return heading + '\n' + code
+    for imp in imports:
+        comment = f'// importing {imp}'
+        code = code.replace(f'import {imp}', f'import {imp}  {comment}\n')
+    return code
 
 
 def add_comments_to_declarations(code: str) -> str:
@@ -161,7 +146,7 @@ def add_comments_to_assignments(code: str) -> str:
     :param code: input code string
     :return: output code string
     """
-    pattern = r'([a-zA-Z0-9_]+)\s*=\s*([\S\s]+)'
+    pattern = r'([a-zA-Z0-9_]+)\s*=\s*([^\n]+)'
     matches = re.finditer(pattern, code)
     for match in matches:
         name = match.group(1)
@@ -226,7 +211,7 @@ def add_comments(code: str) -> str:
     :param code: input code string
     :return: output code string
     """
-    # code = add_comments_to_imports(code)
+    code = add_comments_to_imports(code)
     code = add_comments_to_declarations(code)
     code = add_comments_to_assignments(code)
     code = add_comments_to_conditionals(code)
