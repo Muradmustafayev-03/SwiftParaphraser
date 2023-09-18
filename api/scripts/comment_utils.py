@@ -9,7 +9,7 @@ def find_all_imports(code: str) -> list:
     :param code: input code string
     :return: list of import names
     """
-    pattern = r'^import\s+([a-zA-Z0-9_]+)'
+    pattern = r'^import\s+([\S\s]+?)'
     matches = re.findall(pattern, code, flags=re.MULTILINE)
     return matches
 
@@ -25,7 +25,7 @@ def add_comments_to_imports(code: str) -> str:
     imports = find_all_imports(code)
     for imp in imports:
         comment = f'// importing {imp}'
-        code = code.replace(f'import {imp}', f'import {imp}  {comment}\n', 1)
+        code = code.replace(f'import {imp.strip()}', f'import {imp}  {comment}\n', 1)
     return code
 
 
@@ -152,7 +152,7 @@ def add_comments_to_assignments(code: str) -> str:
 
     no_comments_code = remove_comments(code)
 
-    pattern = r'([a-zA-Z0-9_]+)\s*=\s*([^\n]+)'
+    pattern = r'([a-zA-Z0-9_]+)\s*=\s*([\S\s]+?)'
     matches = re.finditer(pattern, no_comments_code)
     for match in matches:
         name = match.group(1)
