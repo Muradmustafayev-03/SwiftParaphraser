@@ -1,4 +1,5 @@
 import regex as re
+from .text import remove_comments
 
 
 def find_all_imports(code: str) -> list:
@@ -36,9 +37,11 @@ def add_comments_to_declarations(code: str) -> str:
     :return: output code string
     """
 
+    no_comments_code = remove_comments(code)
+
     # Add comments to variable declarations
     pattern = r'/var\s+([a-zA-Z0-9_]+)(?:\s*:\s*([a-zA-Z0-9_]+))?(?:\s*=\s*([\S\s]+?))?'
-    matches = re.finditer(pattern, code)
+    matches = re.finditer(pattern, no_comments_code)
     for match in matches:
         name = match.group(1)
         try:
@@ -55,7 +58,7 @@ def add_comments_to_declarations(code: str) -> str:
 
     # Add comments to constant declarations
     pattern = r'/let\s+([a-zA-Z0-9_]+)(?:\s*:\s*([a-zA-Z0-9_]+))?(?:\s*=\s*([\S\s]+?))?'
-    matches = re.finditer(pattern, code)
+    matches = re.finditer(pattern, no_comments_code)
     for match in matches:
         name = match.group(1)
         try:
@@ -72,7 +75,7 @@ def add_comments_to_declarations(code: str) -> str:
 
     # Add comments to function declarations
     pattern = r'/func\s+([a-zA-Z0-9_]+)\s*\(([\S\s]*?)\)\s*(?:->\s*([a-zA-Z0-9_]+))?\s*{'
-    matches = re.finditer(pattern, code)
+    matches = re.finditer(pattern, no_comments_code)
     for match in matches:
         name = match.group(1)
         try:
@@ -89,7 +92,7 @@ def add_comments_to_declarations(code: str) -> str:
 
     # Add comments to class declarations
     pattern = r'/class\s+([a-zA-Z0-9_]+)\s*:\s*([a-zA-Z0-9_]+)\s*{'
-    matches = re.finditer(pattern, code)
+    matches = re.finditer(pattern, no_comments_code)
     for match in matches:
         name = match.group(1)
         try:
@@ -102,7 +105,7 @@ def add_comments_to_declarations(code: str) -> str:
 
     # Add comments to struct declarations
     pattern = r'/struct\s+([a-zA-Z0-9_]+)\s*{'
-    matches = re.finditer(pattern, code)
+    matches = re.finditer(pattern, no_comments_code)
     for match in matches:
         name = match.group(1)
 
@@ -111,7 +114,7 @@ def add_comments_to_declarations(code: str) -> str:
 
     # Add comments to enum declarations
     pattern = r'/enum\s+([a-zA-Z0-9_]+)\s*{'
-    matches = re.finditer(pattern, code)
+    matches = re.finditer(pattern, no_comments_code)
     for match in matches:
         name = match.group(1)
 
@@ -120,7 +123,7 @@ def add_comments_to_declarations(code: str) -> str:
 
     # Add comments to protocol declarations
     pattern = r'/protocol\s+([a-zA-Z0-9_]+)\s*{'
-    matches = re.finditer(pattern, code)
+    matches = re.finditer(pattern, no_comments_code)
     for match in matches:
         name = match.group(1)
 
@@ -129,7 +132,7 @@ def add_comments_to_declarations(code: str) -> str:
 
     # Add comments to extension declarations
     pattern = r'/extension\s+([a-zA-Z0-9_]+)\s*{'
-    matches = re.finditer(pattern, code)
+    matches = re.finditer(pattern, no_comments_code)
     for match in matches:
         name = match.group(1)
 
@@ -146,8 +149,11 @@ def add_comments_to_assignments(code: str) -> str:
     :param code: input code string
     :return: output code string
     """
+
+    no_comments_code = remove_comments(code)
+
     pattern = r'([a-zA-Z0-9_]+)\s*=\s*([^\n]+)'
-    matches = re.finditer(pattern, code)
+    matches = re.finditer(pattern, no_comments_code)
     for match in matches:
         name = match.group(1)
         value = match.group(2)
@@ -165,8 +171,11 @@ def add_comments_to_conditionals(code: str) -> str:
     :param code: input code string
     :return: output code string
     """
+
+    no_comments_code = remove_comments(code)
+
     pattern = r'/if\s+([\S\s]+?)\s*{'
-    matches = re.finditer(pattern, code)
+    matches = re.finditer(pattern, no_comments_code)
     for match in matches:
         condition = match.group(1)
 
@@ -174,13 +183,13 @@ def add_comments_to_conditionals(code: str) -> str:
         code = code.replace(match.group(0), comment + '\n' + match.group(0))
 
     pattern = r'/else\s*{'
-    matches = re.finditer(pattern, code)
+    matches = re.finditer(pattern, no_comments_code)
     for match in matches:
         comment = f'/* otherwise, execute the following code */'
         code = code.replace(match.group(0), match.group(0) + '  ' + comment)
 
     pattern = r'/switch\s+([\S\s]+?)\s*{'
-    matches = re.finditer(pattern, code)
+    matches = re.finditer(pattern, no_comments_code)
     for match in matches:
         condition = match.group(1)
 
@@ -188,7 +197,7 @@ def add_comments_to_conditionals(code: str) -> str:
         code = code.replace(match.group(0), match.group(0) + '  ' + comment)
 
     pattern = r'/case\s+([\S\s]+?)\s*{'
-    matches = re.finditer(pattern, code)
+    matches = re.finditer(pattern, no_comments_code)
     for match in matches:
         condition = match.group(1)
 
@@ -196,7 +205,7 @@ def add_comments_to_conditionals(code: str) -> str:
         code = code.replace(match.group(0), match.group(0) + '  ' + comment)
 
     pattern = r'/default\s*{'
-    matches = re.finditer(pattern, code)
+    matches = re.finditer(pattern, no_comments_code)
     for match in matches:
         comment = f'/* otherwise, execute the following code */'
         code = code.replace(match.group(0), match.group(0) + '  ' + comment)
