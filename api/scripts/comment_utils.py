@@ -222,6 +222,6 @@ def add_comments(code: str) -> str:
     """
     code = add_comments_to_imports(code)
     code = add_comments_to_declarations(code)
-    code = add_comments_to_assignments(code)
+    # code = add_comments_to_assignments(code)
     code = add_comments_to_conditionals(code)
     return code
