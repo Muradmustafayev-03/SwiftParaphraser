@@ -142,28 +142,6 @@ def add_comments_to_declarations(code: str) -> str:
     return code
 
 
-def add_comments_to_assignments(code: str) -> str:
-    """
-    Adds comments to all assignments in a string.
-
-    :param code: input code string
-    :return: output code string
-    """
-
-    no_comments_code = remove_comments(code)
-
-    pattern = r'([a-zA-Z0-9_]+)\s*=\s*([^\n]+)'
-    matches = re.finditer(pattern, no_comments_code)
-    for match in matches:
-        name = match.group(1)
-        value = match.group(2)
-
-        comment = f'/* assign the value {value} to the variable {name} */'
-        code = code.replace(match.group(0), match.group(0).rstrip() + '  ' + comment + '\n', 1)
-
-    return code
-
-
 def add_comments_to_conditionals(code: str) -> str:
     """
     Adds comments to all conditionals in a string.
@@ -222,6 +200,5 @@ def add_comments(code: str) -> str:
     """
     code = add_comments_to_imports(code)
     code = add_comments_to_declarations(code)
-    # code = add_comments_to_assignments(code)
     code = add_comments_to_conditionals(code)
     return code
