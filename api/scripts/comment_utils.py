@@ -9,7 +9,7 @@ def find_all_imports(code: str) -> list:
     :param code: input code string
     :return: list of import names
     """
-    pattern = r'^import\s+([\S\s]+?)'
+    pattern = r'^import\s+([^\n]+)'
     matches = re.findall(pattern, code, flags=re.MULTILINE)
     return matches
 
@@ -152,7 +152,7 @@ def add_comments_to_assignments(code: str) -> str:
 
     no_comments_code = remove_comments(code)
 
-    pattern = r'([a-zA-Z0-9_]+)\s*=\s*([\S\s]+?)'
+    pattern = r'([a-zA-Z0-9_]+)\s*=\s*([^\n]+)'
     matches = re.finditer(pattern, no_comments_code)
     for match in matches:
         name = match.group(1)
