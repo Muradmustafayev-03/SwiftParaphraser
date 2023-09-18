@@ -25,7 +25,7 @@ def add_comments_to_imports(code: str) -> str:
     imports = find_all_imports(code)
     for imp in imports:
         comment = f'// importing {imp}'
-        code = code.replace(f'import {imp.strip()}', f'import {imp}  {comment}\n')
+        code = code.replace(f'import {imp.strip()}', f'import {imp}  {comment}\n', 1)
     return code
 
 
@@ -54,7 +54,7 @@ def add_comments_to_declarations(code: str) -> str:
             value = None
 
         comment = f'// declare a new variable {name} of type {type_name} and assign it the value {value}'
-        code = code.replace(match.group(0), comment + '\n' + match.group(0))
+        code = code.replace(match.group(0), comment + '\n' + match.group(0), 1)
 
     # Add comments to constant declarations
     pattern = r'/let\s+([a-zA-Z0-9_]+)(?:\s*:\s*([a-zA-Z0-9_]+))?(?:\s*=\s*([\S\s]+?))?'
@@ -71,7 +71,7 @@ def add_comments_to_declarations(code: str) -> str:
             value = None
 
         comment = f'// declare a new constant {name} of type {type_name} and assign it the value {value}'
-        code = code.replace(match.group(0), comment + '\n' + match.group(0))
+        code = code.replace(match.group(0), comment + '\n' + match.group(0), 1)
 
     # Add comments to function declarations
     pattern = r'/func\s+([a-zA-Z0-9_]+)\s*\(([\S\s]*?)\)\s*(?:->\s*([a-zA-Z0-9_]+))?\s*{'
@@ -88,7 +88,7 @@ def add_comments_to_declarations(code: str) -> str:
             return_type = 'Void'
 
         comment = f'// declare a new function {name} with parameters {parameters} and return type {return_type}'
-        code = code.replace(match.group(0), comment + '\n' + match.group(0))
+        code = code.replace(match.group(0), comment + '\n' + match.group(0), 1)
 
     # Add comments to class declarations
     pattern = r'/class\s+([a-zA-Z0-9_]+)\s*:\s*([a-zA-Z0-9_]+)\s*{'
@@ -101,7 +101,7 @@ def add_comments_to_declarations(code: str) -> str:
             superclass_name = 'AnyObject'
 
         comment = f'// declare a new class {name} with superclass {superclass_name}'
-        code = code.replace(match.group(0), comment + '\n' + match.group(0))
+        code = code.replace(match.group(0), comment + '\n' + match.group(0), 1)
 
     # Add comments to struct declarations
     pattern = r'/struct\s+([a-zA-Z0-9_]+)\s*{'
@@ -110,7 +110,7 @@ def add_comments_to_declarations(code: str) -> str:
         name = match.group(1)
 
         comment = f'// declare a new struct {name}'
-        code = code.replace(match.group(0), comment + '\n' + match.group(0))
+        code = code.replace(match.group(0), comment + '\n' + match.group(0), 1)
 
     # Add comments to enum declarations
     pattern = r'/enum\s+([a-zA-Z0-9_]+)\s*{'
@@ -119,7 +119,7 @@ def add_comments_to_declarations(code: str) -> str:
         name = match.group(1)
 
         comment = f'// declare a new enum {name}'
-        code = code.replace(match.group(0), comment + '\n' + match.group(0))
+        code = code.replace(match.group(0), comment + '\n' + match.group(0), 1)
 
     # Add comments to protocol declarations
     pattern = r'/protocol\s+([a-zA-Z0-9_]+)\s*{'
@@ -128,7 +128,7 @@ def add_comments_to_declarations(code: str) -> str:
         name = match.group(1)
 
         comment = f'// declare a new protocol {name}'
-        code = code.replace(match.group(0), comment + '\n' + match.group(0))
+        code = code.replace(match.group(0), comment + '\n' + match.group(0), 1)
 
     # Add comments to extension declarations
     pattern = r'/extension\s+([a-zA-Z0-9_]+)\s*{'
@@ -137,7 +137,7 @@ def add_comments_to_declarations(code: str) -> str:
         name = match.group(1)
 
         comment = f'// declare a new extension {name}'
-        code = code.replace(match.group(0), comment + '\n' + match.group(0))
+        code = code.replace(match.group(0), comment + '\n' + match.group(0), 1)
 
     return code
 
@@ -159,7 +159,7 @@ def add_comments_to_assignments(code: str) -> str:
         value = match.group(2)
 
         comment = f'/* assign the value {value} to the variable {name} */'
-        code = code.replace(match.group(0), match.group(0).rstrip() + '  ' + comment + '\n')
+        code = code.replace(match.group(0), match.group(0).rstrip() + '  ' + comment + '\n', 1)
 
     return code
 
@@ -180,13 +180,13 @@ def add_comments_to_conditionals(code: str) -> str:
         condition = match.group(1)
 
         comment = f'/* if {condition} is true, execute the following code */'
-        code = code.replace(match.group(0), comment + '\n' + match.group(0))
+        code = code.replace(match.group(0), comment + '\n' + match.group(0), 1)
 
     pattern = r'/else\s*{'
     matches = re.finditer(pattern, no_comments_code)
     for match in matches:
         comment = f'/* otherwise, execute the following code */'
-        code = code.replace(match.group(0), match.group(0) + '  ' + comment)
+        code = code.replace(match.group(0), match.group(0) + '  ' + comment, 1)
 
     pattern = r'/switch\s+([\S\s]+?)\s*{'
     matches = re.finditer(pattern, no_comments_code)
@@ -194,7 +194,7 @@ def add_comments_to_conditionals(code: str) -> str:
         condition = match.group(1)
 
         comment = f'/* switch on {condition} and execute the following code */'
-        code = code.replace(match.group(0), match.group(0) + '  ' + comment)
+        code = code.replace(match.group(0), match.group(0) + '  ' + comment, 1)
 
     pattern = r'/case\s+([\S\s]+?)\s*{'
     matches = re.finditer(pattern, no_comments_code)
@@ -202,13 +202,13 @@ def add_comments_to_conditionals(code: str) -> str:
         condition = match.group(1)
 
         comment = f'/* if {condition} is true, execute the following code */'
-        code = code.replace(match.group(0), match.group(0) + '  ' + comment)
+        code = code.replace(match.group(0), match.group(0) + '  ' + comment, 1)
 
     pattern = r'/default\s*{'
     matches = re.finditer(pattern, no_comments_code)
     for match in matches:
         comment = f'/* otherwise, execute the following code */'
-        code = code.replace(match.group(0), match.group(0) + '  ' + comment)
+        code = code.replace(match.group(0), match.group(0) + '  ' + comment, 1)
 
     return code
 
