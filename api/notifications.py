@@ -15,3 +15,10 @@ def receive_notification(project_id):
         return message
     except FileNotFoundError:
         return None
+
+
+def remove_notification_file(project_id):
+    try:
+        os.remove(f'notifications/{project_id}.txt')
+    except FileNotFoundError:
+        pass
