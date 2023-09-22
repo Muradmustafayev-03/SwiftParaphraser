@@ -12,14 +12,6 @@ from .pipeline import *
 
 app = FastAPI()
 
-
-# # Define your CORS configuration
-# origins = [
-#     "http://127.0.0.1",
-#     "http://127.0.0.1:8000",
-#     "https://swiftparaphraser-production.up.railway.app",
-# ]
-
 # Add CORS middleware to the FastAPI app
 app.add_middleware(
     CORSMiddleware,
@@ -28,12 +20,6 @@ app.add_middleware(
     allow_methods=["*"],  # You can specify HTTP methods here (e.g., ["GET", "POST"])
     allow_headers=["*"],  # You can specify HTTP headers here
 )
-
-
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
-
 
 @app.post("/api/v1/paraphrase")
 async def paraphrase(
