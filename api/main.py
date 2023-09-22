@@ -11,7 +11,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from websockets.exceptions import ConnectionClosedOK
 
 from .pipeline import *
-from .notifications import *
 
 app = FastAPI()
 
@@ -67,9 +66,11 @@ async def paraphrase(
         comment_adding: bool = Query(True),
 ):
 
+    notify(unique_id, 'Received project...')
+
     # check if zip file is provided
     if not zip_file.filename.endswith('.zip'):
-        return {"message": "Please provide a zip file."}
+        return {'message': 'Please provide a zip file.'}
 
     filename = zip_file.filename
     content = zip_file.file.read()
@@ -78,18 +79,23 @@ async def paraphrase(
     folder = f'{root_dir}/{filename[:-4]}/'
     os.makedirs(folder, exist_ok=True)
 
-    # unzip file and save to folder
+    # save the zip file
     with open(f'{root_dir}/{filename}', 'wb') as f:
         f.write(content)
 
+    # extract the zip file
     shutil.unpack_archive(f'{root_dir}/{filename}', folder)
+
+    # remove the zip file
     os.remove(f'{root_dir}/{filename}')
+
+    notify(unique_id, 'Project extracted...')
 
     try:
         project = dir_to_dict(folder)
-        project = preprocess(project)
+        project = preprocess(unique_id, project)
         project = pipeline(
-            project,
+            unique_id, project,
             condition_transformation=condition_transformation,
             loop_transformation=loop_transformation,
             type_renaming=type_renaming,
@@ -101,11 +107,13 @@ async def paraphrase(
 
         dict_to_dir(project)
 
+        notify(unique_id, 'Saving paraphrased project...')
         shutil.make_archive(f'{root_dir}/{filename[:-4]}', 'zip', folder)
 
         with open(f'{root_dir}/{filename}', "rb") as f:
             result = io.BytesIO(f.read())
 
+        notify(unique_id, 'Sending paraphrased project...')
         return StreamingResponse(result, media_type="application/zip",
                                  headers={"Content-Disposition": f"attachment; filename=paraphrased_{filename}"})
     except Exception as e:
