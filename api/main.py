@@ -21,6 +21,7 @@ app.add_middleware(
     allow_headers=["*"],  # You can specify HTTP headers here
 )
 
+
 @app.post("/api/v1/paraphrase")
 async def paraphrase(
         request: Request,
@@ -90,7 +91,6 @@ async def paraphrase(
         )
 
         dict_to_dir(project)
-        print('finished saving project')
 
         shutil.make_archive(f'{root_dir}/{filename[:-4]}', 'zip', folder)
 
