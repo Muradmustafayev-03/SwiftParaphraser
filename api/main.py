@@ -1,14 +1,17 @@
 import io
 import multiprocessing
-import os
 import shutil
 import time
+import asyncio
 
-from fastapi import FastAPI, UploadFile, File, Request, Query
+from fastapi import FastAPI, UploadFile, File, Request, Query, WebSocket, WebSocketDisconnect
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 
+from websockets.exceptions import ConnectionClosedOK
+
 from .pipeline import *
+from .notifications import *
 
 app = FastAPI()
 
@@ -22,9 +25,38 @@ app.add_middleware(
 )
 
 
+@app.get("api/v1/get_id")
+async def get_id(request: Request):
+    return f'{request.client.host.replace(".", "")}{time.time_ns()}{random.randint(0, 1000000)}'
+
+
+# WebSocket route for notifications
+@app.websocket("/ws/notifications/{unique_id}")
+async def websocket_endpoint(websocket: WebSocket, unique_id=0):
+    await websocket.accept()
+    last_notification = None
+    await websocket.send_text('Listening for notifications...')
+    try:
+        while True:  # continuously check for new notifications
+            notification = receive_notification(unique_id)
+            if notification != last_notification:  # only send notification if it is new
+                if notification is None:
+                    # if the notification file is removed, close the connection
+                    await websocket.send_text('Finished listening for notifications.')
+                    await websocket.close()
+                    break
+                await websocket.send_text(notification)  # send the notification
+                last_notification = notification
+            await asyncio.sleep(1)  # Add a delay to control the update frequency
+    except WebSocketDisconnect:
+        pass
+    except ConnectionClosedOK:
+        pass
+
+
 @app.post("/api/v1/paraphrase")
 async def paraphrase(
-        request: Request,
+        unique_id: str = Query("0"),
         zip_file: UploadFile = File(...),
         condition_transformation: bool = Query(True),
         loop_transformation: bool = Query(True),
@@ -34,33 +66,10 @@ async def paraphrase(
         variable_renaming: bool = Query(True),
         comment_adding: bool = Query(True),
 ):
-    """
-    Endpoint for paraphrasing a zip file containing a swift project.
-
-    Request format example:
-    curl -X POST -F "zip_file=@/path/to/your/zipfile.zip" \
-    "http://localhost:8000/api/v1/paraphrase?gpt_modification=true&modification_temperature=0.8&variable_renaming=false"
-
-    :param request: request object
-    :param zip_file: zip file containing a swift project. Required.
-
-    :param condition_transformation: bool, whether to transform conditions, stable, recommended being True. Default: True.
-    :param loop_transformation: bool, whether to transform loops, stable, recommended being True. Default: True.
-    :param type_renaming: bool, whether to rename types, semi-stable, recommended being True for smaller projects. Default: True.
-    :param types_to_rename: tuple of strings, types to rename, recommended being ('struct', 'enum', 'protocol').
-    Possible types are: 'class', 'struct', 'enum', 'protocol'. Applies only if type_renaming is True. Default: ('struct', 'enum', 'protocol').
-    :param file_renaming: bool, whether to rename files, causes `Name` not found in Storyboard error, recommended being False. Default: False.
-    :param variable_renaming: bool, whether to rename variables, stable, recommended being True. Default: True.
-    :param comment_adding: bool, whether to add comments, stable, recommended being True (takes a long time). Default: True.
-
-    :return: zip file containing the paraphrased swift project or json with error message.
-    """
 
     # check if zip file is provided
     if not zip_file.filename.endswith('.zip'):
         return {"message": "Please provide a zip file."}
-
-    unique_id = f'{request.client.host.replace(".", "")}{time.time_ns()}{random.randint(0, 1000000)}'
 
     filename = zip_file.filename
     content = zip_file.file.read()
@@ -103,6 +112,7 @@ async def paraphrase(
         return {"message": "Something went wrong. Please try again. Error: " + str(e)}
     finally:
         shutil.rmtree(root_dir)
+        remove_notification_file(unique_id)
 
 
 if __name__ == "__main__":
