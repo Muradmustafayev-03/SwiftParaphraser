@@ -57,8 +57,6 @@ def apply_to_project(project: dict, func: callable, exclude=(), *args, **kwargs)
     :return:
     """
 
-    print(f'\nApplying {func.__name__} to project...')
-
     for file_path, file_content in project.items():
         if file_path.endswith('.swift') and file_path.split('/')[-1] not in exclude:
             project[file_path] = func(file_content, *args, **kwargs)
