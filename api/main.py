@@ -46,11 +46,11 @@ async def websocket_endpoint(websocket: WebSocket, unique_id=0):
                     break
                 await websocket.send_text(notification)  # send the notification
                 last_notification = notification
-            await asyncio.sleep(1)  # Add a delay to control the update frequency
+            await asyncio.sleep(.1)  # Add a delay to control the update frequency
     except WebSocketDisconnect:
-        pass
+        remove_notification_file(unique_id)
     except ConnectionClosedOK:
-        pass
+        remove_notification_file(unique_id)
 
 
 @app.post("/api/v1/paraphrase")
@@ -65,6 +65,9 @@ async def paraphrase(
         variable_renaming: bool = Query(True),
         comment_adding: bool = Query(True),
 ):
+    # check if id is not in use (if there is no notification file or project folder)
+    if receive_notification(unique_id) is not None or os.path.exists(f'projects/{unique_id}'):
+        return {'message': 'Please provide a unique id.'}
 
     notify(unique_id, 'Received project...')
 
@@ -77,22 +80,34 @@ async def paraphrase(
 
     root_dir = f'projects/{unique_id}'
     folder = f'{root_dir}/{filename[:-4]}/'
-    os.makedirs(folder, exist_ok=True)
-
-    # save the zip file
-    with open(f'{root_dir}/{filename}', 'wb') as f:
-        f.write(content)
-
-    # extract the zip file
-    shutil.unpack_archive(f'{root_dir}/{filename}', folder)
-
-    # remove the zip file
-    os.remove(f'{root_dir}/{filename}')
-
-    notify(unique_id, 'Project extracted...')
 
     try:
+        assert receive_notification(unique_id) is not None, 'Connection interrupted.'
+        notify(unique_id, 'Saving project...')
+        os.makedirs(folder, exist_ok=True)
+
+        # save the zip file
+        with open(f'{root_dir}/{filename}', 'wb') as f:
+            f.write(content)
+
+        notify(unique_id, 'Project saved...')
+        assert receive_notification(unique_id) is not None, 'Connection interrupted.'
+        notify(unique_id, 'Extracting project...')
+
+        # extract the zip file
+        shutil.unpack_archive(f'{root_dir}/{filename}', folder)
+
+        # remove the zip file
+        os.remove(f'{root_dir}/{filename}')
+
+        notify(unique_id, 'Project extracted...')
+
+        assert receive_notification(unique_id) is not None, 'Connection interrupted.'
+        notify(unique_id, 'Reading the project...')
         project = dir_to_dict(folder)
+
+        assert receive_notification(unique_id) is not None, 'Connection interrupted.'
+        notify(unique_id, 'Starting paraphrasing...')
         project = preprocess(unique_id, project)
         project = pipeline(
             unique_id, project,
@@ -105,14 +120,17 @@ async def paraphrase(
             comment_adding=comment_adding,
         )
 
+        assert receive_notification(unique_id) is not None, 'Connection interrupted.'
         dict_to_dir(project)
 
+        assert receive_notification(unique_id) is not None, 'Connection interrupted.'
         notify(unique_id, 'Saving paraphrased project...')
         shutil.make_archive(f'{root_dir}/{filename[:-4]}', 'zip', folder)
 
         with open(f'{root_dir}/{filename}', "rb") as f:
             result = io.BytesIO(f.read())
 
+        assert receive_notification(unique_id) is not None, 'Connection interrupted.'
         notify(unique_id, 'Sending paraphrased project...')
         return StreamingResponse(result, media_type="application/zip",
                                  headers={"Content-Disposition": f"attachment; filename=paraphrased_{filename}"})
@@ -125,4 +143,4 @@ async def paraphrase(
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("api.main:app", host="127.0.0.1", port=8000, workers=multiprocessing.cpu_count())
+    uvicorn.run("api.main:app", host="127.0.0.1", port=8080, workers=multiprocessing.cpu_count())
