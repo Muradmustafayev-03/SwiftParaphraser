@@ -4,6 +4,7 @@ from api import *
 def preprocess(unique_id: str, project: dict) -> dict:
     """
     Preprocess the project. Remove comments and empty lines, change 'class func' to 'static func'.
+
     :param unique_id: str, unique id of the project
     :param project: dict, project to preprocess
     :return: dict, preprocessed project
