@@ -65,6 +65,9 @@ async def paraphrase(
         variable_renaming: bool = Query(True),
         comment_adding: bool = Query(True),
 ):
+    # check if id is not in use (if there is no notification file or project folder)
+    if receive_notification(unique_id) is not None or os.path.exists(f'projects/{unique_id}'):
+        return {'message': 'Please provide a unique id.'}
 
     notify(unique_id, 'Received project...')
 
