@@ -26,12 +26,28 @@ app.add_middleware(
 
 @app.get("api/v1/get_id")
 async def get_id(request: Request):
+    """
+    Get a unique id for the project.
+
+    :param request: Request
+    :return: str, unique id
+    """
     return f'{request.client.host.replace(".", "")}{time.time_ns()}{random.randint(0, 1000000)}'
 
 
 # WebSocket route for notifications
 @app.websocket("/ws/notifications/{unique_id}")
 async def websocket_endpoint(websocket: WebSocket, unique_id=0):
+    """
+    WebSocket endpoint for notifications.
+
+    Request format example:
+    ws://localhost:8000/ws/notifications/1234567890
+    Use your domain name instead of localhost when the backend is deployed.
+
+    :param websocket: WebSocket
+    :param unique_id: str, unique id of the project to listen for notifications
+    """
     await websocket.accept()
     last_notification = None
     await websocket.send_text('Listening for notifications...')
@@ -65,6 +81,28 @@ async def paraphrase(
         variable_renaming: bool = Query(True),
         comment_adding: bool = Query(True),
 ):
+    """
+        Endpoint for paraphrasing a zip file containing a swift project.
+
+        Request format example:
+        curl -X POST -F "zip_file=@/path/to/your/zipfile.zip" \
+        "http://localhost:8000/api/v1/paraphrase?unique_id=5235431&condition_transformation=False"
+        Use your domain name instead of localhost when the backend is deployed.
+
+        :param unique_id: str, unique id of the project. Required. Use the same id to get notifications about the project.
+        :param zip_file: zip file containing a swift project. Required.
+
+        :param condition_transformation: bool, whether to transform conditions, stable, recommended being True. Default: True.
+        :param loop_transformation: bool, whether to transform loops, stable, recommended being True. Default: True.
+        :param type_renaming: bool, whether to rename types, semi-stable, recommended being True for smaller projects. Default: True.
+        :param types_to_rename: tuple of strings, types to rename, recommended being ('struct', 'enum', 'protocol').
+        Possible types are: 'class', 'struct', 'enum', 'protocol'. Applies only if type_renaming is True. Default: ('struct', 'enum', 'protocol').
+        :param file_renaming: bool, whether to rename files, causes `Name` not found in Storyboard error, recommended being False. Default: False.
+        :param variable_renaming: bool, whether to rename variables, stable, recommended being True. Default: True.
+        :param comment_adding: bool, whether to add comments, stable, recommended being True (takes a long time). Default: True.
+
+        :return: zip file containing the paraphrased swift project or json with error message.
+        """
     # check if id is not in use (if there is no notification file or project folder)
     if receive_notification(unique_id) is not None or os.path.exists(f'projects/{unique_id}'):
         return {'message': 'Please provide a unique id.'}
@@ -143,4 +181,4 @@ async def paraphrase(
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("api.main:app", host="127.0.0.1", port=8080, workers=multiprocessing.cpu_count())
+    uvicorn.run("api.main:app", host="127.0.0.1", port=8000, workers=multiprocessing.cpu_count())
