@@ -24,7 +24,7 @@ app.add_middleware(
 )
 
 
-@app.get("api/v1/get_id")
+@app.get("/api/v1/get_id")
 async def get_id(request: Request):
     """
     Get a unique id for the project.
@@ -36,7 +36,7 @@ async def get_id(request: Request):
 
 
 # WebSocket route for notifications
-@app.websocket("/ws/notifications/{unique_id}")
+@app.websocket("/ws/notifications/")
 async def websocket_endpoint(websocket: WebSocket, unique_id=0):
     """
     WebSocket endpoint for notifications.
@@ -181,4 +181,4 @@ async def paraphrase(
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("api.main:app", host="127.0.0.1", port=8000, workers=multiprocessing.cpu_count())
+    uvicorn.run("api.main:app", host="127.0.0.1", port=8080, workers=multiprocessing.cpu_count())
