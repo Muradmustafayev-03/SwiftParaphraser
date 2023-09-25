@@ -36,7 +36,7 @@ async def get_id(request: Request):
 
 
 # WebSocket route for notifications
-@app.websocket("/ws/notifications/")
+@app.websocket("/ws/notifications/{unique_id}")
 async def websocket_endpoint(websocket: WebSocket, unique_id=0):
     """
     WebSocket endpoint for notifications.
