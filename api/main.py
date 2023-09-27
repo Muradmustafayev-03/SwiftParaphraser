@@ -3,6 +3,7 @@ import multiprocessing
 import shutil
 import time
 import asyncio
+from typing import Optional
 
 from fastapi import FastAPI, UploadFile, File, Request, Query, WebSocket, WebSocketDisconnect
 from fastapi.responses import StreamingResponse
@@ -37,7 +38,7 @@ async def get_id(request: Request):
 
 # WebSocket route for notifications
 @app.websocket("/ws/notifications/{unique_id}")
-async def websocket_endpoint(websocket: WebSocket, unique_id=0):
+async def websocket_endpoint(websocket: WebSocket, unique_id: Optional[str] = None):
     """
     WebSocket endpoint for notifications.
 
@@ -46,13 +47,18 @@ async def websocket_endpoint(websocket: WebSocket, unique_id=0):
     Use your domain name instead of localhost when the backend is deployed.
 
     :param websocket: WebSocket
-    :param unique_id: str, unique id of the project to listen for notifications
+    :param unique_id: str, optional, unique id of the project to listen for notifications
     """
     await websocket.accept()
     last_notification = None
     await websocket.send_text('Listening for notifications...')
     try:
         while True:  # continuously check for new notifications
+            if unique_id is None:
+                # If the unique_id is not provided, close the connection
+                await websocket.send_text('Invalid unique_id.')
+                await websocket.close()
+                break
             notification = receive_notification(unique_id)
             if notification != last_notification:  # only send notification if it is new
                 if notification is None:
@@ -181,4 +187,4 @@ async def paraphrase(
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("api.main:app", host="127.0.0.1", port=8080, workers=multiprocessing.cpu_count())
+    uvicorn.run("api.main:app", host="127.0.0.1", port=8000, workers=multiprocessing.cpu_count(), ws="websockets")
