@@ -40,6 +40,22 @@ def remove_comments(swift_code: str) -> str:
     return swift_code
 
 
+def format_strings(swift_code: str) -> str:
+    """
+    Inside the strings changes \n to \\n
+    :param swift_code: input code string
+    :return: output code string with utf-8 characters
+    """
+    pattern = r'"(.*?)"'
+    strings = re.findall(pattern, swift_code)
+
+    for string in strings:
+        new_string = string.replace('\n', '\\n')
+        swift_code = swift_code.replace(string, new_string)
+
+    return swift_code
+
+
 def split_conditions(condition: str) -> list:
     # split the condition by "," but ignore "," inside brackets and strings
     # Regular expression to match commas outside of parentheses and quotes
