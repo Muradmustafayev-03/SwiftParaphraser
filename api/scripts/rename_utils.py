@@ -171,6 +171,12 @@ def parse_type_names(swift_code: str, include_types: tuple = ('class', 'struct',
         pattern = rf'{typedef}\s+([A-Z][a-zA-Z0-9_]+)\s*(:|\{{)'
         matches = re.finditer(pattern, swift_code)
         for match in matches:
+            # extract the part of the code before declaration
+            code_before = swift_code[:match.start()]
+
+            if code_before.count('{') != code_before.count('}'):
+                continue
+
             names.append(match.group(1))
 
     names = list(set(names))
