@@ -65,6 +65,12 @@ def pipeline(unique_id: str, project: dict,
             project = rename_types(project, rename_map, rename_files=file_renaming)
         notify(unique_id, 'Finished renaming types.')
 
+    if file_renaming:
+        assert receive_notification(unique_id) is not None, 'Connection interrupted.'
+        notify(unique_id, 'Renaming files...')
+        project = rename_files(project)
+        notify(unique_id, 'Finished renaming files.')
+
     if variable_renaming:
         assert receive_notification(unique_id) is not None, 'Connection interrupted.'
         notify(unique_id, 'Renaming variables...')
