@@ -301,7 +301,7 @@ def rename_files(project: dict) -> dict:
         if path.endswith('swift'):
             old_name = path.split('/')[-1].replace('.swift', '')
             new_name = rename_map[old_name]
-            new_project[path.replace(old_name, new_name)] = content
+            new_project[path.replace(old_name + '.swift', new_name + '.swift')] = content
         else:
             if path.endswith('.xib') or path.endswith('.storyboard'):
                 for old_name, new_name in rename_map.items():
