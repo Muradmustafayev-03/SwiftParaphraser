@@ -2,6 +2,9 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/api/projects/123456789999/Widgets_SUB_27_09/Tamagochi" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/api/projects/dvmndknvdksj/Widgets_SUB_27_09/Tamagochi" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/api/projects/dvmndknvdksjn/Widgets_SUB_27_09/Tamagochi" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/projects/0/cleanergit 2/cleanergit 2" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/projects/1270011693377656728389300117024/xint-task/xint-task 3" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/projects/1270011693549807102525900598420/xint-task/xint-task 3" vcs="Git" />

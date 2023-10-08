@@ -234,3 +234,80 @@ def transform_loops(code: str, comment_adding: bool = False) -> str:
             n += 1
 
     return transformed_code
+
+
+def parse_functions(code: str):
+    functions = []
+
+    # parsing functions
+    pattern = re.compile(
+        r'(?:(?<!class)(\s*?)(public|private|protected|internal|fileprivate|open|override|@objc)\s+)?(static\s+)?func\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(\s*(.*?)\s*\)\s*(?:\s*->\s*(?:.*?)?)?\s*{')
+    declarations = [match.group(0) for match in pattern.finditer(code)]
+
+    def parse_params(unparsed: str):
+        parsed = []
+
+        for param in unparsed.split(','):
+            param = param.split(':')[0].strip()
+            if not param:
+                continue
+            split_params = param.split(' ')
+            left = split_params[0]
+            right = split_params[-1]
+            parsed.append((left, right))
+
+        return parsed
+
+    for declaration in declarations:
+        open_brackets = 1
+        func_start_index = code.find(declaration)
+        body_start_index = func_start_index + len(declaration)
+        body_end_index = body_start_index
+
+        while open_brackets > 0 and body_end_index < len(code):
+            if code[body_end_index] == '{':
+                open_brackets += 1
+            elif code[body_end_index] == '}':
+                open_brackets -= 1
+            body_end_index += 1
+
+        if open_brackets != 0:
+            continue
+
+        function = code[func_start_index:body_end_index]
+        name = declaration.split('func')[1].split('(')[0].strip()
+        unparsed_params = declaration.split('(')[1].split(')')[0].strip()
+        params = parse_params(unparsed_params)
+        body = code[body_start_index:body_end_index - 1]
+        returns_value = '->' in declaration or r'\breturn\b' in body
+
+        functions.append([function, name, params, declaration, body, returns_value])
+
+    return functions
+
+
+def compose_call(name: str, params: list, return_value: bool = False):
+    if return_value:
+        return f'return {name}({", ".join([f"{param[0]}: {param[1]}" for param in params])})'
+    return f'{name}({", ".join([f"{param[0]}: {param[1]}" for param in params])})'
+
+
+def compose_wrapper_function(declaration, new_name, params, return_value):
+    return f'{declaration}\n{compose_call(new_name, params, return_value)}\n}}'
+
+
+def rename_function(function: str, old_name: str, new_name: str):
+    pattern = rf'func\s+{old_name}'
+    return re.sub(pattern, f'func {new_name}', function)
+
+
+def restructure_functions(code: str):
+    new_code = code
+    functions = parse_functions(code)
+    for function, name, params, declaration, body, returns_value in functions:
+        new_name = generate_random_name('func')
+        wrapper_function = compose_wrapper_function(declaration, new_name, params, returns_value)
+        performing_function = rename_function(function, name, new_name)
+        new_code = new_code.replace(function, wrapper_function + '\n\n\t' + performing_function)
+
+    return new_code
