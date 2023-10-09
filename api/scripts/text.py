@@ -315,6 +315,63 @@ def restructure_functions(code: str):
 
 def change_classes_to_structs(project: dict) -> dict:
     for file, content in project.items():
-        if file.endswith('.swift'):
-            project[file] = content.replace('class ', 'struct ')
+        if not file.endswith('.swift'):
+            continue
+
+        # class declaration pattern
+        pattern = r'class\s+([A-Z][a-zA-Z0-9_]+)\s*(:|\{{)'
+        matches = re.finditer(pattern, content)
+
+        for match in matches:
+            name = match.group(1)
+            if rf'class\s+([A-Z][a-zA-Z0-9_]+)\s*:\s*{name}' in '\n'.join(project.values()):
+                continue
+            declaration_start = file.find(match.group(0))
+            declaration_end = declaration_start
+            while content[declaration_end] != '{':
+                declaration_end += 1
+            declaration = content[declaration_start:declaration_end]
+            if ':' in declaration:
+                continue
+
+            body_start = declaration_end + 1
+            body_end = body_start
+
+            open_brackets = 1
+            while open_brackets > 0 and body_end < len(content):
+                if content[body_end] == '{':
+                    open_brackets += 1
+                elif content[body_end] == '}':
+                    open_brackets -= 1
+                body_end += 1
+
+            if open_brackets != 0:
+                continue
+
+            body = content[body_start:body_end - 1]
+
+            # pattern of assigning to a property of self
+            pattern = rf'self\.([a-zA-Z0-9_]*)\s*=\s*([a-zA-Z0-9_\(\)]*)'
+            matches = re.finditer(pattern, body)
+            if len(list(matches)) > 0:
+                continue
+
+            # parse class variables
+            pattern = r'var\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*:'
+            variables = [match.group(1) for match in re.finditer(pattern, body)]
+            skip = False
+            for variable in variables:
+                # check if reassignment of variable
+                pattern = rf'(?<!var){variable}\s*=\s*([a-zA-Z0-9_\(\)]*)'
+                matches = re.finditer(pattern, body)
+                if len(list(matches)) > 0:
+                    skip = True
+                    break
+            if skip:
+                continue
+
+            new_declaration = declaration.replace('class', 'struct')
+            project[file] = content.replace(declaration, new_declaration, 1)
+
     return project
+
