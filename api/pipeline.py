@@ -21,10 +21,6 @@ def preprocess(unique_id: str, project: dict) -> dict:
     notify(unique_id, 'Removing empty lines...')
     project = apply_to_project(project, remove_empty_lines)
 
-    assert receive_notification(unique_id) is not None, 'Connection interrupted.'
-    notify(unique_id, 'Changing classes to structs...')
-    project = change_classes_to_structs(project)
-
     notify(unique_id, 'Finished preprocessing the project...')
     return project
 
@@ -60,6 +56,11 @@ def pipeline(unique_id: str, project: dict,
         notify(unique_id, 'Transforming loops...')
         project = apply_to_project(project, transform_loops, comment_adding=comment_adding)
         notify(unique_id, 'Finished transforming loops.')
+
+    assert receive_notification(unique_id) is not None, 'Connection interrupted.'
+    notify(unique_id, 'Changing classes to structs...')
+    project = change_classes_to_structs(project)
+    notify(unique_id, 'Finished changing classes to structs.')
 
     if type_renaming:
         assert receive_notification(unique_id) is not None, 'Connection interrupted.'
