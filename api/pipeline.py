@@ -28,7 +28,7 @@ def preprocess(unique_id: str, project: dict) -> dict:
 def pipeline(unique_id: str, project: dict,
              condition_transformation=True, loop_transformation=True,
              type_renaming=True, types_to_rename=('struct', 'enum', 'protocol'),
-             file_renaming=False, functions_restructuring=True, variable_renaming=True, comment_adding=True):
+             file_renaming=False, function_transformation=True, variable_renaming=True, comment_adding=True):
     """
     Project paraphrasing pipeline.
 
@@ -39,7 +39,7 @@ def pipeline(unique_id: str, project: dict,
     :param type_renaming: bool, whether to rename types, semi-stable, recommended being True for smaller projects
     :param types_to_rename: tuple of strings, types to rename, recommended being ('struct', 'enum', 'protocol')
     :param file_renaming: bool, whether to rename files, causes `Name` not found in Storyboard error, recommended being False
-    :param functions_restructuring: bool, whether to restructure functions, unstable, recommended being True
+    :param function_transformation: bool, whether to restructure functions, unstable, recommended being True
     :param variable_renaming: bool, whether to rename variables, stable, recommended being True
     :param comment_adding: bool, whether to add comments, stable, recommended being True (takes a long time)
     """
@@ -72,7 +72,7 @@ def pipeline(unique_id: str, project: dict,
         project = rename_files(project)
         notify(unique_id, 'Finished renaming files.')
 
-    if functions_restructuring:
+    if function_transformation:
         assert receive_notification(unique_id) is not None, 'Connection interrupted.'
         notify(unique_id, 'Restructuring functions...')
         project = apply_to_project(project, restructure_functions)
