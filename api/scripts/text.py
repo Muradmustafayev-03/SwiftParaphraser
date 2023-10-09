@@ -311,3 +311,12 @@ def restructure_functions(code: str):
         new_code = new_code.replace(function, wrapper_function + '\n\n\t' + performing_function)
 
     return new_code
+
+
+def change_classes_to_structs(project: dict) -> dict:
+    for file, content in project.items():
+        if 'Network' not in file:
+            continue
+        if file.endswith('.swift'):
+            project[file] = content.replace('class ', 'struct ')
+    return project
