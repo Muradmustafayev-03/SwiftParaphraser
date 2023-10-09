@@ -315,8 +315,6 @@ def restructure_functions(code: str):
 
 def change_classes_to_structs(project: dict) -> dict:
     for file, content in project.items():
-        if 'Network' not in file:
-            continue
         if file.endswith('.swift'):
             project[file] = content.replace('class ', 'struct ')
     return project
