@@ -84,7 +84,7 @@ async def paraphrase(
         type_renaming: bool = Query(True),
         types_to_rename: str = Query("struct,enum,protocol"),
         file_renaming: bool = Query(False),
-        functions_restructuring: bool = Query(True),
+        function_transformation: bool = Query(True),
         variable_renaming: bool = Query(True),
         comment_adding: bool = Query(True),
 ):
@@ -105,7 +105,7 @@ async def paraphrase(
         :param types_to_rename: tuple of strings, types to rename, recommended being ('struct', 'enum', 'protocol').
         Possible types are: 'class', 'struct', 'enum', 'protocol'. Applies only if type_renaming is True. Default: ('struct', 'enum', 'protocol').
         :param file_renaming: bool, whether to rename files, causes `Name` not found in Storyboard error, recommended being False. Default: False.
-        :param functions_restructuring: bool, whether to restructure functions, stable, recommended being True. Default: True.
+        :param function_transformation: bool, whether to restructure functions, stable, recommended being True. Default: True.
         :param variable_renaming: bool, whether to rename variables, stable, recommended being True. Default: True.
         :param comment_adding: bool, whether to add comments, stable, recommended being True (takes a long time). Default: True.
 
@@ -162,7 +162,7 @@ async def paraphrase(
             type_renaming=type_renaming,
             types_to_rename=types_to_rename.split(','),  # Convert comma-separated string to a list
             file_renaming=file_renaming,
-            functions_restructuring=functions_restructuring,
+            function_transformation=function_transformation,
             variable_renaming=variable_renaming,
             comment_adding=comment_adding,
         )
@@ -182,7 +182,6 @@ async def paraphrase(
         return StreamingResponse(result, media_type="application/zip",
                                  headers={"Content-Disposition": f"attachment; filename=paraphrased_{filename}"})
     except Exception as e:
-        raise e
         return {"message": "Something went wrong. Please try again. Error: " + str(e)}
     finally:
         shutil.rmtree(root_dir)
