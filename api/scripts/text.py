@@ -259,6 +259,14 @@ def parse_functions(code: str):
         return parsed
 
     for declaration in declarations:
+        if declaration.count('(') > declaration.count(')'):
+            declaration_start_index = code.find(declaration)
+            declaration_end_index = declaration_start_index + len(declaration)
+
+            while not (code[declaration_end_index] == '{' and declaration.count('(') == declaration.count(')')):
+                declaration_end_index += 1
+                declaration = code[declaration_start_index:declaration_end_index]
+
         open_brackets = 1
         func_start_index = code.find(declaration)
         body_start_index = func_start_index + len(declaration)
