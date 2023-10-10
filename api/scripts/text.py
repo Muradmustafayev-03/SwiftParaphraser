@@ -308,7 +308,7 @@ def restructure_functions(code: str):
         new_name = generate_random_name('func')
         wrapper_function = compose_wrapper_function(declaration, new_name, params, returns_value)
         performing_function = rename_function(function, name, new_name)
-        new_code = new_code.replace(function, wrapper_function + '\n\n\t' + performing_function)
+        new_code = new_code.replace(function, performing_function + '\n\n\t' + wrapper_function)
 
     return new_code
 
