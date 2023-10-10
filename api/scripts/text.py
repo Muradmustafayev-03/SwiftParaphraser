@@ -279,7 +279,7 @@ def parse_functions(code: str):
         unparsed_params = declaration.split('(')[1].split(')')[0].strip()
         params = parse_params(unparsed_params)
         body = code[body_start_index:body_end_index - 1]
-        returns_value = r'\breturn\b' in body
+        returns_value = '->' in declaration or r'\breturn\b' in body
 
         functions.append([function, name, params, declaration, body, returns_value])
 
