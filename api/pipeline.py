@@ -57,11 +57,6 @@ def pipeline(unique_id: str, project: dict,
         project = apply_to_project(project, transform_loops, comment_adding=comment_adding)
         notify(unique_id, 'Finished transforming loops.')
 
-    assert receive_notification(unique_id) is not None, 'Connection interrupted.'
-    notify(unique_id, 'Changing classes to structs...')
-    project = change_classes_to_structs(project)
-    notify(unique_id, 'Finished changing classes to structs.')
-
     if type_renaming:
         assert receive_notification(unique_id) is not None, 'Connection interrupted.'
         notify(unique_id, 'Renaming types...')
@@ -87,6 +82,12 @@ def pipeline(unique_id: str, project: dict,
         notify(unique_id, 'Renaming variables...')
         project = apply_to_project(project, rename_variables)
         notify(unique_id, 'Finished renaming variables.')
+
+    if True:
+        assert receive_notification(unique_id) is not None, 'Connection interrupted.'
+        notify(unique_id, 'Changing structs to classes...')
+        project = apply_to_project(project, struct_to_class)
+        notify(unique_id, 'Finished changing structs to classes.')
 
     if comment_adding:
         assert receive_notification(unique_id) is not None, 'Connection interrupted.'
