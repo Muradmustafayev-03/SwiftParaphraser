@@ -259,6 +259,14 @@ def parse_functions(code: str):
         return parsed
 
     for declaration in declarations:
+        if declaration.count('(') > declaration.count(')'):
+            declaration_start_index = code.find(declaration)
+            declaration_end_index = declaration_start_index + len(declaration)
+
+            while not (code[declaration_end_index] == '{' and declaration.count('(') == declaration.count(')')):
+                declaration_end_index += 1
+                declaration = code[declaration_start_index:declaration_end_index]
+
         open_brackets = 1
         func_start_index = code.find(declaration)
         body_start_index = func_start_index + len(declaration)
@@ -308,7 +316,7 @@ def restructure_functions(code: str):
         new_name = generate_random_name('func')
         wrapper_function = compose_wrapper_function(declaration, new_name, params, returns_value)
         performing_function = rename_function(function, name, new_name)
-        new_code = new_code.replace(function, wrapper_function + '\n\n\t' + performing_function)
+        new_code = new_code.replace(function, performing_function + '\n\n\t' + wrapper_function)
 
     return new_code
 
