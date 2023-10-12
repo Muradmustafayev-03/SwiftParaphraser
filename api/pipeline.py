@@ -28,7 +28,7 @@ def preprocess(unique_id: str, project: dict) -> dict:
 def pipeline(unique_id: str, project: dict,
              condition_transformation=True, loop_transformation=True,
              type_renaming=True, types_to_rename=('struct', 'enum', 'protocol'),
-             file_renaming=False, variable_renaming=True, comment_adding=True):
+             file_renaming=False, function_transformation=True, variable_renaming=True, comment_adding=True):
     """
     Project paraphrasing pipeline.
 
@@ -39,6 +39,7 @@ def pipeline(unique_id: str, project: dict,
     :param type_renaming: bool, whether to rename types, semi-stable, recommended being True for smaller projects
     :param types_to_rename: tuple of strings, types to rename, recommended being ('struct', 'enum', 'protocol')
     :param file_renaming: bool, whether to rename files, causes `Name` not found in Storyboard error, recommended being False
+    :param function_transformation: bool, whether to restructure functions, unstable, recommended being True
     :param variable_renaming: bool, whether to rename variables, stable, recommended being True
     :param comment_adding: bool, whether to add comments, stable, recommended being True (takes a long time)
     """
@@ -65,11 +66,28 @@ def pipeline(unique_id: str, project: dict,
             project = rename_types(project, rename_map, rename_files=file_renaming)
         notify(unique_id, 'Finished renaming types.')
 
+    if file_renaming:
+        assert receive_notification(unique_id) is not None, 'Connection interrupted.'
+        notify(unique_id, 'Renaming files...')
+        project = rename_files(project)
+        notify(unique_id, 'Finished renaming files.')
+
+    if function_transformation:
+        assert receive_notification(unique_id) is not None, 'Connection interrupted.'
+        notify(unique_id, 'Restructuring functions...')
+        project = apply_to_project(project, restructure_functions)
+
     if variable_renaming:
         assert receive_notification(unique_id) is not None, 'Connection interrupted.'
         notify(unique_id, 'Renaming variables...')
         project = apply_to_project(project, rename_variables)
         notify(unique_id, 'Finished renaming variables.')
+
+    if False:
+        assert receive_notification(unique_id) is not None, 'Connection interrupted.'
+        notify(unique_id, 'Changing structs to classes...')
+        project = apply_to_project(project, struct_to_class)
+        notify(unique_id, 'Finished changing structs to classes.')
 
     if comment_adding:
         assert receive_notification(unique_id) is not None, 'Connection interrupted.'

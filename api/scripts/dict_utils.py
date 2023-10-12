@@ -25,7 +25,7 @@ def dir_to_dict(dir_path: str, file_types: tuple = CHANGEABLE_FILE_TYPES) -> dic
     project = {}
     for file in file_list:
         with open(file, 'r', encoding='utf-8') as f:
-            project[file.replace('\\', '/')] = f.read()
+            project[file.replace('\\', '/')] = f.read().replace('\u2028', ' ')
 
     # remove files in file_list from the dir_path
     for file in file_list:
@@ -41,6 +41,8 @@ def dict_to_dir(data: dict):
     :param data: dictionary where the keys are the file paths and the values are the file contents
     """
     for file_path, content in data.items():
+        directory = '/'.join(file_path.split('/')[:-1])
+        os.makedirs(directory, exist_ok=True)
         with open(file_path, 'w', encoding='utf-8') as file:
             file.write(content)
 

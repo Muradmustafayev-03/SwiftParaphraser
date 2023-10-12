@@ -283,3 +283,30 @@ def rename_types(project: dict, rename_map: dict, rename_files=False):
     for old_name, new_name in rename_map.items():
         project = rename_type(project, old_name, new_name, rename_files)
     return project
+
+
+def rename_files(project: dict) -> dict:
+    """
+    Renames files in the project according to the renaming map.
+
+    :param project: project to rename files in
+    :return: dict, renamed project
+    """
+    new_project = {}
+    filenames = [file_path.split('/')[-1] for file_path in project.keys() if file_path.endswith('.swift')]
+    filenames = [filename.replace('.swift', '') for filename in filenames]
+    rename_map = generate_rename_map(filenames)
+
+    for path, content in project.items():
+        if path.endswith('swift'):
+            old_name = path.split('/')[-1].replace('.swift', '')
+            new_name = rename_map[old_name]
+            new_project[path.replace(old_name + '.swift', new_name + '.swift')] = content
+        else:
+            if path.endswith('.xib') or path.endswith('.storyboard'):
+                for old_name, new_name in rename_map.items():
+                    pattern = r'customModule="' + re.escape(old_name) + r'"'
+                    content = re.sub(pattern, r'customModule="' + new_name + r'"', content)
+            new_project[path] = content
+
+    return new_project
