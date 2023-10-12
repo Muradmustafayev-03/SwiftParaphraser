@@ -83,7 +83,7 @@ def pipeline(unique_id: str, project: dict,
         project = apply_to_project(project, rename_variables)
         notify(unique_id, 'Finished renaming variables.')
 
-    if True:
+    if False:
         assert receive_notification(unique_id) is not None, 'Connection interrupted.'
         notify(unique_id, 'Changing structs to classes...')
         project = apply_to_project(project, struct_to_class)
