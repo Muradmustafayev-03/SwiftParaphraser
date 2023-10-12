@@ -319,7 +319,3 @@ def restructure_functions(code: str):
         new_code = new_code.replace(function, performing_function + '\n\n\t' + wrapper_function)
 
     return new_code
-
-
-def struct_to_class(code: str):
-    return code.replace('struct', 'class')
