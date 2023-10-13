@@ -259,6 +259,15 @@ def parse_functions(code: str):
         return parsed
 
     for declaration in declarations:
+        # check if @available is one line above declaration
+        line_id = 0
+        for line in code.split('\n'):
+            if declaration in line:
+                break
+            line_id += 1
+        if '@available' in code.split('\n')[line_id - 1]:
+            continue
+
         if declaration.count('(') > declaration.count(')'):
             declaration_start_index = code.find(declaration)
             declaration_end_index = declaration_start_index + len(declaration)
@@ -309,7 +318,7 @@ def compose_wrapper_function(declaration, new_name, params, return_value):
 
 def rename_function(function: str, old_name: str, new_name: str):
     pattern = rf'func\s+{old_name}'
-    return re.sub(pattern, f'func {new_name}', function).replace('override ', '', 1)
+    return re.sub(pattern, f'func {new_name}', function).replace('override ', '', 1).replace('override ', '')
 
 
 def restructure_functions(code: str):
