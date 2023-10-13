@@ -323,9 +323,9 @@ def compose_performing_function(function: str, old_name: str, new_name: str, dec
     pattern = rf'func\s+{old_name}'
     new_function = re.sub(pattern, f'func {new_name}', function).replace('override ', '')
 
-    if '->' in declaration and 'return' not in body:
+    if '->' in declaration and 'return' not in body and 'Group' not in body:
         new_function = f"""
-        {declaration}
+        {declaration.replace(old_name, new_name).replace('override ', '')}
             Group {{
                 {body}
             }}
