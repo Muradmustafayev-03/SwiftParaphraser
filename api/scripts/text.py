@@ -267,6 +267,9 @@ def parse_functions(code: str):
                 declaration_end_index += 1
                 declaration = code[declaration_start_index:declaration_end_index]
 
+        if '<' in declaration:
+            continue  # skip generic functions
+
         open_brackets = 1
         func_start_index = code.find(declaration)
         body_start_index = func_start_index + len(declaration)
