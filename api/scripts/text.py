@@ -241,7 +241,8 @@ def parse_functions(code: str):
 
     # parsing functions
     pattern = re.compile(
-        r'(?:(?<!class)(\s*?)(mutating|public|private|protected|internal|fileprivate|open|override|@objc)\s+)?(static\s+)?func\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(\s*(.*?)\s*\)\s*(?:\s*->\s*(?:.*?)?)?\s*{')
+        r'(?:(?<!class)(\s*?)(override|@objc)\s+)?(mutating|public|private|protected|internal|fileprivate|open)\s+)?(static\s+)?'
+        r'func\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(\s*(.*?)\s*\)\s*(?:\s*->\s*(?:.*?)?)?\s*{')
     declarations = [match.group(0) for match in pattern.finditer(code)]
 
     def parse_params(unparsed: str):
@@ -316,7 +317,7 @@ def compose_wrapper_function(declaration, new_name, params, return_value):
     return f'{declaration}\n{compose_call(new_name, params, return_value)}\n}}'
 
 
-def rename_function(function: str, old_name: str, new_name: str):
+def compose_performing_function(function: str, old_name: str, new_name: str):
     pattern = rf'func\s+{old_name}'
     new_function = re.sub(pattern, f'func {new_name}', function).replace('override ', '', 1).replace('override ', '')
     return new_function
@@ -328,7 +329,7 @@ def restructure_functions(code: str):
     for function, name, params, declaration, body, returns_value in functions:
         new_name = generate_random_name('func')
         wrapper_function = compose_wrapper_function(declaration, new_name, params, returns_value)
-        performing_function = rename_function(function, name, new_name)
+        performing_function = compose_performing_function(function, name, new_name)
         new_code = new_code.replace(function, performing_function + '\n\n\t' + wrapper_function)
 
     return new_code
