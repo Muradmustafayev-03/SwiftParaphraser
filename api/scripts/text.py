@@ -318,7 +318,8 @@ def compose_wrapper_function(declaration, new_name, params, return_value):
 
 def rename_function(function: str, old_name: str, new_name: str):
     pattern = rf'func\s+{old_name}'
-    return re.sub(pattern, f'func {new_name}', function).replace('override ', '', 1).replace('override ', '')
+    new_function = re.sub(pattern, f'func {new_name}', function).replace('override ', '', 1).replace('override ', '')
+    return new_function
 
 
 def restructure_functions(code: str):
