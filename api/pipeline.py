@@ -76,6 +76,7 @@ def pipeline(unique_id: str, project: dict,
         assert receive_notification(unique_id) is not None, 'Connection interrupted.'
         notify(unique_id, 'Restructuring functions...')
         project = apply_to_project(project, restructure_functions)
+        notify(unique_id, 'Finished restructuring functions.')
 
     if variable_renaming:
         assert receive_notification(unique_id) is not None, 'Connection interrupted.'
