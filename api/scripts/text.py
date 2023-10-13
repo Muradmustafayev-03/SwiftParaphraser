@@ -268,8 +268,8 @@ def parse_functions(code: str):
         if '@available' in code.split('\n')[line_id - 1]:
             continue
 
-        if 'override ' + declaration in code:
-            declaration = 'override ' + declaration
+        if 'override' + declaration in code:
+            declaration = 'override' + declaration
 
         if declaration.count('(') > declaration.count(')'):
             declaration_start_index = code.find(declaration)
