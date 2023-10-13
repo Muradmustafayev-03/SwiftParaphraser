@@ -321,11 +321,11 @@ def compose_wrapper_function(declaration, new_name, params, return_value):
 
 def compose_performing_function(function: str, old_name: str, new_name: str, declaration: str, body: str):
     pattern = rf'func\s+{old_name}'
-    new_function = re.sub(pattern, f'func {new_name}', function).replace('override ', '')
+    new_function = re.sub(pattern, f'func {new_name}', function, count=1).replace('override ', '')
 
-    if '->' in declaration and 'return' not in body and 'Group' not in body:
+    if '->' in declaration and 'return' not in body and 'Group' not in body and 'if' in body and 'else' in body:
         new_function = f"""
-        {declaration.replace(old_name, new_name).replace('override ', '')}
+        {declaration.replace(old_name, new_name, 1).replace('override ', '')}
             Group {{
                 {body}
             }}
