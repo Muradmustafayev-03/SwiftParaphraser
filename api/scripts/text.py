@@ -319,9 +319,19 @@ def compose_wrapper_function(declaration, new_name, params, return_value):
     return f'{declaration}\n{compose_call(new_name, params, return_value)}\n}}'
 
 
-def compose_performing_function(function: str, old_name: str, new_name: str):
+def compose_performing_function(function: str, old_name: str, new_name: str, declaration: str, body: str):
     pattern = rf'func\s+{old_name}'
     new_function = re.sub(pattern, f'func {new_name}', function).replace('override ', '')
+
+    if '->' in declaration and 'return' not in body:
+        new_function = f"""
+        {declaration}
+            Group {{
+                {body}
+            }}
+        }}
+        """
+
     return new_function
 
 
@@ -331,7 +341,7 @@ def restructure_functions(code: str):
     for function, name, params, declaration, body, returns_value in functions:
         new_name = generate_random_name('func')
         wrapper_function = compose_wrapper_function(declaration, new_name, params, returns_value)
-        performing_function = compose_performing_function(function, name, new_name)
+        performing_function = compose_performing_function(function, name, new_name, declaration, body)
         new_code = new_code.replace(function, performing_function + '\n\n\t' + wrapper_function)
 
     return new_code
