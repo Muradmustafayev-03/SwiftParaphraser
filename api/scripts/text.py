@@ -241,7 +241,7 @@ def parse_functions(code: str):
 
     # parsing functions
     pattern = re.compile(
-        r'(?:(?<!class)(\s*?)(override)(\s*?)(mutating|public|private|protected|internal|fileprivate|open|@objc)\s+)?(static\s+)?func\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(\s*(.*?)\s*\)\s*(?:\s*->\s*(?:.*?)?)?\s*{')
+        r'(?:(?<!class)(\s*?)(mutating|public|private|protected|internal|fileprivate|open|override|@objc)\s+)?(static\s+)?func\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(\s*(.*?)\s*\)\s*(?:\s*->\s*(?:.*?)?)?\s*{')
     declarations = [match.group(0) for match in pattern.finditer(code)]
 
     def parse_params(unparsed: str):
@@ -267,6 +267,9 @@ def parse_functions(code: str):
             line_id += 1
         if '@available' in code.split('\n')[line_id - 1]:
             continue
+
+        if 'override ' + declaration in code:
+            declaration = 'override ' + declaration
 
         if declaration.count('(') > declaration.count(')'):
             declaration_start_index = code.find(declaration)
@@ -318,7 +321,7 @@ def compose_wrapper_function(declaration, new_name, params, return_value):
 
 def compose_performing_function(function: str, old_name: str, new_name: str):
     pattern = rf'func\s+{old_name}'
-    new_function = re.sub(pattern, f'func {new_name}', function).replace('override ', '', 1).replace('override ', '')
+    new_function = re.sub(pattern, f'func {new_name}', function).replace('override ', '')
     return new_function
 
 
