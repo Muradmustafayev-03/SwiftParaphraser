@@ -301,6 +301,9 @@ def parse_functions(code: str):
         body = code[body_start_index:body_end_index - 1]
         returns_value = '->' in declaration or r'\breturn\b' in body
 
+        if '->' in declaration and r'\breturn\b' not in body:
+            returns_value = 'group'
+
         functions.append([function, name, params, declaration, body, returns_value])
 
     return functions
@@ -316,9 +319,19 @@ def compose_wrapper_function(declaration, new_name, params, return_value):
     return f'{declaration}\n{compose_call(new_name, params, return_value)}\n}}'
 
 
-def rename_function(function: str, old_name: str, new_name: str):
+def compose_performing_function(function: str, old_name: str, new_name: str,
+                                declaration: str, body: str, returns_value: bool or str):
     pattern = rf'func\s+{old_name}'
-    return re.sub(pattern, f'func {new_name}', function).replace('override ', '', 1).replace('override ', '')
+    function = re.sub(pattern, f'func {new_name}', function).replace('override ', '', 1).replace('override ', '')
+    if returns_value == 'group' and 'if' in body and 'else' in body:
+        function = f"""
+        {declaration}
+        Group {{
+            {body}
+        }}
+        }}
+        """
+    return function
 
 
 def restructure_functions(code: str):
@@ -327,7 +340,7 @@ def restructure_functions(code: str):
     for function, name, params, declaration, body, returns_value in functions:
         new_name = generate_random_name('func')
         wrapper_function = compose_wrapper_function(declaration, new_name, params, returns_value)
-        performing_function = rename_function(function, name, new_name)
+        performing_function = compose_performing_function(function, name, new_name)
         new_code = new_code.replace(function, performing_function + '\n\n\t' + wrapper_function)
 
     return new_code
