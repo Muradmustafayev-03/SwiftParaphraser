@@ -241,8 +241,7 @@ def parse_functions(code: str):
 
     # parsing functions
     pattern = re.compile(
-        r'(?:(?<!class)(\s*?)(override|@objc)\s+)?(mutating|public|private|protected|internal|fileprivate|open)\s+)?(static\s+)?'
-        r'func\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(\s*(.*?)\s*\)\s*(?:\s*->\s*(?:.*?)?)?\s*{')
+        r'(?:(?<!class)(\s*?)(override)(\s*?)(mutating|public|private|protected|internal|fileprivate|open|@objc)\s+)?(static\s+)?func\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(\s*(.*?)\s*\)\s*(?:\s*->\s*(?:.*?)?)?\s*{')
     declarations = [match.group(0) for match in pattern.finditer(code)]
 
     def parse_params(unparsed: str):
