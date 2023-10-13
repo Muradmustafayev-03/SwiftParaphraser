@@ -309,7 +309,7 @@ def parse_functions(code: str):
     return functions
 
 
-def compose_call(name: str, params: list, return_value: bool = False):
+def compose_call(name: str, params: list, return_value: bool or str = False):
     if return_value:
         return f'return {name}({", ".join([f"{param[0]}: {param[1]}" for param in params])})'
     return f'{name}({", ".join([f"{param[0]}: {param[1]}" for param in params])})'
@@ -340,7 +340,7 @@ def restructure_functions(code: str):
     for function, name, params, declaration, body, returns_value in functions:
         new_name = generate_random_name('func')
         wrapper_function = compose_wrapper_function(declaration, new_name, params, returns_value)
-        performing_function = compose_performing_function(function, name, new_name)
+        performing_function = compose_performing_function(function, name, new_name, declaration, body, returns_value)
         new_code = new_code.replace(function, performing_function + '\n\n\t' + wrapper_function)
 
     return new_code
