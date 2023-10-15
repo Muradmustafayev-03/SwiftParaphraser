@@ -302,7 +302,7 @@ def parse_functions(code: str):
         unparsed_params = declaration.split('(')[1].split(')')[0].strip()
         params = parse_params(unparsed_params)
         body = code[body_start_index:body_end_index - 1]
-        returns_value = ('->' in declaration and 'Void' not in declaration) or r'\breturn\b' in body
+        returns_value = ('->' in declaration and 'Void' not in declaration) or 'return ' in body
 
         functions.append([function, name, params, declaration, body, returns_value])
 
@@ -319,11 +319,11 @@ def compose_wrapper_function(declaration, new_name, params, return_value):
     return f'{declaration}\n{compose_call(new_name, params, return_value)}\n}}'
 
 
-def compose_performing_function(function: str, old_name: str, new_name: str, declaration: str, body: str):
+def compose_performing_function(function: str, old_name: str, new_name: str, declaration: str, body: str, returns_value: bool):
     pattern = rf'func\s+{old_name}'
     new_function = re.sub(pattern, f'func {new_name}', function, count=1).replace('override ', '')
 
-    if '->' in declaration and 'return' not in body and 'Group' not in body and 'if' in body and 'else' in body:
+    if returns_value and 'return' not in body and 'Group' not in body and 'if' in body and 'else' in body and 'some' in declaration:
         new_function = f"""
         {declaration.replace(old_name, new_name, 1).replace('override ', '')}
             Group {{
@@ -341,7 +341,7 @@ def restructure_functions(code: str):
     for function, name, params, declaration, body, returns_value in functions:
         new_name = generate_random_name('func')
         wrapper_function = compose_wrapper_function(declaration, new_name, params, returns_value)
-        performing_function = compose_performing_function(function, name, new_name, declaration, body)
+        performing_function = compose_performing_function(function, name, new_name, declaration, body, returns_value)
         new_code = new_code.replace(function, performing_function + '\n\n\t' + wrapper_function)
 
     return new_code
