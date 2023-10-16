@@ -338,7 +338,9 @@ def restructure_functions(code: str):
         new_name = generate_random_name('func')
         wrapper_function = compose_wrapper_function(declaration, new_name, params, returns_value)
         performing_function = compose_performing_function(name, new_name, declaration, body, returns_value)
-        useless_function = compose_performing_function(name, generate_random_name('func'), declaration, body, returns_value)
+        useless_name = generate_random_name('func')
+        useless_body = f'if (1 > 2) {{\n\t\t{body}\n\t}} else {{\n\t\t{body}\n\t}}'
+        useless_function = compose_performing_function(name, useless_name, declaration, useless_body, returns_value)
         if not performing_function.strip():
             continue
         if not wrapper_function.strip():
