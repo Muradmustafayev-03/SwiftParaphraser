@@ -338,8 +338,11 @@ def restructure_functions(code: str):
         new_name = generate_random_name('func')
         wrapper_function = compose_wrapper_function(declaration, new_name, params, returns_value)
         performing_function = compose_performing_function(name, new_name, declaration, body, returns_value)
-        if not performing_function or not wrapper_function:
+        useless_function = compose_performing_function(name, generate_random_name('func'), declaration, body, returns_value)
+        if not performing_function.strip():
             continue
-        new_code = new_code.replace(function, performing_function + '\n\n\t' + wrapper_function)
+        if not wrapper_function.strip():
+            continue
+        new_code = new_code.replace(function, performing_function + '\n\n\t' + wrapper_function + '\n\n\t' + useless_function)
 
     return new_code
