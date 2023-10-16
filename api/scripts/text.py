@@ -314,6 +314,9 @@ def parse_functions(code: str):
 
 
 def compose_call(name: str, params: list, return_value: bool = False):
+    for i in range(len(params)):
+        if params[i][0] == 'into':
+            params[i][1] = '&' + params[i][1]
     if return_value:
         return f'return {name}({", ".join([f"{param[0]}: {param[1]}" for param in params])})'
     return f'{name}({", ".join([f"{param[0]}: {param[1]}" for param in params])})'
@@ -340,13 +343,10 @@ def restructure_functions(code: str):
         new_name = generate_random_name('func')
         wrapper_function = compose_wrapper_function(declaration, new_name, params, returns_value)
         performing_function = compose_performing_function(name, new_name, declaration, body, returns_value)
-        useless_name = generate_random_name('func')
-        useless_body = f'if (1 > 2) {{\n\t\t{body}\n\t}} else {{\n\t\t{body}\n\t}}'
-        useless_function = compose_performing_function(name, useless_name, declaration, useless_body, returns_value)
         if not performing_function.strip():
             continue
         if not wrapper_function.strip():
             continue
-        new_code = new_code.replace(function, performing_function + '\n\n\t' + wrapper_function + '\n\n\t' + useless_function)
+        new_code = new_code.replace(function, performing_function + '\n\n\t' + wrapper_function)
 
     return new_code
