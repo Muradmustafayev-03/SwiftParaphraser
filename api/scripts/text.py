@@ -316,7 +316,7 @@ def parse_functions(code: str):
 def compose_call(name: str, params: list, return_value: bool = False):
     for i in range(len(params)):
         if params[i][0] == 'into':
-            params[i][1] = '&' + params[i][1]
+            params[i] = (params[i][0], '&' + params[i][1])
     if return_value:
         return f'return {name}({", ".join([f"{param[0]}: {param[1]}" for param in params])})'
     return f'{name}({", ".join([f"{param[0]}: {param[1]}" for param in params])})'
