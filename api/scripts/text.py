@@ -270,6 +270,8 @@ def parse_functions(code: str):
 
         if 'override' + declaration in code:
             declaration = 'override' + declaration
+        if '@objc' + declaration in code:
+            declaration = '@objc' + declaration
 
         if declaration.count('(') > declaration.count(')'):
             declaration_start_index = code.find(declaration)
@@ -320,8 +322,7 @@ def compose_wrapper_function(declaration, new_name, params, return_value):
 
 
 def compose_performing_function(function: str, old_name: str, new_name: str, declaration: str, body: str, returns_value: bool):
-    pattern = rf'func\s+{old_name}'
-    new_function = re.sub(pattern, f'func {new_name}', function, count=1).replace('override ', '')
+    new_function = function.replace(old_name, new_name, 1).replace('override ', '')
 
     if returns_value and 'return' not in body and 'Group' not in body and 'if' in body and 'else' in body and 'some' in declaration:
         new_function = f"""
@@ -331,7 +332,7 @@ def compose_performing_function(function: str, old_name: str, new_name: str, dec
             }}
         }}
         """
-
+    # print(new_function.split('\n')[0])
     return new_function
 
 
@@ -342,6 +343,8 @@ def restructure_functions(code: str):
         new_name = generate_random_name('func')
         wrapper_function = compose_wrapper_function(declaration, new_name, params, returns_value)
         performing_function = compose_performing_function(function, name, new_name, declaration, body, returns_value)
+        if not performing_function or not wrapper_function:
+            continue
         new_code = new_code.replace(function, performing_function + '\n\n\t' + wrapper_function)
 
     return new_code
