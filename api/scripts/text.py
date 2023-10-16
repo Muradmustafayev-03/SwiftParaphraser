@@ -281,7 +281,7 @@ def parse_functions(code: str):
 
             while not (code[declaration_end_index] == '{' and declaration.count('(') == declaration.count(')')):
                 declaration_end_index += 1
-                declaration = code[declaration_start_index:declaration_end_index]
+                declaration = code[declaration_start_index:declaration_end_index+1]
 
         if '<' in declaration:
             continue  # skip generic functions
