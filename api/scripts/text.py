@@ -322,7 +322,7 @@ def compose_wrapper_function(declaration, new_name, params, return_value):
 
 
 def compose_performing_function(old_name: str, new_name: str, declaration: str, body: str, returns_value: bool):
-    declaration = declaration.replace(old_name, new_name)
+    declaration = declaration.replace(old_name, new_name, 1)
     declaration = declaration.replace('override ', '')
     if returns_value and 'return' not in body and 'Group' not in body and 'if' in body and 'else' in body and 'some' in declaration:
         body = f'Group {{\n\t\t{body}\n\t}}'
@@ -333,7 +333,7 @@ def restructure_functions(code: str):
     new_code = code
     functions = parse_functions(code)
     for function, name, params, declaration, body, returns_value in functions:
-        if not name:
+        if not name.strip():
             continue
         new_name = generate_random_name('func')
         wrapper_function = compose_wrapper_function(declaration, new_name, params, returns_value)
