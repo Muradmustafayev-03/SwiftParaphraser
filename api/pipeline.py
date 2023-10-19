@@ -63,7 +63,7 @@ def pipeline(unique_id: str, project: dict,
         type_names = parse_types_in_project(project, include_types=types_to_rename)
         if type_names:
             rename_map = generate_rename_map(type_names)
-            project = rename_types(project, rename_map, rename_files=file_renaming)
+            project = rename_types(project, rename_map)
         notify(unique_id, 'Finished renaming types.')
 
     if file_renaming:
