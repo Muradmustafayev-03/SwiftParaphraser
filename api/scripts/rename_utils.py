@@ -216,18 +216,16 @@ def generate_rename_map(names: list):
     return {name: new_type_name(name) for name in names}
 
 
-def rename_type(project: dict, old_name: str, new_name: str, rename_files: bool = False):
+def rename_type(project: dict, old_name: str, new_name: str):
     """
     Renames the type in the project. If rename_files is True, the files will be renamed as well.
 
     :param project: project to rename the type in
     :param old_name: old type name
     :param new_name: new type name
-    :param rename_files: bool, whether to rename files or not
     :return: dict, renamed project
     """
     new_project = {}
-    renamed_files = []
 
     if project_contains_string(project, f'@{old_name}'):
         return project
@@ -238,32 +236,19 @@ def rename_type(project: dict, old_name: str, new_name: str, rename_files: bool 
     for file_path, file_content in project.items():
         if file_path.endswith('.swift'):
             new_path = file_path
-
-            if file_path.split('/')[-1] == old_name + '.swift' and rename_files:
-                new_path = file_path.replace(old_name + '.swift', new_name + '.swift')
-                renamed_files.append((old_name, new_name))
-
             # pattern if old name is not surrounded by alphanumeric characters
             pattern = rf'(?<![a-zA-Z0-9_]){old_name}(?![a-zA-Z0-9_])'
             new_project[new_path] = re.sub(pattern, new_name, file_content)
             continue
-
         elif file_path.endswith('.xib') or file_path.endswith('.storyboard'):
             pattern = r'customClass="' + re.escape(old_name) + r'"'
             new_content = re.sub(pattern, r'customClass="' + new_name + r'"', file_content)
-
-            for old_filename, new_filename in renamed_files:
-                pattern = r'customModule="' + re.escape(old_filename) + r'"'
-                new_content = re.sub(pattern, r'customModule="' + new_filename + r'"', new_content)
-
             new_project[file_path] = new_content
             continue
-
         elif file_path.endswith('.xml') or file_path.endswith('.pbxproj') or file_path.endswith('.plist'):
             pattern = r'>' + re.escape(old_name) + r'<'
             new_project[file_path] = re.sub(pattern, r'>' + new_name + r'<', file_content)
             continue
-
         else:
             new_project[file_path] = file_content
             continue
@@ -271,17 +256,16 @@ def rename_type(project: dict, old_name: str, new_name: str, rename_files: bool 
     return new_project
 
 
-def rename_types(project: dict, rename_map: dict, rename_files=False):
+def rename_types(project: dict, rename_map: dict):
     """
     Renames types in the project according to the renaming map.
 
     :param project: project to rename types in
     :param rename_map: renaming map in the format {old_name: new_name}
-    :param rename_files: bool, whether to rename files or not
     :return: dict, renamed project
     """
     for old_name, new_name in rename_map.items():
-        project = rename_type(project, old_name, new_name, rename_files)
+        project = rename_type(project, old_name, new_name)
     return project
 
 
