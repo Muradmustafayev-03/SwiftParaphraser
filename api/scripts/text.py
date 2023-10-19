@@ -272,6 +272,8 @@ def parse_functions(code: str):
             declaration = 'override' + declaration
         if '@objc' + declaration in code:
             declaration = '@objc' + declaration
+        if '@objc ' + declaration in code:
+            declaration = '@objc ' + declaration
         if 'class' + declaration in code:
             declaration = 'class' + declaration
 
