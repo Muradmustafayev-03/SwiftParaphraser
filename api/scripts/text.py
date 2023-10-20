@@ -307,6 +307,10 @@ def parse_functions(code: str):
         body = code[body_start_index:body_end_index - 1]
         returns_value = ('->' in declaration and 'Void' not in declaration) or 'return ' in body
 
+        # skip if there are nested functions
+        if 'func ' in body:
+            continue
+
         functions.append([function, name, params, declaration, body, returns_value])
 
     return functions
