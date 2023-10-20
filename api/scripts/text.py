@@ -291,16 +291,18 @@ def parse_functions(code: str):
         body_end_index = body_start_index
 
         while open_brackets > 0 and body_end_index < len(code):
-            body_end_index += 1
             if code[body_end_index] == '{':
                 open_brackets += 1
             elif code[body_end_index] == '}':
                 open_brackets -= 1
+            body_end_index += 1
 
         if open_brackets != 0:
             continue
 
         function = code[func_start_index:body_end_index]
+        if function.count('{') > function.count('}'):
+            continue
         name = declaration.split('func')[1].split('(')[0].strip()
         unparsed_params = declaration.split('(')[1].split(')')[0].strip()
         params = parse_params(unparsed_params)
