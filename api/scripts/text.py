@@ -301,7 +301,7 @@ def parse_functions(code: str):
             continue
 
         function = code[func_start_index:body_end_index]
-        if function.count('{') > function.count('}'):
+        if function.count('{') != function.count('}'):
             continue
         name = declaration.split('func')[1].split('(')[0].strip()
         unparsed_params = declaration.split('(')[1].split(')')[0].strip()
