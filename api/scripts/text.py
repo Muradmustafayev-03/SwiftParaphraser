@@ -342,6 +342,8 @@ def restructure_functions(code: str):
     for function, name, params, declaration, body, returns_value in functions:
         if not name.strip():
             continue
+        if 'throws' in declaration:
+            continue
         new_name = generate_random_name('func')
         wrapper_function = compose_wrapper_function(declaration, new_name, params, returns_value)
         performing_function = compose_performing_function(name, new_name, declaration, body, returns_value)
