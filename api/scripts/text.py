@@ -273,11 +273,14 @@ def parse_functions(code: str):
         while code[declaration_start_index - 1] not in ['\n', '{', '}', ';']:
             declaration_start_index -= 1
 
-        while not (code[declaration_end_index + 1] == '{' and
+        while not (code[declaration_end_index] == '{' and
                    declaration.count('(') == declaration.count(')') and
                    declaration.count('{') == declaration.count('}')):
             declaration_end_index += 1
             declaration = code[declaration_start_index:declaration_end_index]
+
+        if declaration.find('}') < declaration.find('{'):
+            continue  # skip functions without body
 
         if '<' in declaration:
             continue  # skip generic functions
