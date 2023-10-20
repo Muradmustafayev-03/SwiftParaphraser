@@ -241,7 +241,7 @@ def parse_functions(code: str):
 
     # parsing functions
     pattern = re.compile(
-        r'func\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(\s*(.*?)\s*\)\s*(?:\s*->\s*(?:.*?)?)?\s*{')
+        r'func\s+([a-zA-Z_][a-zA-Z0-9_]*)')
     declarations = [match.group(0) for match in pattern.finditer(code)]
 
     def parse_params(unparsed: str):
@@ -325,6 +325,7 @@ def compose_wrapper_function(declaration, new_name, params, return_value):
 def compose_performing_function(old_name: str, new_name: str, declaration: str, body: str, returns_value: bool):
     declaration = declaration.replace(old_name, new_name, 1)
     declaration = declaration.replace('override', '')
+    declaration = declaration.strip()
     if returns_value and 'return' not in body and 'Group' not in body and 'if' in body and 'else' in body and 'some' in declaration:
         body = f'Group {{\n\t\t{body}\n\t}}'
     return f'{declaration}{{\n{body}\n}}'
