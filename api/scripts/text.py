@@ -284,7 +284,7 @@ def parse_functions(code: str):
 
         open_brackets = 1
         func_start_index = code.find(declaration)
-        body_start_index = func_start_index + len(declaration)
+        body_start_index = func_start_index + len(declaration) + 2
         body_end_index = body_start_index
 
         while open_brackets > 0 and body_end_index < len(code):
