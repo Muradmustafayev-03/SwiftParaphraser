@@ -277,7 +277,7 @@ def parse_functions(code: str):
                    declaration.count('(') == declaration.count(')') and
                    declaration.count('{') == declaration.count('}')):
             declaration_end_index += 1
-            declaration = code[declaration_start_index:declaration_end_index + 1]
+            declaration = code[declaration_start_index:declaration_end_index]
 
         if '<' in declaration:
             continue  # skip generic functions
