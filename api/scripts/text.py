@@ -309,13 +309,16 @@ def parse_functions(code: str):
     return functions
 
 
-def compose_call(name: str, params: list, return_value: bool = False):
+def compose_call(name: str, params: list, return_value: bool = False, is_async: bool = False):
     for i in range(len(params)):
         if params[i][0] == 'into':
             params[i] = (params[i][0], '&' + params[i][1])
+    call = f'{name}({", ".join([f"{param[0]}: {param[1]}" for param in params])})'
+    if is_async:
+        call = f'await {call}'
     if return_value:
-        return f'return {name}({", ".join([f"{param[0]}: {param[1]}" for param in params])})'
-    return f'{name}({", ".join([f"{param[0]}: {param[1]}" for param in params])})'
+        return f'return {call}'
+    return call
 
 
 def compose_wrapper_function(declaration, new_name, params, return_value):
