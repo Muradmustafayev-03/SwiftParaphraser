@@ -322,7 +322,9 @@ def compose_call(name: str, params: list, return_value: bool = False, is_async: 
 
 
 def compose_wrapper_function(declaration, new_name, params, return_value):
-    return f'{declaration}{{\n{compose_call(new_name, params, return_value, "async" in declaration)}\n}}'
+    pattern = re.compile(r'\basync\b')
+    is_async = pattern.search(declaration) is not None
+    return f'{declaration}{{\n{compose_call(new_name, params, return_value, is_async)}\n}}'
 
 
 def compose_performing_function(old_name: str, new_name: str, declaration: str, body: str, returns_value: bool):
