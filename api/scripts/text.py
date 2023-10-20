@@ -241,7 +241,7 @@ def parse_functions(code: str):
 
     # parsing functions
     pattern = re.compile(
-        r'(?:(mutating|public|private|protected|internal|fileprivate|open|override|@objc|class)\s+)?(static\s+)?func\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(\s*(.*?)\s*\)\s*(?:\s*->\s*(?:.*?)?)?\s*{')
+        r'func\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(\s*(.*?)\s*\)\s*(?:\s*->\s*(?:.*?)?)?\s*{')
     declarations = [match.group(0) for match in pattern.finditer(code)]
 
     def parse_params(unparsed: str):
@@ -268,22 +268,16 @@ def parse_functions(code: str):
         if '@available' in code.split('\n')[line_id - 1]:
             continue
 
-        if 'override' + declaration in code:
-            declaration = 'override' + declaration
-        if '@objc' + declaration in code:
-            declaration = '@objc' + declaration
-        if '@objc ' + declaration in code:
-            declaration = '@objc ' + declaration
-        if 'class' + declaration in code:
-            declaration = 'class' + declaration
+        declaration_start_index = declaration_end_index = code.find(declaration)
 
-        if declaration.count('(') > declaration.count(')'):
-            declaration_start_index = code.find(declaration)
-            declaration_end_index = declaration_start_index + len(declaration)
+        while code[declaration_start_index - 1] not in ['\n', '{', '}', ';']:
+            declaration_start_index -= 1
 
-            while not (code[declaration_end_index] == '{' and declaration.count('(') == declaration.count(')')):
-                declaration_end_index += 1
-                declaration = code[declaration_start_index:declaration_end_index+1]
+        while not (code[declaration_end_index + 1] == '{' and
+                   declaration.count('(') == declaration.count(')') and
+                   declaration.count('{') == declaration.count('}')):
+            declaration_end_index += 1
+            declaration = code[declaration_start_index:declaration_end_index + 1]
 
         if '<' in declaration:
             continue  # skip generic functions
@@ -325,15 +319,15 @@ def compose_call(name: str, params: list, return_value: bool = False):
 
 
 def compose_wrapper_function(declaration, new_name, params, return_value):
-    return f'{declaration}\n{compose_call(new_name, params, return_value)}\n}}'
+    return f'{declaration}{{\n{compose_call(new_name, params, return_value)}\n}}'
 
 
 def compose_performing_function(old_name: str, new_name: str, declaration: str, body: str, returns_value: bool):
     declaration = declaration.replace(old_name, new_name, 1)
-    declaration = declaration.replace('override ', '')
+    declaration = declaration.replace('override', '')
     if returns_value and 'return' not in body and 'Group' not in body and 'if' in body and 'else' in body and 'some' in declaration:
         body = f'Group {{\n\t\t{body}\n\t}}'
-    return f'{declaration}\n{body}\n}}'
+    return f'{declaration}{{\n{body}\n}}'
 
 
 def restructure_functions(code: str):
