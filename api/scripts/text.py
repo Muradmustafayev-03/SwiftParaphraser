@@ -285,6 +285,9 @@ def parse_functions(code: str):
         if '<' in declaration:
             continue  # skip generic functions
 
+        if code.split('\n')[line_id - 1].strip() == '@objc' and '@objc' not in declaration:
+            declaration = code.split('\n')[line_id - 1] + declaration
+
         open_brackets = 1
         func_start_index = code.find(declaration)
         body_start_index = func_start_index + len(declaration) + 2
