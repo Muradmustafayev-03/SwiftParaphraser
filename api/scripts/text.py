@@ -247,6 +247,14 @@ def parse_functions(code: str):
     def parse_params(unparsed: str):
         parsed = []
 
+        # replace patterns in [], (), and {}
+        inner_pattern = re.compile(r'\[[\S\s]*\]')
+        unparsed = re.sub(inner_pattern, '', unparsed)
+        inner_pattern = re.compile(r'\([\S\s]*\)')
+        unparsed = re.sub(inner_pattern, '', unparsed)
+        inner_pattern = re.compile(r'\{[\S\s]*\}')
+        unparsed = re.sub(inner_pattern, '', unparsed)
+
         for param in unparsed.split(','):
             param = param.split(':')[0].strip()
             if not param:
@@ -307,8 +315,12 @@ def parse_functions(code: str):
         if function.count('{') != function.count('}'):
             continue
         name = declaration.split('func')[1].split('(')[0].strip()
-        unparsed_params = declaration.split('(')[1].split(')')[0].strip()
+
+        param_start = declaration.find('(') + 1  # first occurrence of '('
+        param_end = declaration.rfind(')')  # last occurrence of ')'
+        unparsed_params = declaration[param_start:param_end].strip()
         params = parse_params(unparsed_params)
+
         body = code[body_start_index:body_end_index - 1]
         returns_value = ('->' in declaration and 'Void' not in declaration) or 'return ' in body
 
