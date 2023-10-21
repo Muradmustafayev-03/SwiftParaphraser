@@ -248,11 +248,11 @@ def parse_functions(code: str):
         parsed = []
 
         # replace patterns in [], (), and {}
-        inner_pattern = re.compile(r'\[[\S\s]*\]')
+        inner_pattern = re.compile(r'\[[\S\s]*?\]')
         unparsed = re.sub(inner_pattern, '', unparsed)
-        inner_pattern = re.compile(r'\([\S\s]*\)')
+        inner_pattern = re.compile(r'\([\S\s]*?\)')
         unparsed = re.sub(inner_pattern, '', unparsed)
-        inner_pattern = re.compile(r'\{[\S\s]*\}')
+        inner_pattern = re.compile(r'\{[\S\s]*?\}')
         unparsed = re.sub(inner_pattern, '', unparsed)
 
         for param in unparsed.split(','):
