@@ -317,8 +317,17 @@ def parse_functions(code: str):
         name = declaration.split('func')[1].split('(')[0].strip()
 
         param_start = declaration.find('(') + 1  # first occurrence of '('
-        param_end = declaration.rfind(')')  # last occurrence of ')'
-        unparsed_params = declaration[param_start:param_end].strip()
+        open_brackets = 1
+        param_end = param_start
+        while open_brackets > 0 and param_end < len(declaration):
+            if declaration[param_end] == '(':
+                open_brackets += 1
+            elif declaration[param_end] == ')':
+                open_brackets -= 1
+            param_end += 1
+        if open_brackets != 0:
+            continue
+        unparsed_params = declaration[param_start:param_end-1].strip()
         params = parse_params(unparsed_params)
 
         body = code[body_start_index:body_end_index - 1]
