@@ -282,7 +282,7 @@ def rename_files(project: dict) -> dict:
     filenames = [filename.replace('.swift', '') for filename in filenames]
     rename_map = generate_rename_map(filenames)
 
-    for old, new in rename_map:
+    for old, new in rename_map.items():
         if project_name in old or 'View' in old:
             rename_map[old] = old
 
