@@ -41,7 +41,7 @@ def generate_random_name(prefix='', suffix=''):
     :return: generated name
     """
     name = ''
-    for _ in range(random.randint(5, 15)):
+    for _ in range(random.randint(10, 30)):
         letter = random.choice(ALPHABET)
         if random.random() < 0.2:
             letter = letter.upper()
