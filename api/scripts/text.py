@@ -1,3 +1,5 @@
+import random
+
 import regex as re
 from .rename_utils import generate_random_name
 
@@ -384,6 +386,21 @@ def restructure_functions(code: str):
             continue
         if not wrapper_function.strip():
             continue
-        new_code = new_code.replace(function, performing_function + '\n\n\t' + wrapper_function)
+
+        # new_code = new_code.replace(function, performing_function + '\n\n\t' + wrapper_function)
+
+        replacement = performing_function + '\n\n\t' + wrapper_function
+
+        for i in range(100):
+            dummy_name = generate_random_name('func') + str(i)
+            num1 = random.randint(-1000, 1000)
+            num2 = random.randint(-1000, 1000)
+            operator = random.choice(['+', '-', '*', '/', '%'])
+
+            dummy_function = f'func {dummy_name}() {{\n\t\treturn {num1} {operator} {num2}\n\t}}'
+
+            replacement += '\n\n\t' + dummy_function
+
+        new_code = new_code.replace(function, replacement)
 
     return new_code
