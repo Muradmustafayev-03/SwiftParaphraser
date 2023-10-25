@@ -287,9 +287,12 @@ def rename_files(project: dict) -> dict:
             rename_map[old] = old
 
     for path, content in project.items():
+        if 'View' in path:
+            new_project[path] = content
+            continue
         if path.endswith('swift'):
             old_name = path.split('/')[-1].replace('.swift', '')
-            if project_name in old_name or 'View' in old_name:
+            if project_name in old_name:
                 new_project[path] = content
                 continue
             new_name = rename_map[old_name]
@@ -297,6 +300,8 @@ def rename_files(project: dict) -> dict:
         else:
             new_content = content
             for old_name, new_name in rename_map.items():
+                if project_name in old_name:
+                    continue
                 new_content = new_content.replace(old_name, new_name)
             new_project[path] = new_content
 
