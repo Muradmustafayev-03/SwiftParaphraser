@@ -1,4 +1,4 @@
-CHANGEABLE_FILE_TYPES = ('.swift',  '.xcodeproj')
+CHANGEABLE_FILE_TYPES = ('.swift',  '.plist', '.xcbkptlist', 'xcscheme', 'pbxproj')
 
 
 ABBREVIATIONS = {
