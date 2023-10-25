@@ -302,7 +302,9 @@ def rename_files(project: dict) -> dict:
             for old_name, new_name in rename_map.items():
                 if project_name in old_name:
                     continue
-                new_content = new_content.replace(old_name, new_name)
+                # new_content = new_content.replace(old_name, new_name)
+                pattern = rf'\b{old_name}\b'
+                new_content = re.sub(pattern, new_name, new_content)
             new_project[path] = new_content
 
     return new_project
