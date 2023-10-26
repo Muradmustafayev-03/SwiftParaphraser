@@ -90,6 +90,12 @@ def pipeline(unique_id: str, project: dict,
         project = apply_to_project(project, add_comments)
         notify(unique_id, 'Finished adding comments.')
 
+    if True:
+        assert receive_notification(unique_id) is not None, 'Connection interrupted.'
+        notify(unique_id, 'Adding dummy files...')
+        project = add_dummy_files(project)
+        notify(unique_id, 'Finished adding dummy files.')
+
     notify(unique_id, 'Finished paraphrasing the project.')
 
     return project
