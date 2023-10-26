@@ -43,7 +43,7 @@ def generate_file_content(class_name):
 
 
 def add_dummy_files(project):
-    root = '/'.join(project.keys()[0].split('/')[:4])
+    root = '/'.join(list(project.keys())[0].split('/')[:4])
     dummy_folder = f'{root}/DUMMY'
 
     for i in range(len(project) * 10):
