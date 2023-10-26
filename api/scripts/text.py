@@ -387,8 +387,6 @@ def restructure_functions(code: str):
         if not wrapper_function.strip():
             continue
 
-        # new_code = new_code.replace(function, performing_function + '\n\n\t' + wrapper_function)
-
         replacement = performing_function + '\n\n\t' + wrapper_function
 
         for i in range(100):
