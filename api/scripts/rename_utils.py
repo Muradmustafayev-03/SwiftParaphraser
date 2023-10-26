@@ -309,7 +309,9 @@ def rename_files(project: dict) -> dict:
         if path.endswith('.swift'):
             continue
 
+        new_content = content
         for old_name, new_name in rename_map.items():
-            new_project[path] = content.replace(old_name, new_name)
+            new_content = content.replace(old_name, new_name)
+        new_project[path] = new_content
 
     return new_project
