@@ -285,7 +285,7 @@ def rename_files(project: dict) -> dict:
         if '/Pods/' in filepath:
             return False
         filename = filepath.split('/')[-1]
-        return filepath.endswith('.swift') and project_name not in filename and filename.replace('_', '').isalnum()
+        return filepath.endswith('.swift') and project_name not in filename and '+' not in filename and '-' not in filename
 
     renameable_files = [filepath for filepath in project.keys() if is_renameable(filepath)]
 
