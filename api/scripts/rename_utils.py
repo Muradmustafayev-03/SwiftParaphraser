@@ -136,7 +136,8 @@ def rename_variables(code: str) -> str:
     """
 
     # parsing functions
-    pattern = re.compile(r'(?:(?<!class)(\s*?)(public|private|protected|internal|fileprivate|open|override|@objc)\s+)?(static\s+)?func\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(\s*(.*?)\s*\)\s*(?:\s*->\s*(?:.*?)?)?\s*{')
+    pattern = re.compile(
+        r'(?:(?<!class)(\s*?)(public|private|protected|internal|fileprivate|open|override|@objc)\s+)?(static\s+)?func\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(\s*(.*?)\s*\)\s*(?:\s*->\s*(?:.*?)?)?\s*{')
     functions = [match.group(0) for match in pattern.finditer(code)]
 
     for declaration in functions:
@@ -282,7 +283,7 @@ def rename_files(project: dict) -> dict:
 
     def is_renameable(filepath):
         filename = filepath.split('/')[-1]
-        if filepath.endswith('.swift') and project_name not in filename:
+        if filepath.endswith('.swift') and project_name not in filename and '+' not in filename:
             return True
         return False
 
