@@ -278,23 +278,13 @@ def rename_files(project: dict) -> dict:
     """
 
     new_project = {}
-    project_name = list(project.keys())[0].split('/')[3]
 
-    def is_renameable(filepath):
-        return filepath.split('/')[-1] != project_name + 'App'
-
-    renameable_files = [filepath for filepath in project.keys() if is_renameable(filepath)]
-
-    filenames = [file_path.split('/')[-1] for file_path in renameable_files]
+    filenames = [file_path.split('/')[-1] for file_path in project.keys()]
     filenames = [filename.replace('.swift', '') for filename in filenames]
     rename_map = generate_rename_map(filenames)
 
     for path, content in project.items():
         if not path.endswith('.swift'):
-            new_project[path] = content
-            continue
-
-        if not is_renameable(path):
             new_project[path] = content
             continue
 
