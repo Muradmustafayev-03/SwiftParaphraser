@@ -276,33 +276,40 @@ def rename_files(project: dict) -> dict:
     :param project: project to rename files in
     :return: dict, renamed project
     """
+
     new_project = {}
     project_name = list(project.keys())[0].split('/')[3]
-    filenames = [file_path.split('/')[-1] for file_path in project.keys() if file_path.endswith('.swift')]
+
+    def is_renameable(filepath):
+        if filepath.endswith('.swift') and 'View' not in filepath and project_name not in filepath:
+            return True
+        return False
+
+    renameable_files = [filepath for filepath in project.keys() if is_renameable(filepath)]
+
+    filenames = [file_path.split('/')[-1] for file_path in renameable_files]
     filenames = [filename.replace('.swift', '') for filename in filenames]
     rename_map = generate_rename_map(filenames)
 
-    for old, new in rename_map.items():
-        if project_name in old or 'View' in old:
-            rename_map[old] = old
-
     for path, content in project.items():
-        if 'View' in path:
+        if not path.endwith('.swift'):
             new_project[path] = content
             continue
-        if path.endswith('swift'):
-            old_name = path.split('/')[-1].replace('.swift', '')
-            if project_name in old_name:
-                new_project[path] = content
-                continue
-            new_name = rename_map[old_name]
-            new_project[path.replace(old_name + '.swift', new_name + '.swift')] = content
-        else:
-            new_content = content
-            for old_name, new_name in rename_map.items():
-                if project_name in old_name:
-                    continue
-                new_content = new_content.replace(old_name, new_name)
-            new_project[path] = new_content
+
+        if not is_renameable(path):
+            new_project[path] = content
+            continue
+
+        old_name = path.split('/')[-1].replace('.swift', '')
+        new_name = rename_map[old_name]
+        new_project[path.replace(old_name + '.swift', new_name + '.swift')] = content
+
+    for path, content in new_project.items():
+        if path.endwith('.swift'):
+            continue
+
+        for old_name, new_name in rename_map.items():
+            pattern = r'\b' + re.escape(old_name) + r'\b'
+            new_project[path] = re.sub(pattern, new_name, content)
 
     return new_project
