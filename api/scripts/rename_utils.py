@@ -310,7 +310,6 @@ def rename_files(project: dict) -> dict:
             continue
 
         for old_name, new_name in rename_map.items():
-            pattern = r'\b' + re.escape(old_name) + r'\b'
-            new_project[path] = re.sub(pattern, new_name, content)
+            new_project[path] = content.replace(old_name, new_name)
 
     return new_project
