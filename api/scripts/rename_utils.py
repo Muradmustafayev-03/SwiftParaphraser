@@ -311,7 +311,7 @@ def rename_files(project: dict) -> dict:
 
         new_content = content
         for old_name, new_name in rename_map.items():
-            new_content = new_content.replace(f' {old_name}.swift', f' {new_name}.swift')
+            new_content = new_content.replace(old_name + '.swift', new_name + '.swift')
         new_project[path] = new_content
 
     return new_project
