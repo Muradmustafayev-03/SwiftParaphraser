@@ -292,7 +292,7 @@ def rename_files(project: dict) -> dict:
     rename_map = generate_rename_map(filenames)
 
     for path, content in project.items():
-        if not path.endwith('.swift'):
+        if not path.endswith('.swift'):
             new_project[path] = content
             continue
 
@@ -305,7 +305,7 @@ def rename_files(project: dict) -> dict:
         new_project[path.replace(old_name + '.swift', new_name + '.swift')] = content
 
     for path, content in new_project.items():
-        if path.endwith('.swift'):
+        if path.endswith('.swift'):
             continue
 
         for old_name, new_name in rename_map.items():
