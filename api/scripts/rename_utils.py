@@ -311,9 +311,7 @@ def rename_files(project: dict) -> dict:
 
         new_content = content
         for old_name, new_name in rename_map.items():
-            # pattern if old name is not surrounded by alphanumeric characters
-            pattern = rf'(?<![a-zA-Z0-9_]){old_name}(?![a-zA-Z0-9_])'
-            new_content = re.sub(pattern, new_name, new_content)
+            new_content = new_content.replace(f' {old_name}.swift', f' {new_name}.swift')
         new_project[path] = new_content
 
     return new_project
