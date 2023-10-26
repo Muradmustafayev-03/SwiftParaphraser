@@ -282,7 +282,7 @@ def rename_files(project: dict) -> dict:
 
     def is_renameable(filepath):
         filename = filepath.split('/')[-1]
-        if filepath.endswith('.swift') and 'View' not in filepath and project_name not in filename:
+        if filepath.endswith('.swift') and project_name not in filename:
             return True
         return False
 
