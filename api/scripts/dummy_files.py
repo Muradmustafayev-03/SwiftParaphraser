@@ -32,7 +32,23 @@ def generate_file_content(class_name):
     function = generate_dummy_function()
 
     protocol = generate_dummy_protocol(protocol_name, function)
-    extension = generate_dummy_extension(protocol_name)
+
+    content = f'import Foundation\n\n{protocol}\n\n'
+    for i in range(100):
+        content += generate_dummy_extension(protocol_name) + '\n\n'
 
     conforming_class = generate_conforming_class(class_name, protocol_name, function)
-    return f'{protocol}\n\n{extension}\n\n{conforming_class}'
+    content += conforming_class
+    return content
+
+
+def add_dummy_files(project):
+    root = '/'.join(project.keys()[0].split('/')[:4])
+    dummy_folder = f'{root}/DUMMY'
+
+    for i in range(len(project) * 10):
+        class_name = generate_random_name('Type')
+        content = generate_file_content(class_name)
+        project[f'{dummy_folder}/{class_name}.swift'] = content
+
+    return project
