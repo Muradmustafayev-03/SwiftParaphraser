@@ -61,12 +61,7 @@ def new_var_name(name: str):
     name = open_abbreviation(name)
     name = first_letter_upper(name)
 
-    prefix = random.choice(['var', 'variable', 'value'])
-
-    if random.choice([True, False]):
-        return prefix + random.choice(ADJECTIVES) + name
-    else:
-        return generate_random_name(prefix)
+    return 'var' + random.choice(ADJECTIVES) + name
 
 
 def new_type_name(name: str):
@@ -79,10 +74,7 @@ def new_type_name(name: str):
     name = open_abbreviation(name)
     name = first_letter_upper(name)
 
-    if random.choice([True, False]):
-        return 'Type' + random.choice(ADJECTIVES) + name
-    else:
-        return generate_random_name('Type')
+    return 'Type' + random.choice(ADJECTIVES) + name
 
 
 def rename_local_variables(code, function: str):
@@ -285,7 +277,7 @@ def rename_files(project: dict) -> dict:
         if '/Pods/' in filepath:
             return False
         filename = filepath.split('/')[-1]
-        return filepath.endswith('.swift') and project_name not in filename and '+' not in filename and '-' not in filename
+        return (filepath.endswith('.swift') or filepath.endswith('.xib')) and project_name not in filename and '+' not in filename and '-' not in filename
 
     renameable_files = [filepath for filepath in project.keys() if is_renameable(filepath)]
 
