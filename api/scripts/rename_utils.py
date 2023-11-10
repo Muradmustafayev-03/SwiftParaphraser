@@ -198,6 +198,21 @@ def parse_types_in_project(project: dict, include_types: tuple = ('class', 'stru
     return list(set(names))
 
 
+def list_file_names(project: dict):
+    """
+    Lists file names of .swift files in the project.
+
+    :param project: project to list files in
+    :return: list of file names
+    """
+    names = []
+
+    for file_path in project.keys():
+        if file_path.endswith('.swift'):
+            names.append(file_path.split('/')[-1][:-6])
+    return list(set(names))
+
+
 def generate_rename_map(names: list):
     """
     Generates a renaming map (dictionary) for the given names.
