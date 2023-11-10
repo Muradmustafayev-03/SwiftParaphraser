@@ -57,19 +57,21 @@ def pipeline(unique_id: str, project: dict,
         project = apply_to_project(project, transform_loops, comment_adding=comment_adding)
         notify(unique_id, 'Finished transforming loops.')
 
-    if type_renaming:
+    type_names = parse_types_in_project(project, include_types=types_to_rename)
+    file_names = list_file_names(project)
+    names = list(set(type_names + file_names))
+    rename_map = generate_rename_map(names)
+
+    if type_renaming and rename_map:
         assert receive_notification(unique_id) is not None, 'Connection interrupted.'
         notify(unique_id, 'Renaming types...')
-        type_names = parse_types_in_project(project, include_types=types_to_rename)
-        if type_names:
-            rename_map = generate_rename_map(type_names)
-            project = rename_types(project, rename_map)
+        project = rename_types(project, rename_map)
         notify(unique_id, 'Finished renaming types.')
 
     if file_renaming:
         assert receive_notification(unique_id) is not None, 'Connection interrupted.'
         notify(unique_id, 'Renaming files...')
-        project = rename_files(project)
+        project = rename_files(project, rename_map)
         notify(unique_id, 'Finished renaming files.')
 
     if function_transformation:
