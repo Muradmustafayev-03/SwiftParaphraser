@@ -19,6 +19,8 @@ def dir_to_dict(dir_path: str, file_types: tuple = CHANGEABLE_FILE_TYPES) -> dic
             for file_type in file_types:
                 if file.endswith(file_type) and not file.startswith('._'):
                     file_list.append((os.path.join(root, file)).replace('\\', '/'))
+            if file.endswith('.DS_Store'):
+                os.remove(os.path.join(root, file))
 
     print(f'Found {len(file_list)} changeable files in {dir_path}')
 
