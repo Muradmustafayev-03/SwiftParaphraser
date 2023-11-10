@@ -262,49 +262,35 @@ def rename_types(project: dict, rename_map: dict):
     return project
 
 
-def rename_files(project: dict) -> dict:
+def rename_files(project: dict, rename_map: dict) -> dict:
     """
     Renames files in the project according to the renaming map.
 
     :param project: project to rename files in
+    :param rename_map: renaming map in the format {old_name: new_name}
     :return: dict, renamed project
     """
 
     new_project = {}
-    project_name = list(project.keys())[0].split('/')[3]
 
-    def is_renameable(filepath):
-        if '/Pods/' in filepath:
-            return False
-        filename = filepath.split('/')[-1]
-        return (filepath.endswith('.swift') or filepath.endswith('.xib')) and project_name not in filename and '+' not in filename and '-' not in filename
+    for file_path, file_content in project.items():
+        new_path = file_path
 
-    renameable_files = [filepath for filepath in project.keys() if is_renameable(filepath)]
-
-    filenames = [file_path.split('/')[-1] for file_path in renameable_files]
-    filenames = [filename.replace('.swift', '') for filename in filenames]
-    rename_map = generate_rename_map(filenames)
-
-    for path, content in project.items():
-        if not path.endswith('.swift'):
-            new_project[path] = content
+        if '/Pods/' in file_path:
+            new_project[new_path] = file_content
             continue
 
-        if not is_renameable(path):
-            new_project[path] = content
+        if file_path.endswith('.pbxproj'):
+            new_content = file_content
+            for old_name, new_name in rename_map.items():
+                new_content = new_content.replace(f'/* {old_name}.swift */', f'/* {new_name}.swift */')
+                new_content = new_content.replace(f'/* {old_name}.xib */', f'/* {new_name}.xib */')
+            new_project[new_path] = new_content
             continue
 
-        old_name = path.split('/')[-1].replace('.swift', '')
-        new_name = rename_map[old_name]
-        new_project[path.replace('/' + old_name + '.swift', '/' + new_name + '.swift')] = content
-
-    for path, content in new_project.items():
-        if path.endswith('.swift'):
-            continue
-
-        new_content = content
         for old_name, new_name in rename_map.items():
-            new_content = new_content.replace(' ' + old_name + '.swift', ' ' + new_name + '.swift')
-        new_project[path] = new_content
+            new_path = new_path.replace(old_name + '.swift', new_name + '.swift')
+            new_path = new_path.replace(old_name + '.xib', new_name + '.xib')
+        new_project[new_path] = file_content
 
     return new_project
