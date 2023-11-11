@@ -250,12 +250,8 @@ def rename_type(project: dict, old_name: str, new_name: str):
             continue
         elif file_path.endswith('.xib') or file_path.endswith('.storyboard'):
             pattern = r'customClass="' + re.escape(old_name) + r'"'
-            new_content = re.sub(pattern, r'customClass="' + new_name + r'"', file_content)
+            new_content = re.sub(pattern, 'customClass="' + new_name + '"', file_content)
             new_project[file_path] = new_content
-            continue
-        elif file_path.endswith('.xml') or file_path.endswith('.pbxproj') or file_path.endswith('.plist'):
-            pattern = r'>' + re.escape(old_name) + r'<'
-            new_project[file_path] = re.sub(pattern, r'>' + new_name + r'<', file_content)
             continue
         else:
             new_project[file_path] = file_content
