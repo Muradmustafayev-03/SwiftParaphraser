@@ -177,6 +177,8 @@ def parse_type_names(swift_code: str, include_types: tuple = ('class', 'struct',
         names.remove('SceneDelegate')
     if 'AppDelegate' in names:
         names.remove('AppDelegate')
+    if 'ContentState' in names:
+        names.remove('ContentState')
     return names
 
 
