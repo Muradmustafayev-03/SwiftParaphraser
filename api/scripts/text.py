@@ -243,7 +243,7 @@ def parse_functions(code: str):
 
     # parsing functions
     pattern = re.compile(
-        r'(?:\b(?:open|public|internal|fileprivate|private|final|class|static|dynamic|convenience|required|mutating|override)\s+)*func\s+([a-zA-Z_][a-zA-Z0-9_]*)'
+        r'(?:\b(?:open|public|internal|fileprivate|private|final|class|static|dynamic|convenience|required|mutating|override|@objc)\s+)*func\s+([a-zA-Z_][a-zA-Z0-9_]*)'
     )
     declarations = [match.group(0) for match in pattern.finditer(code)]
 
