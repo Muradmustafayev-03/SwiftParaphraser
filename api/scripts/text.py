@@ -389,7 +389,7 @@ def restructure_functions(code: str):
 
         replacement = performing_function + '\n\n\t' + wrapper_function
 
-        for i in range(100):
+        for i in range(1):
             dummy_name = generate_random_name('func', str(i))
             num1 = random.randint(1, 10000)
             num2 = random.randint(1, 10000)
