@@ -212,7 +212,7 @@ def list_file_names(project: dict):
     for file_path in project.keys():
         if file_path.endswith('.swift') or file_path.endswith('.xib'):
             name = file_path.split('/')[-1][:-6]
-            if '+' in name:
+            if '+' in name or '-' in name or ' ' in name:
                 continue
             names.append(name)
     return list(set(names))
