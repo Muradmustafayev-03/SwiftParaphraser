@@ -243,7 +243,8 @@ def parse_functions(code: str):
 
     # parsing functions
     pattern = re.compile(
-        r'func\s+([a-zA-Z_][a-zA-Z0-9_]*)')
+        r'(?:\b(?:open|public|internal|fileprivate|private|final|class|static|dynamic|convenience|required|mutating|override)\s+)*func\s+([a-zA-Z_][a-zA-Z0-9_]*)'
+    )
     declarations = [match.group(0) for match in pattern.finditer(code)]
 
     def parse_params(unparsed: str):
@@ -279,9 +280,6 @@ def parse_functions(code: str):
             continue
 
         declaration_start_index = declaration_end_index = code.find(declaration)
-
-        while code[declaration_start_index - 1] not in ['\n', '{', '}', ';']:
-            declaration_start_index -= 1
 
         while not (code[declaration_end_index] == '{' and
                    declaration.count('(') == declaration.count(')') and
@@ -364,7 +362,7 @@ def compose_wrapper_function(declaration, new_name, params, return_value):
 
 def compose_performing_function(old_name: str, new_name: str, declaration: str, body: str, returns_value: bool):
     declaration = declaration.replace(old_name, new_name, 1)
-    declaration = declaration.replace('override', '')
+    declaration = declaration.replace('override', '').strip()
     declaration = declaration.strip()
     if returns_value and 'return' not in body and 'Group' not in body and 'if' in body and 'else' in body and 'some' in declaration:
         body = f'Group {{\n\t\t{body}\n\t}}'
