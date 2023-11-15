@@ -210,7 +210,8 @@ def list_file_names(project: dict):
     for file_path in project.keys():
         if file_path.endswith('.swift'):
             name = file_path.split('/')[-1][:-6]
-            name = name.split('+')[0]
+            if '+' in name:
+                continue
             names.append(name)
     return list(set(names))
 
@@ -300,9 +301,6 @@ def rename_files(project: dict, rename_map: dict) -> dict:
 
                 new_content = new_content.replace(f'/* {old_name}.xib */', f'/* {new_name}.xib */')
                 new_content = new_content.replace(f'path = {old_name}.xib;', f'path = {new_name}.xib;')
-
-                new_content = new_content.replace(f'/* {old_name}+', f'/* {new_name}+')
-                new_content = new_content.replace(f'path = {old_name}+', f'path = {new_name}+')
 
             new_project[new_path] = new_content
             continue
