@@ -295,6 +295,8 @@ def parse_functions(code: str):
 
         if code.split('\n')[line_id - 1].strip() == '@objc' and '@objc' not in declaration:
             declaration = code.split('\n')[line_id - 1] + declaration
+        if '@objc' in code.split('\n')[line_id] and '@objc' not in declaration:
+            declaration = '@objc ' + declaration
 
         open_brackets = 1
         func_start_index = code.find(declaration)
