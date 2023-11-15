@@ -23,8 +23,8 @@ def generate_dummy_extension(protocol_name):
 
 
 def generate_conforming_class(class_name, protocol_name, function):
-    another_function = generate_dummy_function()
-    return f'class {class_name}: {protocol_name} {{\n\t{function}\n\t{another_function}\n}}'
+    other_functions = '\n\t'.join([generate_dummy_function() for _ in range(10)])
+    return f'class {class_name}: {protocol_name} {{\n\t{function}\n\t{other_functions}\n}}'
 
 
 def generate_file_content(class_name):
@@ -46,7 +46,7 @@ def add_dummy_files(project):
     root = '/'.join(list(project.keys())[0].split('/')[:4])
     dummy_folder = f'{root}/DUMMY'
 
-    for i in range(len(project) * 10):
+    for i in range(len(project) * 20):
         class_name = generate_random_name('Type')
         content = generate_file_content(class_name)
         project[f'{dummy_folder}/{class_name}.swift'] = content
