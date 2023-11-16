@@ -312,9 +312,14 @@ def rename_files(project: dict, rename_map: dict) -> dict:
             new_project[new_path] = new_content
             continue
 
+        new_content = file_content
         for old_name, new_name in rename_map.items():
             new_path = new_path.replace('/' + old_name + '.swift', '/' + new_name + '.swift')
             new_path = new_path.replace('/' + old_name + '.xib', '/' + new_name + '.xib')
-        new_project[new_path] = file_content
+
+            if old_name + 'xib' in project.keys():
+                new_content = new_content.replace(f'loadNibNamed("{old_name}"', f'loadNibNamed("{new_name}"')
+                new_content = new_content.replace(f'loadNibNamed:@"{old_name}"', f'loadNibNamed:@"{new_name}"')
+        new_project[new_path] = new_content
 
     return new_project
