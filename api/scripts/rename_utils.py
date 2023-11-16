@@ -112,7 +112,7 @@ def rename_local_variables(code, function: str):
         if re.search(pattern, func_body):
             continue
 
-        new_func_body = re.sub(old_pattern, new_name, func_body)
+        new_func_body = re.sub(old_pattern, new_name, func_body, flags=re.MULTILINE)
         new_func_body = re.sub(new_pattern, f'\\({new_name})', new_func_body)
         new_func_body = new_func_body.replace(f'...{var_name}', f'...{new_name}')
         new_function = function.replace(func_body, new_func_body)
@@ -253,7 +253,7 @@ def rename_type(project: dict, old_name: str, new_name: str):
             # pattern if old name is not surrounded by alphanumeric characters
             old_pattern = r'(?<!\w)' + re.escape(old_name) + r'(?!\w)(?=(?:(?:[^"]*"){2})*[^"]*$)'
             new_pattern = r'\\\(' + re.escape(old_name) + r'\)'
-            new_content = re.sub(old_pattern, new_name, file_content)
+            new_content = re.sub(old_pattern, new_name, file_content, flags=re.MULTILINE)
             new_content = re.sub(new_pattern, '\\(' + new_name + ')', new_content)
             new_project[file_path] = new_content
             continue
