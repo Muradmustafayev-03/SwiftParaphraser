@@ -93,7 +93,8 @@ def rename_local_variables(code, function: str):
         var_name = var_match.group(2)
         new_name = new_var_name(var_name)
 
-        old_pattern = rf'(?<![a-zA-Z_.]){var_name}(?![a-zA-Z_])'
+        old_pattern = rf'(?<![a-zA-Z_.]){re.escape(var_name)}(?![a-zA-Z_])(?=(?:(?:[^"]*"){2})*[^"]*$)'
+        new_pattern = rf'\\\({re.escape(new_name)}\)'
 
         # exclude declaration and assignment to itself at the same time
         if re.search(rf'{var_name}\s*=\s*{var_name}', function):
@@ -112,6 +113,7 @@ def rename_local_variables(code, function: str):
             continue
 
         new_func_body = re.sub(old_pattern, new_name, func_body)
+        new_func_body = re.sub(new_pattern, f'\\({var_name})', new_func_body)
         new_func_body = new_func_body.replace(f'...{var_name}', f'...{new_name}')
         new_function = function.replace(func_body, new_func_body)
         code = code.replace(function, new_function)
@@ -249,8 +251,13 @@ def rename_type(project: dict, old_name: str, new_name: str):
     for file_path, file_content in project.items():
         if file_path.endswith('.swift'):
             # pattern if old name is not surrounded by alphanumeric characters
-            pattern = rf'(?<![a-zA-Z0-9_]){old_name}(?![a-zA-Z0-9_])'
-            new_project[file_path] = re.sub(pattern, new_name, file_content)
+            pattern = rf'(?<!\w){re.escape(old_name)}(?!\w)(?=(?:(?:[^"]*"){2})*[^"]*$)'
+            new_content = re.sub(pattern, new_name, file_content)
+
+            pattern = rf'\\\(\s*{re.escape(old_name)}\s*\)'
+            new_content = re.sub(pattern, f'\\({new_name})', new_content)
+
+            new_project[file_path] = new_content
             continue
         elif file_path.endswith('.xib') or file_path.endswith('.storyboard'):
             pattern = r'customClass="' + re.escape(old_name) + r'"'
