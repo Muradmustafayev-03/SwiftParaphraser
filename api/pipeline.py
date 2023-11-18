@@ -69,17 +69,15 @@ def pipeline(unique_id: str, path: str,
 
     type_names = parse_types_in_project(project, include_types=types_to_rename)
     file_names = list_file_names(project)
-    names = list(set(type_names + file_names))
-    rename_map = generate_rename_map(names)
 
-    if type_renaming and rename_map:
+    if type_renaming and type_names:
         assert_notify(unique_id, 'Renaming types...')
-        project = rename_types(project, rename_map)
+        project = rename_types(project, generate_rename_map(type_names))
         notify(unique_id, 'Finished renaming types.')
 
-    if file_renaming and rename_map:
+    if file_renaming and file_names:
         assert_notify(unique_id, 'Renaming files...')
-        project = rename_files(project, rename_map)
+        project = rename_files(project, generate_rename_map(file_names))
         notify(unique_id, 'Finished renaming files.')
 
     if True:
