@@ -1,31 +1,25 @@
 from api import *
 
 
-def preprocess(unique_id: str, project: dict) -> dict:
+def preprocess(unique_id: str, path: str):
     """
     Preprocess the project. Remove comments and empty lines, change 'class func' to 'static func'.
 
     :param unique_id: str, unique id of the project
-    :param project: dict, project to preprocess
+    :param path: path to the project to paraphrase
     :return: dict, preprocessed project
     """
 
-    assert receive_notification(unique_id) is not None, 'Connection interrupted.'
-    notify(unique_id, 'Preprocessing...')
+    assert_notify(unique_id, 'Preprocessing...')
 
-    assert receive_notification(unique_id) is not None, 'Connection interrupted.'
-    notify(unique_id, 'Removing comments...')
-    project = apply_to_project(project, remove_comments)
+    assert_notify(unique_id, 'Removing comments...')
+    apply_to_files(path, remove_comments)
 
-    assert receive_notification(unique_id) is not None, 'Connection interrupted.'
-    notify(unique_id, 'Removing empty lines...')
-    project = apply_to_project(project, remove_empty_lines)
-
-    notify(unique_id, 'Finished preprocessing the project...')
-    return project
+    assert_notify(unique_id, 'Removing empty lines...')
+    apply_to_files(path, remove_empty_lines)
 
 
-def pipeline(unique_id: str, project: dict,
+def pipeline(unique_id: str, path: str,
              condition_transformation=True, loop_transformation=True,
              type_renaming=True, types_to_rename=('struct', 'enum', 'protocol'),
              file_renaming=False, function_transformation=True, variable_renaming=True, comment_adding=True):
@@ -33,7 +27,7 @@ def pipeline(unique_id: str, project: dict,
     Project paraphrasing pipeline.
 
     :param unique_id: str, unique id of the project
-    :param project: dict, project to paraphrase
+    :param path: path to the project to paraphrase
     :param condition_transformation: bool, whether to transform conditions, stable, recommended being True
     :param loop_transformation: bool, whether to transform loops, stable, recommended being True
     :param type_renaming: bool, whether to rename types, semi-stable, recommended being True for smaller projects
@@ -43,19 +37,35 @@ def pipeline(unique_id: str, project: dict,
     :param variable_renaming: bool, whether to rename variables, stable, recommended being True
     :param comment_adding: bool, whether to add comments, stable, recommended being True (takes a long time)
     """
-    notify(unique_id, 'Started paraphrasing the project...')
+    preprocess(unique_id, path)
+    notify(unique_id, 'Finished preprocessing the project...')
 
     if condition_transformation:
-        assert receive_notification(unique_id) is not None, 'Connection interrupted.'
-        notify(unique_id, 'Transforming conditions...')
-        project = apply_to_project(project, transform_conditions, comment_adding=comment_adding)
+        assert_notify(unique_id, 'Transforming conditions...')
+        apply_to_files(path, transform_conditions, comment_adding=comment_adding)
         notify(unique_id, 'Finished transforming conditions.')
 
     if loop_transformation:
-        assert receive_notification(unique_id) is not None, 'Connection interrupted.'
-        notify(unique_id, 'Transforming loops...')
-        project = apply_to_project(project, transform_loops, comment_adding=comment_adding)
+        assert_notify(unique_id, 'Transforming loops...')
+        apply_to_files(path, transform_loops, comment_adding=comment_adding)
         notify(unique_id, 'Finished transforming loops.')
+
+    if function_transformation:
+        assert_notify(unique_id, 'Restructuring functions...')
+        apply_to_files(path, restructure_functions)
+        notify(unique_id, 'Finished restructuring functions.')
+
+    if variable_renaming:
+        assert_notify(unique_id, 'Renaming variables...')
+        apply_to_files(path, rename_variables)
+        notify(unique_id, 'Finished renaming variables.')
+
+    if comment_adding:
+        assert_notify(unique_id, 'Adding comments...')
+        apply_to_files(path, add_comments)
+        notify(unique_id, 'Finished adding comments.')
+
+    project = dir_to_dict(path)
 
     type_names = parse_types_in_project(project, include_types=types_to_rename)
     file_names = list_file_names(project)
@@ -63,41 +73,21 @@ def pipeline(unique_id: str, project: dict,
     rename_map = generate_rename_map(names)
 
     if type_renaming and rename_map:
-        assert receive_notification(unique_id) is not None, 'Connection interrupted.'
-        notify(unique_id, 'Renaming types...')
+        assert_notify(unique_id, 'Renaming types...')
         project = rename_types(project, rename_map)
         notify(unique_id, 'Finished renaming types.')
 
     if file_renaming and rename_map:
-        assert receive_notification(unique_id) is not None, 'Connection interrupted.'
-        notify(unique_id, 'Renaming files...')
+        assert_notify(unique_id, 'Renaming files...')
         project = rename_files(project, rename_map)
         notify(unique_id, 'Finished renaming files.')
 
-    if function_transformation:
-        assert receive_notification(unique_id) is not None, 'Connection interrupted.'
-        notify(unique_id, 'Restructuring functions...')
-        project = apply_to_project(project, restructure_functions)
-        notify(unique_id, 'Finished restructuring functions.')
-
-    if variable_renaming:
-        assert receive_notification(unique_id) is not None, 'Connection interrupted.'
-        notify(unique_id, 'Renaming variables...')
-        project = apply_to_project(project, rename_variables)
-        notify(unique_id, 'Finished renaming variables.')
-
-    if comment_adding:
-        assert receive_notification(unique_id) is not None, 'Connection interrupted.'
-        notify(unique_id, 'Adding comments...')
-        project = apply_to_project(project, add_comments)
-        notify(unique_id, 'Finished adding comments.')
-
     if True:
-        assert receive_notification(unique_id) is not None, 'Connection interrupted.'
-        notify(unique_id, 'Adding dummy files...')
+        assert_notify(unique_id, 'Adding dummy files...')
         project = add_dummy_files(project)
         notify(unique_id, 'Finished adding dummy files.')
 
     notify(unique_id, 'Finished paraphrasing the project.')
 
-    return project
+    assert_notify(unique_id, 'Saving paraphrased project...')
+    dict_to_dir(project)
