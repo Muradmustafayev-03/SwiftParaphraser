@@ -1,7 +1,7 @@
 import random
 import regex as re
 from .constants import *
-from .dict_utils import project_contains_string
+from .file_utils import project_contains_string
 
 
 def open_abbreviation(name: str):
