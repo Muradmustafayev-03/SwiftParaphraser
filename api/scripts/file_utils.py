@@ -82,16 +82,19 @@ def project_contains_string(project: dict, string: str) -> bool:
     return False
 
 
-def apply_to_files(dir_path: str, func: callable, exclude=(), file_types: tuple = '.swift', *args, **kwargs):
+def apply_to_files(dir_path: str, func: callable, exclude=(), *args, **kwargs):
     for root, dirs, files in os.walk(dir_path):
         # Check if any folder in the path is in FRAMEWORKS
         if 'Pods' in root.replace('\\', '/').split('/'):
             continue  # skip files in frameworks
         for file in files:
-            for file_type in file_types:
-                if file.endswith(file_type) and not file.startswith('._') and file not in exclude:
-                    with open(file, 'r', encoding='utf-8') as f:
-                        content = f.read().replace('\u2028', ' ')
-                        new_content = func(content, *args, **kwargs)
-                    with open(file, 'w', encoding='utf-8') as f:
-                        f.write(new_content)
+            if not file.endswith('.swift'):
+                continue
+            if file.startswith('._') or file in exclude:
+                continue
+            path = (os.path.join(root, file)).replace('\\', '/')
+            with open(path, 'r', encoding='utf-8') as f:
+                content = f.read().replace('\u2028', ' ')
+                new_content = func(content, *args, **kwargs)
+            with open(path, 'w', encoding='utf-8') as f:
+                f.write(new_content)
