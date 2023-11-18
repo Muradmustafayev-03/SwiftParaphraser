@@ -279,13 +279,16 @@ def parse_functions(code: str):
         if '@available' in code.split('\n')[line_id - 1]:
             continue
 
-        declaration_start_index = declaration_end_index = code.find(declaration)
+        try:
+            declaration_start_index = declaration_end_index = code.find(declaration)
 
-        while not (code[declaration_end_index] == '{' and
-                   declaration.count('(') == declaration.count(')') and
-                   declaration.count('{') == declaration.count('}')):
-            declaration_end_index += 1
-            declaration = code[declaration_start_index:declaration_end_index]
+            while not (code[declaration_end_index] == '{' and
+                       declaration.count('(') == declaration.count(')') and
+                       declaration.count('{') == declaration.count('}')):
+                declaration_end_index += 1
+                declaration = code[declaration_start_index:declaration_end_index]
+        except IndexError:
+            continue
 
         if declaration.find('}') < declaration.find('{'):
             continue  # skip functions without body
@@ -329,7 +332,7 @@ def parse_functions(code: str):
             param_end += 1
         if open_brackets != 0:
             continue
-        unparsed_params = declaration[param_start:param_end-1].strip()
+        unparsed_params = declaration[param_start:param_end - 1].strip()
         params = parse_params(unparsed_params)
 
         body = code[body_start_index:body_end_index - 1]

@@ -182,8 +182,10 @@ async def paraphrase(
         return StreamingResponse(result, media_type="application/zip",
                                  headers={"Content-Disposition": f"attachment; filename=paraphrased_{filename}"})
     except Exception as e:
+        raise e
         return {"message": "Something went wrong. Please try again. Error: " + str(e)}
     finally:
+        time.sleep(10)
         shutil.rmtree(root_dir)
         remove_notification_file(unique_id)
 
@@ -191,4 +193,4 @@ async def paraphrase(
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("api.main:app", host="127.0.0.1", port=8000, workers=multiprocessing.cpu_count(), ws="websockets")
+    uvicorn.run("api.main:app", host="127.0.0.1", port=8080, workers=multiprocessing.cpu_count(), ws="websockets")
