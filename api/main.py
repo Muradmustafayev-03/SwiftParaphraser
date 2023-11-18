@@ -130,17 +130,15 @@ async def paraphrase(
     folder = f'{root_dir}/{filename[:-4]}/'
 
     try:
-        assert receive_notification(unique_id) is not None, 'Connection interrupted.'
-        notify(unique_id, 'Saving project...')
+        assert_notify(unique_id, 'Saving project...')
         os.makedirs(folder, exist_ok=True)
 
         # save the zip file
         with open(f'{root_dir}/{filename}', 'wb') as f:
             f.write(content)
 
-        notify(unique_id, 'Project saved...')
-        assert receive_notification(unique_id) is not None, 'Connection interrupted.'
-        notify(unique_id, 'Extracting project...')
+        assert_notify(unique_id, 'Project saved...')
+        assert_notify(unique_id, 'Extracting project...')
 
         # extract the zip file
         shutil.unpack_archive(f'{root_dir}/{filename}', folder)
@@ -148,10 +146,9 @@ async def paraphrase(
         # remove the zip file
         os.remove(f'{root_dir}/{filename}')
 
-        notify(unique_id, 'Project extracted...')
+        assert_notify(unique_id, 'Project extracted...')
+        assert_notify(unique_id, 'Starting paraphrasing...')
 
-        assert receive_notification(unique_id) is not None, 'Connection interrupted.'
-        notify(unique_id, 'Starting paraphrasing...')
         pipeline(
             unique_id, folder,
             condition_transformation=condition_transformation,
@@ -164,15 +161,13 @@ async def paraphrase(
             comment_adding=comment_adding,
         )
 
-        assert receive_notification(unique_id) is not None, 'Connection interrupted.'
-        notify(unique_id, 'Archiving the project...')
+        assert_notify(unique_id, 'Archiving the project...')
         shutil.make_archive(f'{root_dir}/{filename[:-4]}', 'zip', folder)
 
         with open(f'{root_dir}/{filename}', "rb") as f:
             result = io.BytesIO(f.read())
 
-        assert receive_notification(unique_id) is not None, 'Connection interrupted.'
-        notify(unique_id, 'Sending paraphrased project...')
+        assert_notify(unique_id, 'Sending paraphrased project...')
         return StreamingResponse(result, media_type="application/zip",
                                  headers={"Content-Disposition": f"attachment; filename=paraphrased_{filename}"})
     except Exception as e:

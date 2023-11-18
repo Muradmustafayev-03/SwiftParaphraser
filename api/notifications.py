@@ -22,3 +22,8 @@ def remove_notification_file(project_id):
         os.remove(f'notifications/{project_id}.txt')
     except FileNotFoundError:
         pass
+
+
+def assert_notify(project_id, message):
+    assert receive_notification(project_id) is not None, 'Connection interrupted.'
+    notify(project_id, message)
