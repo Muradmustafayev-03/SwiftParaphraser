@@ -85,7 +85,7 @@ def project_contains_string(project: dict, string: str) -> bool:
 def apply_to_files(dir_path: str, func: callable, exclude=(), *args, **kwargs):
     for root, dirs, files in os.walk(dir_path):
         # Check if any folder in the path is in FRAMEWORKS
-        if 'Pods' in root.replace('\\', '/').split('/'):
+        if 'Pods' in root.replace('\\', '/').split('/') or 'Frameworks' in root.replace('\\', '/').split('/'):
             continue  # skip files in frameworks
         for file in files:
             if not file.endswith('.swift'):
