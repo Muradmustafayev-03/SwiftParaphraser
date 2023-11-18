@@ -10,15 +10,12 @@ def preprocess(unique_id: str, path: str):
     :return: dict, preprocessed project
     """
 
-    assert receive_notification(unique_id) is not None, 'Connection interrupted.'
-    notify(unique_id, 'Preprocessing...')
+    assert_notify(unique_id, 'Preprocessing...')
 
-    assert receive_notification(unique_id) is not None, 'Connection interrupted.'
-    notify(unique_id, 'Removing comments...')
+    assert_notify(unique_id, 'Removing comments...')
     apply_to_files(path, remove_comments)
 
-    assert receive_notification(unique_id) is not None, 'Connection interrupted.'
-    notify(unique_id, 'Removing empty lines...')
+    assert_notify(unique_id, 'Removing empty lines...')
     apply_to_files(path, remove_empty_lines)
 
 
@@ -44,32 +41,27 @@ def pipeline(unique_id: str, path: str,
     notify(unique_id, 'Finished preprocessing the project...')
 
     if condition_transformation:
-        assert receive_notification(unique_id) is not None, 'Connection interrupted.'
-        notify(unique_id, 'Transforming conditions...')
+        assert_notify(unique_id, 'Transforming conditions...')
         apply_to_files(path, transform_conditions, comment_adding=comment_adding)
         notify(unique_id, 'Finished transforming conditions.')
 
     if loop_transformation:
-        assert receive_notification(unique_id) is not None, 'Connection interrupted.'
-        notify(unique_id, 'Transforming loops...')
+        assert_notify(unique_id, 'Transforming loops...')
         apply_to_files(path, transform_loops, comment_adding=comment_adding)
         notify(unique_id, 'Finished transforming loops.')
 
     if function_transformation:
-        assert receive_notification(unique_id) is not None, 'Connection interrupted.'
-        notify(unique_id, 'Restructuring functions...')
+        assert_notify(unique_id, 'Restructuring functions...')
         apply_to_files(path, restructure_functions)
         notify(unique_id, 'Finished restructuring functions.')
 
     if variable_renaming:
-        assert receive_notification(unique_id) is not None, 'Connection interrupted.'
-        notify(unique_id, 'Renaming variables...')
+        assert_notify(unique_id, 'Renaming variables...')
         apply_to_files(path, rename_variables)
         notify(unique_id, 'Finished renaming variables.')
 
     if comment_adding:
-        assert receive_notification(unique_id) is not None, 'Connection interrupted.'
-        notify(unique_id, 'Adding comments...')
+        assert_notify(unique_id, 'Adding comments...')
         apply_to_files(path, add_comments)
         notify(unique_id, 'Finished adding comments.')
 
@@ -81,25 +73,21 @@ def pipeline(unique_id: str, path: str,
     rename_map = generate_rename_map(names)
 
     if type_renaming and rename_map:
-        assert receive_notification(unique_id) is not None, 'Connection interrupted.'
-        notify(unique_id, 'Renaming types...')
+        assert_notify(unique_id, 'Renaming types...')
         project = rename_types(project, rename_map)
         notify(unique_id, 'Finished renaming types.')
 
     if file_renaming and rename_map:
-        assert receive_notification(unique_id) is not None, 'Connection interrupted.'
-        notify(unique_id, 'Renaming files...')
+        assert_notify(unique_id, 'Renaming files...')
         project = rename_files(project, rename_map)
         notify(unique_id, 'Finished renaming files.')
 
     if True:
-        assert receive_notification(unique_id) is not None, 'Connection interrupted.'
-        notify(unique_id, 'Adding dummy files...')
+        assert_notify(unique_id, 'Adding dummy files...')
         project = add_dummy_files(project)
         notify(unique_id, 'Finished adding dummy files.')
 
     notify(unique_id, 'Finished paraphrasing the project.')
 
-    assert receive_notification(unique_id) is not None, 'Connection interrupted.'
-    notify(unique_id, 'Saving paraphrased project...')
+    assert_notify(unique_id, 'Saving paraphrased project...')
     dict_to_dir(project)
