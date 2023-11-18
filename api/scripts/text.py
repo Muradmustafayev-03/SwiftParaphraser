@@ -374,34 +374,34 @@ def compose_performing_function(old_name: str, new_name: str, declaration: str, 
     return f'{declaration}{{\n{body}\n}}'
 
 
+def restructure_function(code, function_data):
+    function, name, params, declaration, body, returns_value = function_data
+
+    if not name.strip():
+        return code
+    if 'throws' in declaration:
+        return code
+
+    new_name = generate_random_name('func')
+    wrapper_function = compose_wrapper_function(declaration, new_name, params, returns_value)
+    performing_function = compose_performing_function(name, new_name, declaration, body, returns_value)
+
+    if not performing_function.strip():
+        return code
+    if not wrapper_function.strip():
+        return code
+
+    dummy_function = f'func {generate_random_name("func", name)}() -> Int ' \
+                     f'{{\n\t\treturn {random.randint(1, 10000)} ' \
+                     f'{random.choice(["+", "-", "*", "%"])} ' \
+                     f'{random.randint(1, 10000)}\n\t}}'
+
+    return code.replace(function, '\n\n\t'.join([performing_function, wrapper_function, dummy_function]))
+
+
 def restructure_functions(code: str):
     new_code = code
     functions = parse_functions(code)
-    for function, name, params, declaration, body, returns_value in functions:
-        if not name.strip():
-            continue
-        if 'throws' in declaration:
-            continue
-        new_name = generate_random_name('func')
-        wrapper_function = compose_wrapper_function(declaration, new_name, params, returns_value)
-        performing_function = compose_performing_function(name, new_name, declaration, body, returns_value)
-        if not performing_function.strip():
-            continue
-        if not wrapper_function.strip():
-            continue
-
-        replacement = performing_function + '\n\n\t' + wrapper_function
-
-        for i in range(1):
-            dummy_name = generate_random_name('func', str(i))
-            num1 = random.randint(1, 10000)
-            num2 = random.randint(1, 10000)
-            operator = random.choice(['+', '-', '*', '%'])
-
-            dummy_function = f'func {dummy_name}() -> Int {{\n\t\treturn {num1} {operator} {num2}\n\t}}'
-
-            replacement += '\n\n\t' + dummy_function
-
-        new_code = new_code.replace(function, replacement)
-
+    for function_data in functions:
+        new_code = restructure_function(new_code, function_data)
     return new_code
