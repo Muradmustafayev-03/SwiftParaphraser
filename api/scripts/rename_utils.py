@@ -303,10 +303,10 @@ def rename_files(project: dict, rename_map: dict) -> dict:
 
         if file_path.endswith('.pbxproj'):
             for old_name, new_name in rename_map.items():
-                new_content = new_content.replace(f'/* {old_name}.swift */', f'/* {new_name}.swift */')
+                new_content = new_content.replace(f'/* {old_name}.swift ', f'/* {new_name}.swift ')
                 new_content = new_content.replace(f'path = {old_name}.swift;', f'path = {new_name}.swift;')
 
-                new_content = new_content.replace(f'/* {old_name}.xib */', f'/* {new_name}.xib */')
+                new_content = new_content.replace(f'/* {old_name}.xib ', f'/* {new_name}.xib ')
                 new_content = new_content.replace(f'path = {old_name}.xib;', f'path = {new_name}.xib;')
 
             new_project[new_path] = new_content
@@ -315,7 +315,6 @@ def rename_files(project: dict, rename_map: dict) -> dict:
         for old_name, new_name in rename_map.items():
             new_path = new_path.replace('/' + old_name + '.swift', '/' + new_name + '.swift')
             new_path = new_path.replace('/' + old_name + '.xib', '/' + new_name + '.xib')
-
 
             new_content = new_content.replace(f'loadNibNamed("{old_name}"', f'loadNibNamed("{new_name}"')
             new_content = new_content.replace(f'loadNibNamed:@"{old_name}"', f'loadNibNamed:@"{new_name}"')
