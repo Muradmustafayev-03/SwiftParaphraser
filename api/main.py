@@ -4,6 +4,7 @@ import shutil
 import time
 import asyncio
 from typing import Optional
+import random
 
 from fastapi import FastAPI, UploadFile, File, Request, Query, WebSocket, WebSocketDisconnect
 from fastapi.responses import StreamingResponse
@@ -11,7 +12,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from websockets.exceptions import ConnectionClosedOK
 
-from .pipeline import *
+from .pipeline import pipeline
+from .notifications import *
 
 app = FastAPI()
 
@@ -149,14 +151,9 @@ async def paraphrase(
         notify(unique_id, 'Project extracted...')
 
         assert receive_notification(unique_id) is not None, 'Connection interrupted.'
-        notify(unique_id, 'Reading the project...')
-        project = dir_to_dict(folder)
-
-        assert receive_notification(unique_id) is not None, 'Connection interrupted.'
         notify(unique_id, 'Starting paraphrasing...')
-        project = preprocess(unique_id, project)
-        project = pipeline(
-            unique_id, project,
+        pipeline(
+            unique_id, folder,
             condition_transformation=condition_transformation,
             loop_transformation=loop_transformation,
             type_renaming=type_renaming,
@@ -168,10 +165,7 @@ async def paraphrase(
         )
 
         assert receive_notification(unique_id) is not None, 'Connection interrupted.'
-        dict_to_dir(project)
-
-        assert receive_notification(unique_id) is not None, 'Connection interrupted.'
-        notify(unique_id, 'Saving paraphrased project...')
+        notify(unique_id, 'Archiving the project...')
         shutil.make_archive(f'{root_dir}/{filename[:-4]}', 'zip', folder)
 
         with open(f'{root_dir}/{filename}', "rb") as f:
@@ -182,10 +176,8 @@ async def paraphrase(
         return StreamingResponse(result, media_type="application/zip",
                                  headers={"Content-Disposition": f"attachment; filename=paraphrased_{filename}"})
     except Exception as e:
-        raise e
         return {"message": "Something went wrong. Please try again. Error: " + str(e)}
     finally:
-        time.sleep(10)
         shutil.rmtree(root_dir)
         remove_notification_file(unique_id)
 
