@@ -168,20 +168,10 @@ def parse_type_names(swift_code: str, include_types: tuple = ('class', 'struct',
         for match in matches:
             # extract the part of the code before declaration
             code_before = swift_code[:match.start()]
-
             if code_before.count('{') != code_before.count('}'):
                 continue
-
             names.append(match.group(1))
-
-    names = list(set(names))
-    if 'SceneDelegate' in names:
-        names.remove('SceneDelegate')
-    if 'AppDelegate' in names:
-        names.remove('AppDelegate')
-    if 'ContentState' in names:
-        names.remove('ContentState')
-    return names
+    return list(set(names))
 
 
 def parse_types_in_project(project: dict, include_types: tuple = ('class', 'struct', 'enum')):
@@ -199,7 +189,13 @@ def parse_types_in_project(project: dict, include_types: tuple = ('class', 'stru
             continue
         if file_path.endswith('.swift'):
             names += parse_type_names(file_content, include_types)
-    return list(set(names))
+    names = list(set(names))
+    for name in names:
+        if project_contains_string(project, f'import {name}'):
+            names.remove(name)
+        elif name in ['SceneDelegate', 'AppDelegate', 'ContentState']:
+            names.remove(name)
+    return names
 
 
 def list_file_names(project: dict):
