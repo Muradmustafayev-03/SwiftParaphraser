@@ -286,7 +286,8 @@ def rename_type(project: dict, old_name: str, new_name: str):
             matches = re.finditer(new_pattern, new_content)
 
             for match in matches:
-                new_match = re.sub(old_pattern, new_name, match.group(0), flags=re.MULTILINE)
+                pattern = r'(?<!\w)' + re.escape(old_name) + r'(?!\w)'
+                new_match = re.sub(pattern, new_name, match.group(0))
                 new_content = new_content.replace(match.group(0), new_match)
 
             new_project[file_path] = new_content
