@@ -1,3 +1,4 @@
+import os
 import random
 import regex as re
 from .constants import *
@@ -174,12 +175,28 @@ def parse_type_names(swift_code: str, include_types: tuple = ('class', 'struct',
     return list(set(names))
 
 
-def parse_types_in_project(project: dict, include_types: tuple = ('class', 'struct', 'enum')):
+def parse_framework_types(swift_code: str):
+    types = ('class', 'struct', 'enum', 'protocol', 'typealias', 'extension', 'interface')
+    names = []
+
+    for typedef in types:
+        pattern = rf'{typedef}\s+([A-Z][a-zA-Z0-9_]+)'
+        matches = re.finditer(pattern, swift_code)
+        for match in matches:
+            names.append(match.group(1))
+
+    return list(set(names))
+
+
+def parse_types_in_project(project: dict,
+                           include_types: tuple = ('class', 'struct', 'enum'),
+                           exclude_names: tuple = ('SceneDelegate', 'AppDelegate', 'ContentState')):
     """
     Parses type names from the project. Types are specified in the include_types parameter.
 
     :param project: dict, project to parse
     :param include_types: tuple of types to parse
+    :param exclude_names: tuple of names to exclude
     :return: list of parsed type names
     """
     names = []
@@ -193,9 +210,24 @@ def parse_types_in_project(project: dict, include_types: tuple = ('class', 'stru
     for name in names:
         if project_contains_string(project, f'import {name}'):
             names.remove(name)
-        elif name in ['SceneDelegate', 'AppDelegate', 'ContentState']:
+        elif name in exclude_names:
             names.remove(name)
     return names
+
+
+def parse_types_in_frameworks(dir_path: str):
+    types = []
+    for root, dirs, files in os.walk(dir_path):
+        # Check if any folder in the path is in FRAMEWORKS
+        if 'Pods' not in root.replace('\\', '/').split('/') and 'Frameworks' not in root.replace('\\', '/').split('/'):
+            continue
+        for file in files:
+            if file.endswith('.swift') or file.endswith('.h') or file.endswith('.hpp'):
+                path = (os.path.join(root, file)).replace('\\', '/')
+                with open(path, 'r', encoding='utf-8') as f:
+                    content = f.read().replace('\u2028', ' ')
+                    types += parse_framework_types(content)
+    return list(set(types))
 
 
 def list_file_names(project: dict):
