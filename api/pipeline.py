@@ -68,6 +68,8 @@ def pipeline(unique_id: str, path: str,
     project = dir_to_dict(path)
 
     type_names = parse_types_in_project(project, include_types=types_to_rename)
+    types_in_frameworks = parse_types_in_frameworks(path)
+    type_names = list(set(type_names) - set(types_in_frameworks))
     file_names = list_file_names(project)
 
     if type_renaming and type_names:
