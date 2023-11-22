@@ -282,7 +282,7 @@ def rename_type(project: dict, old_name: str, new_name: str):
             old_pattern = r'(?<!\w)' + re.escape(old_name) + r'(?!\w)(?=(?:(?:[^"]*"){2})*[^"]*$)'
             new_content = re.sub(old_pattern, new_name, file_content, flags=re.MULTILINE)
 
-            new_pattern = r'\\\([\S\s]*\)'
+            new_pattern = r'\\\([\S\s]*?\)'
             matches = re.finditer(new_pattern, new_content)
 
             for match in matches:
