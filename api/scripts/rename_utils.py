@@ -280,9 +280,15 @@ def rename_type(project: dict, old_name: str, new_name: str):
         if file_path.endswith('.swift'):
             # pattern if old name is not surrounded by alphanumeric characters
             old_pattern = r'(?<!\w)' + re.escape(old_name) + r'(?!\w)(?=(?:(?:[^"]*"){2})*[^"]*$)'
-            new_pattern = r'\\\(' + re.escape(old_name) + r'\)'
             new_content = re.sub(old_pattern, new_name, file_content, flags=re.MULTILINE)
-            new_content = re.sub(new_pattern, '\\(' + new_name + ')', new_content)
+
+            new_pattern = r'\\\([\S\s]*\)'
+            matches = re.finditer(new_pattern, new_content)
+
+            for match in matches:
+                new_match = re.sub(old_pattern, new_name, match.group(0), flags=re.MULTILINE)
+                new_content = new_content.replace(match.group(0), new_match)
+
             new_project[file_path] = new_content
             continue
         elif file_path.endswith('.xib') or file_path.endswith('.storyboard'):
