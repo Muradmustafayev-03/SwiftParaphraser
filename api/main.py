@@ -79,6 +79,7 @@ async def websocket_endpoint(websocket: WebSocket, unique_id: Optional[str] = No
 
 @app.post("/api/v1/paraphrase")
 async def paraphrase(
+        request: Request,
         unique_id: str = Query("0"),
         zip_file: UploadFile = File(...),
         condition_transformation: bool = Query(True),
@@ -98,6 +99,7 @@ async def paraphrase(
         "http://localhost:8000/api/v1/paraphrase?unique_id=5235431&condition_transformation=False"
         Use your domain name instead of localhost when the backend is deployed.
 
+        :param request: Request object
         :param unique_id: str, unique id of the project. Required. Use the same id to get notifications about the project.
         :param zip_file: zip file containing a swift project. Required.
 
@@ -113,6 +115,9 @@ async def paraphrase(
 
         :return: zip file containing the paraphrased swift project or json with error message.
         """
+    if unique_id == '0':
+        unique_id = await get_id(request)
+
     # check if id is not in use (if there is no notification file or project folder)
     if receive_notification(unique_id) is not None or os.path.exists(f'projects/{unique_id}'):
         return {'message': 'Please provide a unique id.'}
