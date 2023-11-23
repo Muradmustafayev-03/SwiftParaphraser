@@ -347,6 +347,13 @@ def rename_files(project: dict, rename_map: dict) -> dict:
             new_project[new_path] = new_content
             continue
 
+        elif file_path.endswith('.storyboard'):
+            for old_name, new_name in rename_map.items():
+                new_content = new_content.replace(f'customClass="{old_name}"', f'customClass="{new_name}"')
+
+            new_project[new_path] = new_content
+            continue
+
         for old_name, new_name in rename_map.items():
             new_path = new_path.replace('/' + old_name + '.swift', '/' + new_name + '.swift')
             new_path = new_path.replace('/' + old_name + '.xib', '/' + new_name + '.xib')
