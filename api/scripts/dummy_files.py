@@ -27,6 +27,14 @@ def generate_conforming_class(class_name, protocol_name, function):
     return f'class {class_name}: {protocol_name} {{\n\t{function}\n\t{other_functions}\n}}'
 
 
+def generate_dummy_enum():
+    name = generate_random_name('enum')
+    cases = [generate_random_name('case') for _ in range(random.randint(1, 20))]
+    cases = '\n\t'.join(cases)
+    enum = f'enum {name} {{\n\t{cases}\n}}'
+    return enum
+
+
 def generate_file_content(class_name):
     protocol_name = generate_random_name('protocol')
     function = generate_dummy_function()
@@ -37,8 +45,12 @@ def generate_file_content(class_name):
     for i in range(100):
         content += generate_dummy_extension(protocol_name) + '\n\n'
 
-    conforming_class = generate_conforming_class(class_name, protocol_name, function)
-    content += conforming_class
+    for i in range(10):
+        content += generate_conforming_class(class_name, protocol_name, function) + '\n\n'
+
+    for i in range(100):
+        content += generate_dummy_enum() + '\n\n'
+
     return content
 
 

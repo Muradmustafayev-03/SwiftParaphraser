@@ -189,7 +189,7 @@ def parse_framework_types(swift_code: str):
 
 
 def parse_types_in_project(project: dict,
-                           include_types: tuple = ('class', 'struct', 'enum'),
+                           include_types: tuple = ('class', 'struct', 'enum', 'protocol'),
                            exclude_names: tuple = ('SceneDelegate', 'AppDelegate', 'ContentState')):
     """
     Parses type names from the project. Types are specified in the include_types parameter.
