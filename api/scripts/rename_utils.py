@@ -5,20 +5,6 @@ from .constants import *
 from .file_utils import project_contains_string
 
 
-def open_abbreviation(name: str):
-    """
-    Replaces abbreviations with their full form and vice versa.
-    """
-    abbreviations = list(ABBREVIATIONS.items())
-    random.shuffle(abbreviations)
-    for abbr, opening in abbreviations:
-        if opening in name:
-            name = name.replace(opening, abbr)
-        elif abbr in name:
-            name = name.replace(abbr, opening)
-    return name
-
-
 def first_letter_upper(name: str):
     """
     Capitalizes the first letter of the name.
@@ -59,7 +45,6 @@ def new_var_name(name: str):
     :param name: old variable name
     :return: new variable name
     """
-    name = open_abbreviation(name)
     name = first_letter_upper(name)
 
     return 'var' + random.choice(ADJECTIVES) + name
@@ -72,7 +57,6 @@ def new_type_name(name: str):
     :param name: old type name
     :return: new type name
     """
-    name = open_abbreviation(name)
     name = first_letter_upper(name)
 
     return 'Type' + random.choice(ADJECTIVES) + name
@@ -230,10 +214,11 @@ def parse_types_in_frameworks(dir_path: str):
     return list(set(types))
 
 
-def list_file_names(project: dict):
+def list_file_names(project: dict, exclude_names: tuple = ('TuneUpPopUp', 'TopUIButtonStyleKit')):
     """
     Lists file names of .swift files in the project.
 
+    :param exclude_names:
     :param project: project to list files in
     :return: list of file names
     """
@@ -243,6 +228,8 @@ def list_file_names(project: dict):
         if file_path.endswith('.swift') or file_path.endswith('.xib'):
             name = file_path.split('/')[-1][:-6]
             if '+' in name or '-' in name or ' ' in name:
+                continue
+            if name in exclude_names:
                 continue
             names.append(name)
     return list(set(names))
