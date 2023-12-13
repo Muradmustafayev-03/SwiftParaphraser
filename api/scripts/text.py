@@ -321,6 +321,9 @@ def parse_functions(code: str):
             continue
         name = declaration.split('func')[1].split('(')[0].strip()
 
+        if not name.isalnum():
+            continue
+
         param_start = declaration.find('(') + 1  # first occurrence of '('
         open_brackets = 1
         param_end = param_start
