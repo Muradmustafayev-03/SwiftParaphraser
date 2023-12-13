@@ -239,8 +239,6 @@ def transform_loops(code: str, comment_adding: bool = False) -> str:
 
 
 def parse_functions(code: str):
-    functions = []
-
     # parsing functions
     pattern = re.compile(
         r'(?:\b(?:open|public|internal|fileprivate|private|final|class|static|dynamic|convenience|required|mutating|override|@objc)\s+)*func\s+([a-zA-Z_][a-zA-Z0-9_]*)'
@@ -321,6 +319,9 @@ def parse_functions(code: str):
             continue
         name = declaration.split('func')[1].split('(')[0].strip()
 
+        if not name.isalnum():
+            continue
+
         param_start = declaration.find('(') + 1  # first occurrence of '('
         open_brackets = 1
         param_end = param_start
@@ -342,9 +343,7 @@ def parse_functions(code: str):
         if 'func ' in body:
             continue
 
-        functions.append([function, name, params, declaration, body, returns_value])
-
-    return functions
+        yield [function, name, params, declaration, body, returns_value]
 
 
 def compose_call(name: str, params: list, return_value: bool = False, is_async: bool = False):
@@ -401,7 +400,6 @@ def restructure_function(code, function_data):
 
 def restructure_functions(code: str):
     new_code = code
-    functions = parse_functions(code)
-    for function_data in functions:
+    for function_data in parse_functions(code):
         new_code = restructure_function(new_code, function_data)
     return new_code
