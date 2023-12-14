@@ -348,7 +348,7 @@ def parse_functions(code: str):
 
 def compose_call(name: str, params: list, return_value: bool = False, is_async: bool = False):
     for i in range(len(params)):
-        if params[i][0] == 'into':
+        if params[i][0] == 'inout':
             params[i] = (params[i][0], '&' + params[i][1])
     call = f'{name}({", ".join([f"{param[0]}: {param[1]}" for param in params])})'
     if is_async:
