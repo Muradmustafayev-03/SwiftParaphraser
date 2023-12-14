@@ -135,7 +135,7 @@ def transform_conditions(code: str, comment_adding: bool = False) -> str:
 
         if open_brackets == 0:
             statement = code[code.find(statement_start):idx]
-            else_body = statement[statement.find('{') + 1: -1]
+            else_body = statement[len(statement_start): -1]
             transformed_statement = transform_condition(statement, condition, else_body, comment_adding=comment_adding)
             transformed_code = transformed_code.replace(statement, transformed_statement)
 
