@@ -276,6 +276,8 @@ def parse_functions(code: str):
             line_id += 1
         if '@available' in code.split('\n')[line_id - 1]:
             continue
+        if '@MainActor' in code.split('\n')[line_id - 1]:
+            continue
 
         try:
             declaration_start_index = declaration_end_index = code.find(declaration)
