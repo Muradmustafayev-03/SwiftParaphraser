@@ -209,8 +209,11 @@ def parse_types_in_frameworks(dir_path: str):
             if file.endswith('.swift') or file.endswith('.h') or file.endswith('.hpp'):
                 path = (os.path.join(root, file)).replace('\\', '/')
                 with open(path, 'r', encoding='utf-8') as f:
-                    content = f.read().replace('\u2028', ' ')
-                    types += parse_framework_types(content)
+                    try:
+                        content = f.read().replace('\u2028', ' ')
+                        types += parse_framework_types(content)
+                    except UnicodeDecodeError:
+                        pass
     return list(set(types))
 
 
