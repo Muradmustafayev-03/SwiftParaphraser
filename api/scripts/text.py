@@ -293,6 +293,9 @@ def parse_functions(code: str):
         if declaration.find('}') < declaration.find('{'):
             continue  # skip functions without body
 
+        if declaration.count('{') > 1 or declaration.count('}') > 0:
+            continue  # skip functions with multiple bodies
+
         if '<' in declaration:
             continue  # skip generic functions
 
