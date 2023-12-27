@@ -155,6 +155,8 @@ def parse_type_names(swift_code: str, include_types: tuple = ('class', 'struct',
             code_before = swift_code[:match.start()]
             if code_before.count('{') != code_before.count('}'):
                 continue
+            if f'@objc({match.group(1)})' in swift_code:
+                continue
             names.append(match.group(1))
     return list(set(names))
 
