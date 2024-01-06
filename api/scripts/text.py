@@ -296,6 +296,9 @@ def parse_functions(code: str):
         if declaration.count('{') > 1 or declaration.count('}') > 0:
             continue  # skip functions with multiple bodies
 
+        if declaration.count('func') > 1:
+            continue  # skip functions with multiple func keywords
+
         if '<' in declaration:
             continue  # skip generic functions
 
