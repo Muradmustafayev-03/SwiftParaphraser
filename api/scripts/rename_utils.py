@@ -352,6 +352,7 @@ def rename_files(project: dict, rename_map: dict) -> dict:
 
             new_content = new_content.replace(f'loadNibNamed("{old_name}"', f'loadNibNamed("{new_name}"')
             new_content = new_content.replace(f'loadNibNamed:@"{old_name}"', f'loadNibNamed:@"{new_name}"')
+
         new_project[new_path] = new_content
 
     return new_project
