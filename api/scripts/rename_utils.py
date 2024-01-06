@@ -147,6 +147,8 @@ def parse_type_names(swift_code: str, include_types: tuple = ('class', 'struct',
     """
     names = []
 
+    core_data_imported = 'import CoreData' in swift_code
+
     for typedef in include_types:
         pattern = rf'{typedef}\s+([A-Z][a-zA-Z0-9_]+)\s*(:|\{{)'
         matches = re.finditer(pattern, swift_code)
@@ -156,6 +158,8 @@ def parse_type_names(swift_code: str, include_types: tuple = ('class', 'struct',
             if code_before.count('{') != code_before.count('}'):
                 continue
             if f'@objc({match.group(1)})' in swift_code:
+                continue
+            if core_data_imported and match.group(1) + ':' in match.group(0):
                 continue
             names.append(match.group(1))
     return list(set(names))
