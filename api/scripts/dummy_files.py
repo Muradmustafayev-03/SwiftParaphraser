@@ -3,13 +3,99 @@ import random
 from .rename_utils import generate_random_name
 
 
+def generate_dummy_body(return_type, loop, operator):
+    string = generate_random_name()
+    n1 = random.randint(1, 10000)
+    n2 = random.randint(1, 10000)
+    f1 = random.uniform(1, 10000)
+    f2 = random.uniform(1, 10000)
+
+    if return_type == 'Int':
+        if loop:
+            return f'''
+            var {string} = {int(f1)}
+            for i in 0...{n1} {{
+                {string} = {string} {operator} {int(f2)}
+            }}
+            return {string}
+            '''
+        else:
+            return f'return {n1} {operator} {n2}'
+    elif return_type == 'String':
+        if loop:
+            return f'for i in 0...{n1} {{\n\t\t\t{string} += "{string}"\n\t\t}}\n\t\treturn {string}'
+        else:
+            return f'return "{string}"'
+    elif return_type == 'Bool':
+        if loop:
+            return f'''
+            var {string} = {f1}
+            for i in 0...{n1} {{
+                {string} = {string} {operator} {f2}
+            }}
+            return = {string} {random.choice(['>', '<', '==', '!='])} {n2}
+            '''
+        else:
+            return f"return {n1} {random.choice(['>', '<', '==', '!='])} {n2}"
+    elif return_type == 'Double':
+        if loop:
+            return f'''
+            var {string} = {f1}
+            for i in 0...{n1} {{
+                {string} = {string} {operator} {f2}
+            }}
+            return {string}
+            '''
+        else:
+            return f'return {f1} {operator} {f2}'
+    elif return_type == 'Float':
+        if loop:
+            return f'''
+            var {string} = {f1}
+            for i in 0...{n1} {{
+                {string} = {string} {operator} {f2}
+            }}
+            return {string}
+            '''
+        else:
+            return f'return {f1} {operator} {f2}'
+    elif return_type == 'Void':
+        if loop:
+            return f'''
+            for i in 0...{n1} {{
+                print("{string}")
+                }}
+            '''
+        else:
+            return f'print("{string}")'
+
+
 def generate_dummy_function():
     name = generate_random_name('func')
-    num1 = random.randint(1, 10000)
-    num2 = random.randint(1, 10000)
+
+    return_type = random.choice(['Int', 'String', 'Bool', 'Double', 'Float', 'Void'])
+
+    condition = random.choice([True, False])
+    loop = random.choice([True, False])
     operator = random.choice(['+', '-', '*', '%'])
 
-    return f'func {name}() -> Int {{\n\t\treturn {num1} {operator} {num2}\n\t}}'
+    if condition:
+        i = random.randint(1, 10000)
+        j = random.randint(1, 10000)
+
+        res = f'''
+        func {name}() -> {return_type} {{
+            if {i} {random.choice(['>', '<', '==', '!='])} {j} {{
+                {generate_dummy_body(return_type, loop, operator)}
+            }}
+            else {{
+                {generate_dummy_body(return_type, loop, operator)}
+            }}
+        }}
+        '''
+        return res
+    else:
+        return f'func {name}() -> {return_type} {{\n\t\t{generate_dummy_body(return_type, loop, operator)}\n\t}}'
 
 
 def generate_dummy_protocol(name, function):
