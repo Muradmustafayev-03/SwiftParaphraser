@@ -21,6 +21,8 @@ def remove_comments(swift_code: str) -> str:
     :param swift_code: input code string
     :return: output code string with no comments
     """
+    version_comment = re.search(r'\/\/ swift-tools-version:.*', swift_code)
+
     # Find all strings like "...//..." and replace them with placeholders
     pattern = r'"(.*?//.*?)"'
     preserved_strings = re.findall(pattern, swift_code)
@@ -38,6 +40,10 @@ def remove_comments(swift_code: str) -> str:
     for i, string in enumerate(preserved_strings):
         placeholder = f'[000__PRESERVED_STRING_{i}__000]'
         swift_code = swift_code.replace(placeholder, string)
+
+    # Restore swift-tools-version comment
+    if version_comment:
+        swift_code = version_comment.group() + '\n' + swift_code
 
     return swift_code
 
