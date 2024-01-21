@@ -84,7 +84,7 @@ def pipeline(unique_id: str, path: str,
 
     if True:
         assert_notify(unique_id, 'Adding dummy files...')
-        project = add_dummy_files(project)
+        project = add_dummy_files(project, path)
         notify(unique_id, 'Finished adding dummy files.')
 
     notify(unique_id, 'Finished paraphrasing the project.')
