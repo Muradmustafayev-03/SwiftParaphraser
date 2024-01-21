@@ -141,8 +141,10 @@ def generate_file_content(class_name):
 
 
 def add_dummy_files(project, root=None):
-    if not root:
+    try:
         root = '/'.join(list(project.keys())[0].split('/')[:4])
+    except IndexError:
+        print('No files in project')
     dummy_folder = f'{root}/DUMMY'
 
     for i in range(len(project) * 20):
