@@ -22,7 +22,8 @@ def preprocess(unique_id: str, path: str):
 def pipeline(unique_id: str, path: str,
              condition_transformation=True, loop_transformation=True,
              type_renaming=True, types_to_rename=('struct', 'enum', 'protocol'),
-             file_renaming=False, function_transformation=True, variable_renaming=True, comment_adding=True):
+             file_renaming=False, function_transformation=True, variable_renaming=True,
+             comment_adding=True, dummy_file_adding=True):
     """
     Project paraphrasing pipeline.
 
@@ -82,7 +83,7 @@ def pipeline(unique_id: str, path: str,
         project = rename_files(project, generate_rename_map(file_names))
         notify(unique_id, 'Finished renaming files.')
 
-    if True:
+    if dummy_file_adding:
         assert_notify(unique_id, 'Adding dummy files...')
         project = add_dummy_files(project, path)
         notify(unique_id, 'Finished adding dummy files.')

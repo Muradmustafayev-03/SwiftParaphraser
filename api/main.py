@@ -90,6 +90,7 @@ async def paraphrase(
         function_transformation: bool = Query(True),
         variable_renaming: bool = Query(True),
         comment_adding: bool = Query(True),
+        dummy_file_adding: bool = Query(True),
 ):
     """
         Endpoint for paraphrasing a zip file containing a swift project.
@@ -112,6 +113,7 @@ async def paraphrase(
         :param function_transformation: bool, whether to restructure functions, stable, recommended being True. Default: True.
         :param variable_renaming: bool, whether to rename variables, stable, recommended being True. Default: True.
         :param comment_adding: bool, whether to add comments, stable, recommended being True (takes a long time). Default: True.
+        :param dummy_file_adding: bool, whether to add dummy files, stable, recommended being True. Default: True.
 
         :return: zip file containing the paraphrased swift project or json with error message.
         """
@@ -164,6 +166,7 @@ async def paraphrase(
             function_transformation=function_transformation,
             variable_renaming=variable_renaming,
             comment_adding=comment_adding,
+            dummy_file_adding=dummy_file_adding,
         )
 
         assert_notify(unique_id, 'Archiving the project...')
