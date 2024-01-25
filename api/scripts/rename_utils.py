@@ -234,12 +234,15 @@ def list_file_names(project: dict, exclude_names: tuple = ('TuneUpPopUp', 'TopUI
     names = []
 
     for file_path in project.keys():
-        if file_path.endswith('.swift') or file_path.endswith('.xib'):
+        if file_path.endswith('.swift'):
             name = file_path.split('/')[-1][:-6]
-            if '+' in name or '-' in name or ' ' in name:
-                continue
-            if name in exclude_names:
-                continue
+        elif file_path.endswith('.xib'):
+            name = file_path.split('/')[-1][:-4]
+        else:
+            continue
+        if '+' in name or '-' in name or ' ' in name:
+            continue
+        if name not in exclude_names:
             names.append(name)
     return list(set(names))
 
