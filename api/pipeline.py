@@ -72,15 +72,19 @@ def pipeline(unique_id: str, path: str,
     types_in_frameworks = parse_types_in_frameworks(path)
     type_names = list(set(type_names) - set(types_in_frameworks))
     file_names = list_file_names(project)
+    all_names = set(type_names + file_names)
+    if 'Package' in all_names:
+        all_names.remove('Package')
+    all_names = list(all_names)
 
     if type_renaming and type_names:
         assert_notify(unique_id, 'Renaming types...')
-        project = rename_types(project, generate_rename_map(type_names))
+        project = rename_types(project, generate_rename_map(all_names))
         notify(unique_id, 'Finished renaming types.')
 
     if file_renaming and file_names:
         assert_notify(unique_id, 'Renaming files...')
-        project = rename_files(project, generate_rename_map(file_names))
+        project = rename_files(project, generate_rename_map(all_names))
         notify(unique_id, 'Finished renaming files.')
 
     if dummy_file_adding:
