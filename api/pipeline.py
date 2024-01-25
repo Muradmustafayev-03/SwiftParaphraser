@@ -42,6 +42,16 @@ def pipeline(unique_id: str, path: str,
     preprocess(unique_id, path)
     notify(unique_id, 'Finished preprocessing the project...')
 
+    if variable_renaming:
+        assert_notify(unique_id, 'Renaming variables...')
+        apply_to_files(path, rename_variables)
+        notify(unique_id, 'Finished renaming variables.')
+
+    if function_transformation:
+        assert_notify(unique_id, 'Restructuring functions...')
+        apply_to_files(path, restructure_functions)
+        notify(unique_id, 'Finished restructuring functions.')
+
     if condition_transformation:
         assert_notify(unique_id, 'Transforming conditions...')
         apply_to_files(path, transform_conditions, comment_adding=comment_adding)
@@ -51,16 +61,6 @@ def pipeline(unique_id: str, path: str,
         assert_notify(unique_id, 'Transforming loops...')
         apply_to_files(path, transform_loops, comment_adding=comment_adding)
         notify(unique_id, 'Finished transforming loops.')
-
-    if function_transformation:
-        assert_notify(unique_id, 'Restructuring functions...')
-        apply_to_files(path, restructure_functions)
-        notify(unique_id, 'Finished restructuring functions.')
-
-    if variable_renaming:
-        assert_notify(unique_id, 'Renaming variables...')
-        apply_to_files(path, rename_variables)
-        notify(unique_id, 'Finished renaming variables.')
 
     if comment_adding:
         assert_notify(unique_id, 'Adding comments...')
