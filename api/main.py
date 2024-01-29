@@ -153,6 +153,15 @@ async def paraphrase(
         # remove the zip file
         os.remove(f'{root_dir}/{filename}')
 
+        # recursively extract all zip files
+        for root, dirs, files in os.walk(folder):
+            if root == '__MACOSX':
+                continue
+            for file in files:
+                if file.endswith('.zip') and not file.startswith('._'):
+                    shutil.unpack_archive(f'{root}/{file}', root)
+                    os.remove(f'{root}/{file}')
+
         assert_notify(unique_id, 'Project extracted...')
         assert_notify(unique_id, 'Starting paraphrasing...')
 
