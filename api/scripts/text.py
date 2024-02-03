@@ -357,6 +357,12 @@ def parse_functions(code: str):
         if 'func ' in body:
             continue
 
+        declaration = declaration.strip()
+
+        # skip if there are new lines in declaration
+        if '\n' in declaration and declaration.index('\n') > declaration.index(')'):
+            continue
+
         yield [function, name, params, declaration, body, returns_value]
 
 
