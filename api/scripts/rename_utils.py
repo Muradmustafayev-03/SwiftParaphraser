@@ -132,8 +132,7 @@ def rename_variables(code: str) -> str:
 
         if open_brackets == 0:
             entire_function = code[code.find(declaration):idx]
-            if len(entire_function) < 20000:
-                code = rename_local_variables(code, entire_function)
+            code = rename_local_variables(code, entire_function)
     return code
 
 
