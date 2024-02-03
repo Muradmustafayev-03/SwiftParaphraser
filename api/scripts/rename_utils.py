@@ -288,6 +288,9 @@ def rename_type(project: dict, old_name: str, new_name: str):
                 new_match = re.sub(pattern, new_name, match.group(0))
                 new_content = new_content.replace(match.group(0), new_match)
 
+            in_string_pattern = r'\"' + re.escape(old_name) + r'\"'
+            new_content = re.sub(in_string_pattern, f'"{new_name}"', new_content)
+
             new_project[file_path] = new_content
             continue
         elif file_path.endswith('.xib') or file_path.endswith('.storyboard'):
