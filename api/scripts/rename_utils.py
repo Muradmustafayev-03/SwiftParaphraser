@@ -132,8 +132,7 @@ def rename_variables(code: str) -> str:
 
         if open_brackets == 0:
             entire_function = code[code.find(declaration):idx]
-            if len(entire_function) < 20000:
-                code = rename_local_variables(code, entire_function)
+            code = rename_local_variables(code, entire_function)
     return code
 
 
@@ -288,6 +287,9 @@ def rename_type(project: dict, old_name: str, new_name: str):
                 pattern = r'(?<!\w)' + re.escape(old_name) + r'(?!\w)'
                 new_match = re.sub(pattern, new_name, match.group(0))
                 new_content = new_content.replace(match.group(0), new_match)
+
+            in_string_pattern = r'\"' + re.escape(old_name) + r'\"'
+            new_content = re.sub(in_string_pattern, f'"{new_name}"', new_content)
 
             new_project[file_path] = new_content
             continue
