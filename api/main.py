@@ -6,8 +6,8 @@ import asyncio
 from typing import Optional
 import random
 
-from fastapi import FastAPI, UploadFile, File, Request, Query, WebSocket, WebSocketDisconnect
-from fastapi.responses import StreamingResponse
+from fastapi import FastAPI, UploadFile, File, Request, Query, WebSocket, WebSocketDisconnect, BackgroundTasks
+from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from websockets.exceptions import ConnectionClosedOK
@@ -28,14 +28,18 @@ app.add_middleware(
 
 
 @app.get("/api/v1/get_id")
-async def get_id(request: Request):
+async def get_id(request: Request, shuffle: Optional[bool] = False):
     """
     Get a unique id for the project.
 
     :param request: Request
+    :param shuffle: bool, whether to shuffle the unique id
     :return: str, unique id
     """
-    return f'{request.client.host.replace(".", "")}{time.time_ns()}{random.randint(0, 1000000)}'
+    unique_id = f'{request.client.host.replace(".", "")}N{time.time_ns()}N{random.randint(0, 1000000)}'
+    if shuffle:
+        unique_id = ''.join(random.sample(unique_id, len(unique_id)))
+    return unique_id
 
 
 # WebSocket route for notifications
@@ -77,11 +81,9 @@ async def websocket_endpoint(websocket: WebSocket, unique_id: Optional[str] = No
         remove_notification_file(unique_id)
 
 
-@app.post("/api/v1/paraphrase")
-async def paraphrase(
-        request: Request,
-        unique_id: str = Query("0"),
-        zip_file: UploadFile = File(...),
+def paraphrase(
+        project_id: str,
+        filename: str,
         condition_transformation: bool = Query(True),
         loop_transformation: bool = Query(True),
         type_renaming: bool = Query(True),
@@ -92,60 +94,11 @@ async def paraphrase(
         comment_adding: bool = Query(True),
         dummy_file_adding: bool = Query(True),
 ):
-    """
-        Endpoint for paraphrasing a zip file containing a swift project.
-
-        Request format example:
-        curl -X POST -F "zip_file=@/path/to/your/zipfile.zip" \
-        "http://localhost:8000/api/v1/paraphrase?unique_id=5235431&condition_transformation=False"
-        Use your domain name instead of localhost when the backend is deployed.
-
-        :param request: Request object
-        :param unique_id: str, unique id of the project. Required. Use the same id to get notifications about the project.
-        :param zip_file: zip file containing a swift project. Required.
-
-        :param condition_transformation: bool, whether to transform conditions, stable, recommended being True. Default: True.
-        :param loop_transformation: bool, whether to transform loops, stable, recommended being True. Default: True.
-        :param type_renaming: bool, whether to rename types, semi-stable, recommended being True for smaller projects. Default: True.
-        :param types_to_rename: tuple of strings, types to rename, recommended being ('struct', 'enum', 'protocol').
-        Possible types are: 'class', 'struct', 'enum', 'protocol'. Applies only if type_renaming is True. Default: ('struct', 'enum', 'protocol').
-        :param file_renaming: bool, whether to rename files, causes `Name` not found in Storyboard error, recommended being False. Default: False.
-        :param function_transformation: bool, whether to restructure functions, stable, recommended being True. Default: True.
-        :param variable_renaming: bool, whether to rename variables, stable, recommended being True. Default: True.
-        :param comment_adding: bool, whether to add comments, stable, recommended being True (takes a long time). Default: True.
-        :param dummy_file_adding: bool, whether to add dummy files, stable, recommended being True. Default: True.
-
-        :return: zip file containing the paraphrased swift project or json with error message.
-        """
-    if unique_id == '0':
-        unique_id = await get_id(request)
-
-    # check if id is not in use (if there is no notification file or project folder)
-    if receive_notification(unique_id) is not None or os.path.exists(f'projects/{unique_id}'):
-        return {'message': 'Please provide a unique id.'}
-
-    notify(unique_id, 'Received project...')
-
-    # check if zip file is provided
-    if not zip_file.filename.endswith('.zip'):
-        return {'message': 'Please provide a zip file.'}
-
-    filename = zip_file.filename
-    content = zip_file.file.read()
-
-    root_dir = f'projects/{unique_id}'
+    root_dir = f'projects/{project_id}'
     folder = f'{root_dir}/{filename[:-4]}/'
 
     try:
-        assert_notify(unique_id, 'Saving project...')
-        os.makedirs(folder, exist_ok=True)
-
-        # save the zip file
-        with open(f'{root_dir}/{filename}', 'wb') as f:
-            f.write(content)
-
-        assert_notify(unique_id, 'Project saved...')
-        assert_notify(unique_id, 'Extracting project...')
+        assert_notify(project_id, 'Extracting project...')
 
         # extract the zip file
         shutil.unpack_archive(f'{root_dir}/{filename}', folder)
@@ -162,11 +115,11 @@ async def paraphrase(
                     shutil.unpack_archive(f'{root}/{file}', root)
                     os.remove(f'{root}/{file}')
 
-        assert_notify(unique_id, 'Project extracted...')
-        assert_notify(unique_id, 'Starting paraphrasing...')
+        assert_notify(project_id, 'Project extracted...')
+        assert_notify(project_id, 'Starting paraphrasing...')
 
         pipeline(
-            unique_id, folder,
+            project_id, folder,
             condition_transformation=condition_transformation,
             loop_transformation=loop_transformation,
             type_renaming=type_renaming,
@@ -177,24 +130,145 @@ async def paraphrase(
             comment_adding=comment_adding,
             dummy_file_adding=dummy_file_adding,
         )
+        assert_notify(project_id, 'Paraphrasing completed...')
 
-        assert_notify(unique_id, 'Archiving the project...')
+        assert_notify(project_id, 'Archiving the project...')
         shutil.make_archive(f'{root_dir}/{filename[:-4]}', 'zip', folder)
+        with open(f'{root_dir}/info.txt', 'r') as f:
+            info = f.readlines()
+        info = [line for line in info if 'Ready' not in line]
+        info.append('Ready: True')
+        with open(f'{root_dir}/info.txt', 'w') as f:
+            f.writelines(info)
+        assert_notify(project_id, 'Project is ready to download')
+    except AssertionError:
+        remove_notification_file(project_id)
+        time.sleep(10)
+        shutil.rmtree(root_dir)
+    except Exception as e:
+        notify(project_id, f'Error: {e}')
+        remove_notification_file(project_id)
+        time.sleep(10)
+        shutil.rmtree(root_dir)
 
+
+@app.post("/api/v1/upload")
+async def upload(
+        request: Request,
+        background_tasks: BackgroundTasks,
+        project_id: str = Query(None),
+        user_id: str = Query(None),
+        zip_file: UploadFile = File(...),
+        condition_transformation: bool = Query(True),
+        loop_transformation: bool = Query(True),
+        type_renaming: bool = Query(True),
+        types_to_rename: str = Query("struct,enum,protocol"),
+        file_renaming: bool = Query(True),
+        function_transformation: bool = Query(True),
+        variable_renaming: bool = Query(True),
+        comment_adding: bool = Query(True),
+        dummy_file_adding: bool = Query(True),
+):
+    if not project_id:
+        project_id = await get_id(request)
+    if not user_id:
+        user_id = await get_id(request, shuffle=True)
+
+    # check if id is not in use (if there is no notification file or project folder)
+    if receive_notification(project_id) is not None or os.path.exists(f'projects/{project_id}'):
+        return JSONResponse({'message': 'Project ID already in use. Please try again.'}, 400)
+
+    notify(project_id, 'Received project...')
+
+    # check if zip file is provided
+    if not zip_file.filename.endswith('.zip'):
+        return JSONResponse({'message': 'Invalid file type. Please upload a zip file.'}, 400)
+
+    filename = zip_file.filename
+    content = zip_file.file.read()
+
+    root_dir = f'projects/{project_id}'
+    folder = f'{root_dir}/{filename[:-4]}/'
+
+    try:
+        assert_notify(project_id, 'Saving project...')
+        os.makedirs(folder, exist_ok=True)
+
+        # save the zip file
+        with open(f'{root_dir}/{filename}', 'wb') as f:
+            f.write(content)
+
+        with open(f'{root_dir}/info.txt', 'w') as f:
+            lines = [
+                f'Project ID: {project_id}\n',
+                f'User ID: {user_id}\n',
+                f'Filename: {filename}\n',
+                'Ready: False'
+            ]
+            f.writelines(lines)
+
+        assert_notify(project_id, 'Project saved...')
+
+        background_tasks.add_task(paraphrase,
+                                  project_id, filename,
+                                  condition_transformation, loop_transformation,
+                                  type_renaming, types_to_rename, file_renaming,
+                                  function_transformation, variable_renaming,
+                                  comment_adding, dummy_file_adding
+                                  )
+        return JSONResponse({'message': 'File uploaded successfully',
+                             'project_id': project_id,
+                             'user_id': user_id,
+                             }, 200)
+
+    except Exception as e:
+        return JSONResponse({
+            'message': 'Failed to upload the file',
+            'details': e
+        }, 500)
+
+
+@app.post("/api/v1/download")
+async def download(project_id: str = Query(...), user_id: str = Query(...)):
+    if not project_id or not user_id:
+        return JSONResponse({'message': 'Please, provide project_id and user_id'}, 403)
+
+    root_dir = f'projects/{project_id}'
+
+    if not os.path.exists(root_dir):
+        return JSONResponse({'message': 'Invalid project_id or user_id'}, 403)
+
+    try:
+        with open(f'{root_dir}/info.txt', 'r') as f:
+            info = f.readlines()
+
+        info = {line.split(': ')[0]: line.split(': ')[1].strip() for line in info}
+
+        if info['User ID'] != user_id:
+            return JSONResponse({'message': 'Invalid project_id or user_id'}, 403)
+        if info['Ready'] != 'True':
+            return JSONResponse({'message': 'The project is not ready yet'}, 400)
+
+        filename = info['Filename']
+    except Exception as e:
+        return JSONResponse({'message': 'Failed to download the file', 'details': e}, 500)
+
+    try:
         with open(f'{root_dir}/{filename}', "rb") as f:
             result = io.BytesIO(f.read())
 
-        assert_notify(unique_id, 'Sending paraphrased project...')
-        return StreamingResponse(result, media_type="application/zip",
+        assert_notify(project_id, 'Sending paraphrased project...')
+        return StreamingResponse(result, media_type="application/zip", status_code=200,
                                  headers={"Content-Disposition": f"attachment; filename=paraphrased_{filename}"})
     except Exception as e:
-        return {"message": "Something went wrong. Please try again. Error: " + str(e)}
+        return JSONResponse({'message': 'Failed to download the file', 'details': e}, 500)
     finally:
+        remove_notification_file(project_id)
+        time.sleep(10)
         shutil.rmtree(root_dir)
-        remove_notification_file(unique_id)
 
 
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("api.main:app", host="127.0.0.1", port=8080, workers=multiprocessing.cpu_count(), ws="websockets")
+    uvicorn.run("api.main:app", host="127.0.0.1", port=8000, workers=multiprocessing.cpu_count(), ws="websockets")
