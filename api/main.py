@@ -140,7 +140,6 @@ def paraphrase(
         info.append('Ready: True')
         with open(f'{root_dir}/info.txt', 'w') as f:
             f.writelines(info)
-        time.sleep(20)
         assert_notify(project_id, 'Project is ready to download')
     except AssertionError:
         remove_notification_file(project_id)
