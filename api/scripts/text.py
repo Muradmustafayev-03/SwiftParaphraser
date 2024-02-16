@@ -263,12 +263,20 @@ def parse_functions(code: str):
         unparsed = re.sub(inner_pattern, '', unparsed)
 
         for param in unparsed.split(','):
-            param = param.split(':')[0].strip()
+            type_ = None
+
+            if ':' in param:
+                type_ = param.split(':')[1]
+                param = param.split(':')[0]
+            param = param.strip()
+
             if not param:
                 continue
             split_params = param.split(' ')
             left = split_params[0]
             right = split_params[-1]
+            if 'inout' in type_:
+                right = '&' + right
             parsed.append((left, right))
 
         return parsed
@@ -309,7 +317,7 @@ def parse_functions(code: str):
             continue  # skip generic functions
 
         if code.split('\n')[line_id - 1].strip() == '@objc' and '@objc' not in declaration:
-            declaration = code.split('\n')[line_id - 1] + declaration
+            declaration = code.split('\n')[line_id - 1] + '\n' + declaration
         if '@objc' in code.split('\n')[line_id] and '@objc' not in declaration:
             declaration = '@objc ' + declaration
 
@@ -330,6 +338,8 @@ def parse_functions(code: str):
 
         function = code[func_start_index:body_end_index]
         if function.count('{') != function.count('}'):
+            continue
+        if not function.replace(declaration, '').strip():
             continue
         name = declaration.split('func')[1].split('(')[0].strip()
 
