@@ -228,7 +228,7 @@ async def upload(
         }, 500)
 
 
-@app.get("/api/v1/download")
+@app.post("/api/v1/download")
 async def download(project_id: str = Query(...), user_id: str = Query(...)):
     if not project_id or not user_id:
         return JSONResponse({'message': 'Please, provide project_id and user_id'}, 403)
