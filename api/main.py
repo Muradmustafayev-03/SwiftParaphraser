@@ -98,7 +98,7 @@ def paraphrase(
     folder = f'{root_dir}/{filename[:-4]}/'
 
     try:
-        assert_notify(project_id, 'Extracting project...')
+        notify(project_id, 'Extracting project...')
 
         # extract the zip file
         shutil.unpack_archive(f'{root_dir}/{filename}', folder)
@@ -115,8 +115,8 @@ def paraphrase(
                     shutil.unpack_archive(f'{root}/{file}', root)
                     os.remove(f'{root}/{file}')
 
-        assert_notify(project_id, 'Project extracted...')
-        assert_notify(project_id, 'Starting paraphrasing...')
+        notify(project_id, 'Project extracted...')
+        notify(project_id, 'Starting paraphrasing...')
 
         pipeline(
             project_id, folder,
@@ -130,9 +130,9 @@ def paraphrase(
             comment_adding=comment_adding,
             dummy_file_adding=dummy_file_adding,
         )
-        assert_notify(project_id, 'Paraphrasing completed...')
+        notify(project_id, 'Paraphrasing completed...')
 
-        assert_notify(project_id, 'Archiving the project...')
+        notify(project_id, 'Archiving the project...')
         shutil.make_archive(f'{root_dir}/{filename[:-4]}', 'zip', folder)
         with open(f'{root_dir}/info.txt', 'r') as f:
             info = f.readlines()
@@ -140,12 +140,7 @@ def paraphrase(
         info.append('Ready: True')
         with open(f'{root_dir}/info.txt', 'w') as f:
             f.writelines(info)
-        time.sleep(20)
-        assert_notify(project_id, 'Project is ready to download')
-    except AssertionError:
-        remove_notification_file(project_id)
-        time.sleep(10)
-        shutil.rmtree(root_dir)
+        notify(project_id, 'Project is ready to download')
     except Exception as e:
         notify(project_id, f'Error: {e}')
         remove_notification_file(project_id)
@@ -192,7 +187,7 @@ async def upload(
     folder = f'{root_dir}/{filename[:-4]}/'
 
     try:
-        assert_notify(project_id, 'Saving project...')
+        notify(project_id, 'Saving project...')
         os.makedirs(folder, exist_ok=True)
 
         # save the zip file
@@ -208,7 +203,7 @@ async def upload(
             ]
             f.writelines(lines)
 
-        assert_notify(project_id, 'Project saved...')
+        notify(project_id, 'Project saved...')
 
         background_tasks.add_task(paraphrase,
                                   project_id, filename,
