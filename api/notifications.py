@@ -9,6 +9,8 @@ def notify(project_id, message):
 
 
 def receive_notification(project_id):
+    print(os.listdir('notifications/'))
+    print(project_id)
     try:
         with open(f'notifications/{project_id}.txt', 'r') as file:
             message = file.read()
