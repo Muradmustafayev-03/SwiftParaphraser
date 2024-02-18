@@ -1,5 +1,5 @@
 regex~=2023.8.8
-fastapi~=0.103.2
+fastapi~=0.109.2
 uvicorn[standard]~=0.22.0
 python-multipart~=0.0.6
 websockets~=11.0.3
