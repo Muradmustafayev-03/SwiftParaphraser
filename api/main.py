@@ -66,18 +66,10 @@ async def websocket_endpoint(websocket: WebSocket, unique_id: Optional[str] = No
                 await websocket.close()
                 break
             notification = receive_notification(unique_id)
-            if last_notification == 'Archiving the project...':
-                last_notification = notification
-                continue
             if notification != last_notification:  # only send notification if it is new
-                if notification is None:
-                    # if the notification file is removed, close the connection
-                    await websocket.send_text('Finished listening for notifications.')
-                    await websocket.close()
-                    break
                 await websocket.send_text(notification)  # send the notification
                 last_notification = notification
-            await asyncio.sleep(.5)  # Add a delay to control the update frequency
+            await asyncio.sleep(.1)  # Add a delay to control the update frequency
     except WebSocketDisconnect:
         remove_notification_file(unique_id)
     except ConnectionClosedOK:
@@ -270,7 +262,7 @@ async def download(project_id: str = Query(...), user_id: str = Query(...)):
         with open(f'{root_dir}/{filename}', "rb") as f:
             result = io.BytesIO(f.read())
 
-        assert_notify(project_id, 'Sending paraphrased project...')
+        print(project_id, 'Sending paraphrased project...')
         return StreamingResponse(result, media_type="application/zip", status_code=200,
                                  headers={"Content-Disposition": f"attachment; filename=paraphrased_{filename}"})
     except Exception as e:
