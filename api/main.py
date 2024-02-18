@@ -1,6 +1,5 @@
 import io
 import multiprocessing
-import os
 import shutil
 import time
 import asyncio
@@ -68,13 +67,13 @@ async def websocket_endpoint(websocket: WebSocket, unique_id: Optional[str] = No
                 break
             notification = receive_notification(unique_id)
             if notification != last_notification:  # only send notification if it is new
-                if notification is None and unique_id not in os.listdir('projects/'):
+                if notification is None:
+                    if last_notification == 'Archiving the project...':
+                        continue
                     # if the notification file is removed, close the connection
                     await websocket.send_text('Finished listening for notifications.')
                     await websocket.close()
                     break
-                elif notification is None:
-                    continue
                 await websocket.send_text(notification)  # send the notification
                 last_notification = notification
             await asyncio.sleep(.1)  # Add a delay to control the update frequency
@@ -145,6 +144,7 @@ def paraphrase(
 
         assert_notify(project_id, 'Archiving the project...')
         shutil.make_archive(f'{root_dir}/{filename[:-4]}', 'zip', folder)
+        assert_notify(project_id, 'Finished archiving the project...')
         with open(f'{root_dir}/info.txt', 'r') as f:
             info = f.readlines()
         info = [line for line in info if 'Ready' not in line]
