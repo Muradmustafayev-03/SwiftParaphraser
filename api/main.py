@@ -67,6 +67,7 @@ async def websocket_endpoint(websocket: WebSocket, unique_id: Optional[str] = No
                 break
             notification = receive_notification(unique_id)
             if notification != last_notification and last_notification != 'Archiving the project...':  # only send notification if it is new
+                print(last_notification)
                 if notification is None:
                     # if the notification file is removed, close the connection
                     await websocket.send_text('Finished listening for notifications.')
@@ -74,7 +75,7 @@ async def websocket_endpoint(websocket: WebSocket, unique_id: Optional[str] = No
                     break
                 await websocket.send_text(notification)  # send the notification
                 last_notification = notification
-            await asyncio.sleep(.1)  # Add a delay to control the update frequency
+            await asyncio.sleep(.5)  # Add a delay to control the update frequency
     except WebSocketDisconnect:
         remove_notification_file(unique_id)
     except ConnectionClosedOK:
