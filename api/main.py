@@ -67,11 +67,13 @@ async def websocket_endpoint(websocket: WebSocket, unique_id: Optional[str] = No
                 break
             notification = receive_notification(unique_id)
             if notification != last_notification:  # only send notification if it is new
-                if notification is None:
+                if notification is None and unique_id not in os.listdir('projects/'):
                     # if the notification file is removed, close the connection
                     await websocket.send_text('Finished listening for notifications.')
                     await websocket.close()
                     break
+                elif notification is None:
+                    continue
                 await websocket.send_text(notification)  # send the notification
                 last_notification = notification
             await asyncio.sleep(.1)  # Add a delay to control the update frequency
@@ -140,6 +142,7 @@ def paraphrase(
         info.append('Ready: True')
         with open(f'{root_dir}/info.txt', 'w') as f:
             f.writelines(info)
+        time.sleep(10)
         assert_notify(project_id, 'Project is ready to download')
     except AssertionError:
         remove_notification_file(project_id)
