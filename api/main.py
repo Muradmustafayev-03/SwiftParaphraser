@@ -134,6 +134,7 @@ def paraphrase(
 
         notify(project_id, 'Archiving the project...')
         shutil.make_archive(f'{root_dir}/{filename[:-4]}', 'zip', folder)
+        notify(project_id, 'Archived the project')
         with open(f'{root_dir}/info.txt', 'r') as f:
             info = f.readlines()
         info = [line for line in info if 'Ready' not in line]
