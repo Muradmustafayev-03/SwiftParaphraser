@@ -1,5 +1,6 @@
 import io
 import multiprocessing
+import os
 import shutil
 import time
 import asyncio
@@ -118,6 +119,14 @@ def paraphrase(
                     os.remove(f'{root}/{file}')
 
         assert_notify(project_id, 'Project extracted...')
+
+        # remove .git folder
+        for root, dirs, files in os.walk(folder):
+            if '__MACOSX' in root:
+                continue
+            if '.git' in dirs:
+                shutil.rmtree(f'{root}/.git')
+
         assert_notify(project_id, 'Starting paraphrasing...')
 
         pipeline(
