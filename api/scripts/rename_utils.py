@@ -3,6 +3,7 @@ import random
 import regex as re
 from .constants import *
 from .file_utils import project_contains_string
+from .names import *
 
 
 def first_letter_upper(name: str):
@@ -19,23 +20,22 @@ def first_letter_lower(name: str):
     return name[0].lower() + name[1:] if len(name) > 0 else name
 
 
-def generate_random_name(prefix='', suffix=''):
+def generate_random_name(prefix='', old_name='', suffix=''):
     """
     Generates a random name.
 
+    :param old_name:
     :param prefix: prefix to add to the name
     :param suffix: suffix to add to the name
     :return: generated name
     """
-    name = ''
-    for _ in range(random.randint(10, 30)):
-        letter = random.choice(ALPHABET)
-        if random.random() < 0.2:
-            letter = letter.upper()
-        name += letter
+    if old_name:
+        name = random.choice(name_prefixes) + first_letter_upper(old_name)
+    else:
+        name = random.choice(name_prefixes) + random.choice(name_roots)
+        name += str(random.randint(0, len(name) * 100))
     name = first_letter_upper(name) if prefix else first_letter_lower(name)
-    name = prefix + name + suffix
-    return name
+    return prefix + name + suffix
 
 
 def new_var_name(name: str):
