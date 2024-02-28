@@ -23,7 +23,7 @@ def pipeline(unique_id: str, path: str,
              condition_transformation=True, loop_transformation=True,
              type_renaming=True, types_to_rename=('struct', 'enum', 'protocol'),
              file_renaming=False, function_transformation=True, variable_renaming=True,
-             comment_adding=True, dummy_file_adding=True):
+             comment_adding=True, dummy_file_adding=True, dummy_files_number=10):
     """
     Project paraphrasing pipeline.
 
@@ -38,6 +38,7 @@ def pipeline(unique_id: str, path: str,
     :param variable_renaming: bool, whether to rename variables, stable, recommended being True
     :param comment_adding: bool, whether to add comments, stable, recommended being True (takes a long time)
     :param dummy_file_adding: bool, whether to add dummy files, stable, recommended being True
+    :param dummy_files_number: int, number of dummy files to be added
     """
     preprocess(unique_id, path)
     notify(unique_id, 'Finished preprocessing the project...')
@@ -101,7 +102,7 @@ def pipeline(unique_id: str, path: str,
 
         if dummy_file_adding:
             assert_notify(unique_id, 'Adding dummy files...')
-            project = add_dummy_files(project, path)
+            project = add_dummy_files(project, dummy_files_number, path)
             notify(unique_id, 'Finished adding dummy files.')
 
         notify(unique_id, 'Finished paraphrasing the project.')

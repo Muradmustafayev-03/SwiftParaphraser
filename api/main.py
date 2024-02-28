@@ -88,6 +88,7 @@ def paraphrase(
         variable_renaming: bool = Query(True),
         comment_adding: bool = Query(True),
         dummy_file_adding: bool = Query(True),
+        dummy_file_number: int = Query(10)
 ):
     root_dir = f'projects/{project_id}'
     folder = f'{root_dir}/{filename[:-4]}/'
@@ -132,6 +133,7 @@ def paraphrase(
             variable_renaming=variable_renaming,
             comment_adding=comment_adding,
             dummy_file_adding=dummy_file_adding,
+            dummy_files_number=dummy_file_number,
         )
         assert_notify(project_id, 'Paraphrasing completed...')
 

@@ -140,14 +140,14 @@ def generate_file_content(class_name):
     return content
 
 
-def add_dummy_files(project, root=None):
+def add_dummy_files(project, number=10, root=None):
     try:
         root = '/'.join(list(project.keys())[0].split('/')[:4])
     except IndexError:
         print('No files in project')
     dummy_folder = f'{root}/DUMMY'
 
-    for i in range(len(project) * 10):
+    for i in range(len(project) * number):
         class_name = generate_random_name('Type')
         content = generate_file_content(class_name)
         project[f'{dummy_folder}/{class_name}.swift'] = content
