@@ -2,6 +2,7 @@ import random
 
 import regex as re
 from .rename_utils import generate_random_name
+from .dummy_files import generate_dummy_function
 
 
 def remove_empty_lines(swift_code: str) -> str:
@@ -411,7 +412,7 @@ def restructure_function(code, function_data):
     if 'throws' in declaration:
         return code
 
-    new_name = generate_random_name('func')
+    new_name = generate_random_name('func', old_name=name)
     wrapper_function = compose_wrapper_function(declaration, new_name, params, returns_value)
     performing_function = compose_performing_function(name, new_name, declaration, body, returns_value)
 
@@ -420,10 +421,7 @@ def restructure_function(code, function_data):
     if not wrapper_function.strip():
         return code
 
-    dummy_function = f'func {generate_random_name("func", name)}() -> Int ' \
-                     f'{{\n\t\treturn {random.randint(1, 10000)} ' \
-                     f'{random.choice(["+", "-", "*", "%"])} ' \
-                     f'{random.randint(1, 10000)}\n\t}}'
+    dummy_function = generate_dummy_function()
 
     return code.replace(function, '\n\n\t'.join([performing_function, wrapper_function, dummy_function]))
 

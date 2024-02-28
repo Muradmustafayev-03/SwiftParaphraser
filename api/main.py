@@ -88,7 +88,7 @@ def paraphrase(
         variable_renaming: bool = Query(True),
         comment_adding: bool = Query(True),
         dummy_file_adding: bool = Query(True),
-        dummy_file_number: int = Query(10)
+        dummy_file_number: int = 10
 ):
     root_dir = f'projects/{project_id}'
     folder = f'{root_dir}/{filename[:-4]}/'
@@ -175,6 +175,7 @@ async def upload(
         variable_renaming: bool = Query(True),
         comment_adding: bool = Query(True),
         dummy_file_adding: bool = Query(True),
+        dummy_files_number: int = 10
 ):
     if not project_id:
         project_id = await get_id(request)
@@ -221,7 +222,7 @@ async def upload(
                                   condition_transformation, loop_transformation,
                                   type_renaming, types_to_rename, file_renaming,
                                   function_transformation, variable_renaming,
-                                  comment_adding, dummy_file_adding
+                                  comment_adding, dummy_file_adding, dummy_files_number
                                   )
         return JSONResponse({'message': 'File uploaded successfully',
                              'project_id': project_id,

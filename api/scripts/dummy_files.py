@@ -23,7 +23,7 @@ def generate_dummy_body(return_type, loop, operator):
             return f'return {n1} {operator} {n2}'
     elif return_type == 'String':
         if loop:
-            return f'for i in 0...{n1} {{\n\t\t\t{string} += "{string}"\n\t\t}}\n\t\treturn {string}'
+            return f'var {string} = "{string}"\n\t\tfor i in 0...{n1} {{\n\t\t\t{string} += "{string}"\n\t\t}}\n\t\treturn {string}'
         else:
             return f'return "{string}"'
     elif return_type == 'Bool':
@@ -33,7 +33,7 @@ def generate_dummy_body(return_type, loop, operator):
             for i in 0...{n1} {{
                 {string} = {string} {operator} {f2}
             }}
-            return = {string} {random.choice(['>', '<', '==', '!='])} {n2}
+            return {string} {random.choice(['>', '<', '==', '!='])} {n2}
             '''
         else:
             return f"return {n1} {random.choice(['>', '<', '==', '!='])} {n2}"
@@ -55,10 +55,10 @@ def generate_dummy_body(return_type, loop, operator):
             for i in 0...{n1} {{
                 {string} = {string} {operator} {f2}
             }}
-            return {string}
+            return Float({string})
             '''
         else:
-            return f'return {f1} {operator} {f2}'
+            return f'return Float({f1} {operator} {f2})'
     elif return_type == 'Void':
         if loop:
             return f'''
@@ -77,7 +77,7 @@ def generate_dummy_function():
 
     condition = random.choice([True, False])
     loop = random.choice([True, False])
-    operator = random.choice(['+', '-', '*', '%'])
+    operator = random.choice(['+', '-', '*'])
 
     if condition:
         i = random.randint(1, 10000)
