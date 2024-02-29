@@ -88,7 +88,8 @@ def paraphrase(
         variable_renaming: bool = Query(True),
         comment_adding: bool = Query(True),
         dummy_file_adding: bool = Query(True),
-        dummy_file_number: int = 10
+        dummy_file_number: int = 10,
+        renaming_images: bool = Query(True)
 ):
     root_dir = f'projects/{project_id}'
     folder = f'{root_dir}/{filename[:-4]}/'
@@ -134,6 +135,7 @@ def paraphrase(
             comment_adding=comment_adding,
             dummy_file_adding=dummy_file_adding,
             dummy_files_number=dummy_file_number,
+            renaming_images=renaming_images
         )
         assert_notify(project_id, 'Paraphrasing completed...')
 
@@ -175,7 +177,8 @@ async def upload(
         variable_renaming: bool = Query(True),
         comment_adding: bool = Query(True),
         dummy_file_adding: bool = Query(True),
-        dummy_files_number: int = 10
+        dummy_files_number: int = 10,
+        renaming_images: bool = Query(True)
 ):
     if not project_id:
         project_id = await get_id(request)
@@ -217,13 +220,13 @@ async def upload(
 
         assert_notify(project_id, 'Project saved...')
 
-        background_tasks.add_task(paraphrase,
-                                  project_id, filename,
+        background_tasks.add_task(paraphrase, project_id, filename,
                                   condition_transformation, loop_transformation,
                                   type_renaming, types_to_rename, file_renaming,
                                   function_transformation, variable_renaming,
-                                  comment_adding, dummy_file_adding, dummy_files_number
-                                  )
+                                  comment_adding, dummy_file_adding,
+                                  dummy_files_number, renaming_images)
+
         return JSONResponse({'message': 'File uploaded successfully',
                              'project_id': project_id,
                              'user_id': user_id,
