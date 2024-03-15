@@ -1,7 +1,6 @@
 import os
 import random
 import regex as re
-from .constants import *
 from .file_utils import project_contains_string
 from .names import *
 
@@ -45,9 +44,7 @@ def new_var_name(name: str):
     :param name: old variable name
     :return: new variable name
     """
-    name = first_letter_upper(name)
-
-    return 'var' + random.choice(ADJECTIVES) + name
+    return generate_random_name(prefix='var', old_name=name)
 
 
 def new_type_name(name: str):
@@ -57,9 +54,7 @@ def new_type_name(name: str):
     :param name: old type name
     :return: new type name
     """
-    name = first_letter_upper(name)
-
-    return 'Type' + random.choice(ADJECTIVES) + name
+    return generate_random_name(prefix='Type', old_name=name)
 
 
 def rename_local_variables(code, function: str):

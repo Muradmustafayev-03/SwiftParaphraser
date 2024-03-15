@@ -73,8 +73,12 @@ def pipeline(unique_id: str, path: str,
 
         type_names = parse_types_in_project(project, include_types=types_to_rename)
         types_in_frameworks = parse_types_in_frameworks(path)
+
         type_names = set(type_names) - set(types_in_frameworks)
         file_names = set(list_file_names(project))
+
+        type_names = set([name for name in type_names if name == name.encode('latin1').decode('utf-8')])
+        file_names = set([name for name in file_names if name == name.encode('latin1').decode('utf-8')])
 
         if 'Package' in file_names:
             file_names.remove('Package')

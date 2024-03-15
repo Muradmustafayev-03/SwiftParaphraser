@@ -3,8 +3,11 @@ import multiprocessing
 import shutil
 import time
 import asyncio
+import zipfile
 from typing import Optional
 import random
+import subprocess
+import platform
 
 from fastapi import FastAPI, UploadFile, File, Request, Query, WebSocket, WebSocketDisconnect, BackgroundTasks
 from fastapi.responses import StreamingResponse, JSONResponse
@@ -25,6 +28,20 @@ app.add_middleware(
     allow_methods=["*"],  # You can specify HTTP methods here (e.g., ["GET", "POST"])
     allow_headers=["*"],  # You can specify HTTP headers here
 )
+
+
+def unzip_archive(zip_file, destination):
+    system = platform.system()
+    if system == "Linux":
+        subprocess.run(["unzip", zip_file])
+    elif system == "Windows":
+        zip_file = os.path.abspath(zip_file).replace('/', '\\')  # Convert path to Windows format
+        destination = os.path.abspath(destination).replace('/', '\\')  # Convert path to Windows format
+        subprocess.run(
+            ["powershell", "Expand-Archive", "-Path", f'"{zip_file}"', "-DestinationPath", f'"{destination}"'],
+        )
+    else:
+        print("Unsupported operating system.")
 
 
 @app.get("/api/v1/get_id")
@@ -98,7 +115,7 @@ def paraphrase(
         assert_notify(project_id, 'Extracting project...')
 
         # extract the zip file
-        shutil.unpack_archive(f'{root_dir}/{filename}', folder)
+        unzip_archive(f'{root_dir}/{filename}', folder)
 
         # remove the zip file
         os.remove(f'{root_dir}/{filename}')
@@ -189,7 +206,7 @@ async def upload(
     if receive_notification(project_id) is not None or os.path.exists(f'projects/{project_id}'):
         return JSONResponse({'message': 'Project ID already in use. Please try again.'}, 400)
 
-    notify(project_id, 'Received project...')
+    notify(project_id, f'Received project: {zip_file.filename}...')
 
     # check if zip file is provided
     if not zip_file.filename.endswith('.zip'):
