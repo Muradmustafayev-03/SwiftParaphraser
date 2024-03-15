@@ -1,6 +1,8 @@
 import os
 import random
 import regex as re
+
+from .constants import CHANGEABLE_FILE_TYPES, IMAGE_FILE_TYPES
 from .file_utils import project_contains_string
 from .names import *
 
@@ -250,6 +252,50 @@ def generate_rename_map(names: list):
     :return: dict, renaming map in the format {old_name: new_name}
     """
     return {name: new_type_name(name) for name in names}
+
+
+def search_image_files(path) -> (list, list):
+    image_files = []
+    image_paths = []
+    for root, dirs, files in os.walk(path):
+        # skip __MACOSX folders
+        if '__MACOSX' in root:
+            continue
+        image_files += [file for file in files if
+                        file.endswith(IMAGE_FILE_TYPES) and file == file.encode('latin1').decode('utf-8')]
+        image_paths += [os.path.join(root, file) for file in files
+                        if file.endswith(IMAGE_FILE_TYPES) and file == file.encode('latin1').decode('utf-8')]
+    return image_files, image_paths
+
+
+def rename_images(path, rename_map, image_paths):
+    # Rename the image files
+    for old_name, new_name in rename_map.items():
+        for image_path in image_paths:
+            if old_name in image_path:
+                new_image_path = image_path.replace(old_name, new_name)
+                os.rename(image_path, new_image_path)
+
+    # Rename the image references in the project
+    for root, dirs, files in os.walk(path):
+        # skip __MACOSX folders
+        if '__MACOSX' in root:
+            continue
+        for file in files:
+            for extensions in CHANGEABLE_FILE_TYPES:
+                if file.endswith(extensions):
+                    file_path = os.path.join(root, file)
+                    break
+            else:
+                continue
+
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            for old_name, new_name in rename_map.items():
+                if old_name in content:
+                    content = content.replace(old_name, new_name)
+            with open(file_path, 'w', encoding='utf-8') as f:
+                f.write(content)
 
 
 def rename_type(project: dict, old_name: str, new_name: str):

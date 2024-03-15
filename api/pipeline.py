@@ -39,6 +39,7 @@ def pipeline(unique_id: str, path: str,
     :param comment_adding: bool, whether to add comments, stable, recommended being True (takes a long time)
     :param dummy_file_adding: bool, whether to add dummy files, stable, recommended being True
     :param dummy_files_number: int, number of dummy files to be added
+    :param renaming_images: bool, whether to rename images, stable, recommended being True
     """
     preprocess(unique_id, path)
     notify(unique_id, 'Finished preprocessing the project...')
@@ -67,6 +68,13 @@ def pipeline(unique_id: str, path: str,
         assert_notify(unique_id, 'Adding comments...')
         apply_to_files(path, add_comments)
         notify(unique_id, 'Finished adding comments.')
+
+    if renaming_images:
+        assert_notify(unique_id, 'Renaming images...')
+        image_files, image_paths = search_image_files(path)
+        image_rename_map = generate_rename_map(image_files)
+        rename_images(path, image_rename_map, image_paths)
+        notify(unique_id, 'Finished renaming images.')
 
     if type_renaming or file_renaming or dummy_file_adding:
         project = dir_to_dict(path)

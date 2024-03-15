@@ -3,7 +3,6 @@ import multiprocessing
 import shutil
 import time
 import asyncio
-import zipfile
 from typing import Optional
 import random
 import subprocess
