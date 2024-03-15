@@ -92,6 +92,8 @@ def apply_to_files(dir_path: str, func: callable, exclude=(), *args, **kwargs):
                 continue
             if file.startswith('._') or file in exclude:
                 continue
+            if file != file.encode('latin1').decode('utf-8'):
+                continue
             path = (os.path.join(root, file)).replace('\\', '/')
             with open(path, 'r', encoding='utf-8') as f:
                 content = f.read().replace('\u2028', ' ')
