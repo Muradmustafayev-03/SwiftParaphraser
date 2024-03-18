@@ -261,10 +261,13 @@ def search_image_files(path) -> (list, list):
         # skip __MACOSX folders
         if '__MACOSX' in root:
             continue
-        image_files += [file for file in files if
-                        file.endswith(IMAGE_FILE_TYPES) and file == file.encode('latin1').decode('utf-8')]
-        image_paths += [os.path.join(root, file) for file in files
-                        if file.endswith(IMAGE_FILE_TYPES) and file == file.encode('latin1').decode('utf-8')]
+        for file in files:
+            try:
+                if file.endswith(IMAGE_FILE_TYPES) and file == file.encode('latin1').decode('utf-8'):
+                    image_files.append(file)
+                    image_paths.append(os.path.join(root, file))
+            except (UnicodeEncodeError, UnicodeDecodeError):
+                continue
     return image_files, image_paths
 
 
