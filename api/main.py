@@ -34,7 +34,7 @@ def unzip_archive(zip_file, destination):
     if system == "Linux":
         # install unzip if not installed
         if shutil.which("unzip") is None:
-            subprocess.run(["yum", "install", "-y", "unzip"])
+            subprocess.run(["sudo", "apt-get", "install", "unzip", "-y"])
         subprocess.run(["unzip", zip_file, "-d", destination])
     elif system == "Windows":
         zip_file = os.path.abspath(zip_file).replace('/', '\\')  # Convert path to Windows format
