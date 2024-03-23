@@ -32,9 +32,6 @@ app.add_middleware(
 def unzip_archive(zip_file, destination):
     system = platform.system()
     if system == "Linux":
-        # install unzip if not installed
-        if shutil.which("unzip") is None:
-            subprocess.run(["# yum install unzip -y"])
         subprocess.run(["unzip", zip_file, "-d", destination])
     elif system == "Windows":
         zip_file = os.path.abspath(zip_file).replace('/', '\\')  # Convert path to Windows format
@@ -300,5 +297,17 @@ async def download(project_id: str = Query(...), user_id: str = Query(...)):
 
 if __name__ == "__main__":
     import uvicorn
+
+    system = platform.system()
+    if system == "Linux":
+        distribution = platform.linux_distribution()
+        if distribution[0] == "Ubuntu":
+            subprocess.run(["sudo", "apt-get", "install", "unzip"])
+        elif distribution[0] == "Fedora":
+            subprocess.run(["sudo", "dnf", "install", "unzip"])
+        elif distribution[0] == "CentOS":
+            subprocess.run(["sudo", "yum", "install", "unzip"])
+        else:
+            print("Unsupported Linux distribution.")
 
     uvicorn.run("api.main:app", host="127.0.0.1", port=8000, workers=multiprocessing.cpu_count(), ws="websockets")
