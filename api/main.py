@@ -32,7 +32,10 @@ app.add_middleware(
 def unzip_archive(zip_file, destination):
     system = platform.system()
     if system == "Linux":
-        subprocess.run(["unzip", zip_file])
+        # install unzip if not installed
+        if shutil.which("unzip") is None:
+            subprocess.run(["yum", "install", "-y", "unzip"])
+        subprocess.run(["unzip", zip_file, "-d", destination])
     elif system == "Windows":
         zip_file = os.path.abspath(zip_file).replace('/', '\\')  # Convert path to Windows format
         destination = os.path.abspath(destination).replace('/', '\\')  # Convert path to Windows format
